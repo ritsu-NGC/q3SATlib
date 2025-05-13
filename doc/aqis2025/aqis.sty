@@ -1,0 +1,144 @@
+% aqis.sty: style file for AQIS pre-proceedings
+%
+% Usage: \documentclass[a4paper]{article}
+%	 \usepackage{aqis}
+%	in LaTeX2e or
+%
+%	 \documentstyle[a4paper,aqis]{article}
+%	in LaTeX 2.09.
+%
+% The default of this style file is as follows:
+%	a4paper,
+%	No page number,
+%	Two column except for the title, the abstract and keywords.
+%
+% For more detail, please see aqis_template.tex.
+%
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+
+\typeout{aqis.sty}
+
+\pagestyle{empty}
+
+% Page layout
+\setlength\paperwidth     {210.0mm}
+\setlength\paperheight    {297.0mm}
+\setlength\textwidth      {180.0mm}
+\setlength\textheight     {252.0mm}
+\setlength\oddsidemargin  { 15.0mm}
+\addtolength\oddsidemargin{   -1in}
+\setlength\evensidemargin {\oddsidemargin}
+\setlength\topmargin      { 20.0mm}
+\addtolength\topmargin    {   -1in}
+\setlength\headheight     {  0.0mm}
+\setlength\headsep        {  0.0mm}
+\setlength\footskip       {  0.0mm}
+\setlength\columnsep      {  7.0mm}
+\setlength\parindent      {    1em}
+
+% Two column
+\twocolumn
+\raggedbottom
+
+\sloppy
+
+\def\maketitle{
+  \par
+  \begingroup
+  \def\thefootnote{\fnsymbol{footnote}}
+  \def\@makefnmark{\hbox to 4pt{$^{\@thefnmark}$\hss}}
+  \twocolumn[\@maketitle]\@thanks
+  \endgroup
+  \setcounter{footnote}{0}
+  \let\maketitle\relax
+  \let\@maketitle\relax
+  \gdef\@thanks{}\gdef\@authorinfo{}{}{}\gdef\@title{}\let\thanks\relax
+  \thispagestyle{empty}
+}
+
+\newif\if@firstaffiliation
+
+\def\@maketitle{
+  \vspace*{7mm}%
+  %\newpage \null \hfill
+  %\par\vskip 1.5em%
+  \begin{center}%
+    {\Large\bfseries\@title\par}\vskip 0.5em%
+    {%
+      \large\lineskip .5em%
+      \begin{tabular}[t]{c}\@author\end{tabular}%
+    }%
+  \end{center}%
+  \begin{center}%
+    \@address
+  \end{center}%
+  \begin{center}%
+    {%
+      \setlength{\baselineskip}{9.5pt}%
+      \begin{quotation}\@abstract\end{quotation}%
+    }%
+  \end{center}%
+  \begin{center}%
+    {%
+      \setlength{\baselineskip}{9.5pt}%
+      \begin{quotation}\@keywords\end{quotation}%
+    }%
+  \end{center}%
+}
+
+\def\@abstract{}
+\long\def\abstract#1{%
+  \def\@abstract{\noindent{\bf Abstract.}\hbox to 0.5\parindent{}#1}}
+
+\def\author#1{\gdef\@author{\@firstaffiliationtrue #1}}
+\def\and{%                  % \begin{tabular}
+  \end{tabular}%
+  \hskip 1em \@plus.17fil%
+  \begin{tabular}[t]{c}%
+  \@firstaffiliationtrue}%   % \end{tabular}
+
+\def\affiliation#1{%
+  \if@firstaffiliation\unskip\fi
+  {\renewcommand{\thefootnote}{\arabic{footnote}}%
+   \footnotemark[#1]}%
+  \@firstaffiliationfalse
+}
+\def\@address{\it\renewcommand{\thefootnote}{\arabic{footnote}}}
+\def\redef@doaffiliation#1\endredef@doaffiliation{\def\@address{#1}}%
+\def\address#1#2{%
+  \expandafter\redef@doaffiliation\@address
+    \footnotemark[#1]{#2} \\%
+  \endredef@doaffiliation%
+}
+\def\email#1{\thanks{\tt #1}}
+
+\long\def\@keywords{}
+\def\keywords#1{\def\@keywords{\noindent{\bf Keywords:}\hbox to 0.5\parindent{}#1}}
+
+\def\section{\@startsection{section}{1}{\z@}{2.5ex plus 1ex minus .2ex}
+  {1.5ex plus .2ex}{\large\bf}}
+\def\subsection{\@startsection{subsection}{2}{\z@}{2.25ex plus 1ex minus .2ex}
+  {0.8ex plus .2ex}{\normalsize\bf}}
+\def\subsubsection{\@startsection{subsubsection}{3}{\z@}{2.0ex plus 1ex minus .2ex}
+  {0.5ex plus .2ex}{\normalsize\bf}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{example}{Example}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{remark}[conjecture]{Remark}
+\newtheorem{fact}[conjecture]{Fact}
+
+\newcommand{\qed}{$\square$}
+
+\newenvironment{proof}{%
+  \noindent{\em Proof.\ }}{%
+  \hspace*{\fill}\qed
+  \vspace{2ex}}
+
+% end of file
