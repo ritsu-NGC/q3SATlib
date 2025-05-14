@@ -178,7 +178,7 @@ and $y$, creating a real number, and those real numbers are then summed together
 $+$ and $-$. Table~\ref{table-pseudo-toff} shows the values of $x_a \cdot x_b \cdot y$ with respect to
 its components, where $T(f)$ is as defined in Equation~\ref{eq-toff-bool}. It can be proven by inspection of
 Table~\ref{table-pseudo-toff} that the pseudo-Boolean expression in~\ref{eq-toff-bool} indeed implements
-$x_a \cdot x_b \cdot y$.
+$x_a \cdot x_b \cdot y$. 
 \begin{equation}
   \label{eq-toff-bool}
   \begin{aligned}
@@ -212,6 +212,16 @@ $x_a \cdot x_b \cdot y$.
   \end{minipage}
   
 \end{table*}
+
+\begin{figure*}[t]
+  \centering
+  \scalebox{0.8} {
+    \input{img/fig-toff-mark}
+  }
+  \caption{Implementing $x_a \cdot x_b \cdot y$ using CNOTs and T gates}
+  \label{fig-toff-mark}
+\end{figure*}
+
 
 In general, a pseudo-Boolean function is a function such that
 \begin{equation}
@@ -340,40 +350,11 @@ repeated for every value of $\mathbf{a}$ until all of $\hat{f}(\mathbf{a})$ is c
     f(\mathbf{x}) = x_a + \sum_{\mathbf{a} \neq 000,100} \hat{f}(\mathbf{a}) \cdot \chi_{\mathbf{a}}
   \end{equation}
 
-  Next, the coefficient $\hat{f}(110)$ is calculated. Again, taking a truth table of the function
-  Table~\ref{table-ex-110} for easy visualization.
-
-  \begin{table}[h]
-    \begin{center}
-      \begin{tabular}{c|c|c|c|c|c}
-        $x_a$ & $x_b$ & $y$ & $f(\mathbf{x})$ & $\chi_{110}$ & INNPROD($\chi_{110},f(\mathbf{x}$) \\\hline
-        0 & 0 & 0 & 0 & 0 & 1\\\hline
-        0 & 0 & 1 & 0 & 0 & 1\\\hline
-        0 & 1 & 0 & 0 & 1 & -1\\\hline
-        0 & 1 & 1 & 0 & 1 & -1\\\hline
-        1 & 0 & 0 & 0 & 1 & -1\\\hline
-        1 & 0 & 1 & 0 & 1 & -1\\\hline
-        1 & 1 & 0 & 0 & 1 & 1\\\hline      
-        1 & 1 & 1 & 1 & 1 & -1\\\hline
-      \end{tabular}
-      \caption{The value of $\chi_{110}$ and the inner product $\langle f(\mathbf{x}), \chi_{110} \rangle$}
-      \label{table-ex-110}
-    \end{center}
-  \end{table}
-  The rightmost column is again summed to get $\hat{f}(110)$
-  \begin{align}
-      &\hat{f}(100) = &\langle f(\mathbf{x}), \chi_{100} \rangle = & ( 1 + 1 - 1 - 1 - 1 - 1 + 1 - 1) \\\nonumber
-      &&& = -7\nonumber\\\nonumber
-  \end{align}
-
-  Which means the phase polynomial can again be updated
-  \begin{equation}
-    f(\mathbf{x}) = x_a - 7 (x_a \oplus x_b) + \sum_{\mathbf{a} \neq 000,100,110} \hat{f}(\mathbf{a}) \cdot \chi_{\mathbf{a}}
-  \end{equation}
-
   In the interest of conciseness, the rest of the calculation is omitted. But the reader can easily perform the
   rest to verify its equivalence with Equation~\ref{eq-toff-bool}.
 \end{example}
+
+The pseudo-Boolean function from Eq.~\ref{eq-toff-bool} is implemented as a circuit in Fig~\ref{fig-toff-mark}.
 
 \section{Conclusion}
 \label{Sec:concl}
