@@ -123,13 +123,16 @@ This basis set of quantum gates consists of the CNOT gate and the T-gate and $T^
 whose function is demonstrated in Fig.~\ref{fig-gates}, where $\omega = e^{i\frac{\pi}{4}}$.
 
 \begin{figure}[t]
+  \begin{minipage}{0.45\textwidth}
     \centering
     \scalebox{1.0}{
       \input{img/cnot}
     }
     \subcaption{CNOT-gate}
     \sublabel{fig-cnot}
-    \centering
+  \end{minipage}
+  \begin{minipage}{0.45\textwidth}
+  \centering
     \scalebox{1.0} {
       \input{img/Tgate}
     }
@@ -140,12 +143,13 @@ whose function is demonstrated in Fig.~\ref{fig-gates}, where $\omega = e^{i\fra
     }
     \subcaption{$T^{\dagger}$-gate}
     \sublabel{fig-tdgate}
+  \end{minipage}
   \caption{The CNOT and T-gates}
   \label{fig-gates}
 \end{figure}
 
 These circuits are remarkable because for the 3-input case, it is straightforward to optimize
-the {\it T-count}, which is the number of T-gates and $T^{\dagger}$-gates~\cite{bib-amy-meet-in-middle}.
+the {\it T-count}, which is the number of T-gates and $T^{\dagger}$-gates~\cite{amy-meet-in-middle}.
 Optimizing the T-count is essential for a circuit to be implemented fault-tolerantly, as
 the cost of implementing the T-gate is prohibitively expensive in most fault-tolerant
 encodings~\cite{bib-herr-lattice,bib-fowler-bridge}. {\it T-depth} is the longest such
