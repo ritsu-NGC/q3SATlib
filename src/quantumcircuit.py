@@ -55,7 +55,7 @@ def apply_phase_gate(qc, qubit, coeff):
         qc.z(qubit)
         print(f"  Apply Z gate to q_{qubit} (-2π/ phase)")
     elif abs(coeff - 1.00) < 1e-10:
-        qc.zdg(qubit)
+        qc.z(qubit)
         print(f"  Apply Z† gate to q_{qubit} (2π/ phase)")
 
 class IntelligentQubitMonitor:
@@ -224,12 +224,12 @@ def build_quantum_circuit_with_intelligent_monitoring(coefficients):
     # X1⊕X3 coefficient (a = "101")
     if "101" in coefficients and abs(coefficients["101"]) > 1e-10:
         coeff = coefficients["101"]
-        apply_phase_gate(qc, 2, coeff)
+        # apply_phase_gate(qc, 2, coeff)
         # Apply CNOT q_0 → q_2 to map X1⊕X3 onto q_2
         qc.cx(0, 2)
         monitor.apply_cnot(0, 2)
         
-        
+        apply_phase_gate(qc, 2, coeff)
         print(f"  Current states: {monitor.get_current_states()}\n")
         monitor.step_counter += 1
 
