@@ -51,12 +51,6 @@ def apply_phase_gate(qc, qubit, coeff):
         qc.sdg(qubit)
         qc.tdg(qubit)
         print(f"  Apply S† then T† gate to q_{qubit} (-3π/4 phase)")
-    elif abs(coeff + 1.00) < 1e-10:
-        qc.z(qubit)
-        print(f"  Apply Z gate to q_{qubit} (-2π/ phase)")
-    elif abs(coeff - 1.00) < 1e-10:
-        qc.z(qubit)
-        print(f"  Apply Z† gate to q_{qubit} (2π/ phase)")
 
 class IntelligentQubitMonitor:
     """Intelligent monitoring with strategic CNOT tracking"""
@@ -221,18 +215,13 @@ def build_quantum_circuit_with_intelligent_monitoring(coefficients):
         print(f"  Current states: {monitor.get_current_states()}\n")
         monitor.step_counter += 1
     
-    # X1⊕X3 coefficient (a = "101")
+    # X1⊕X3 coefficient (a = "101") - can be applied directly now
     if "101" in coefficients and abs(coefficients["101"]) > 1e-10:
         coeff = coefficients["101"]
-        # apply_phase_gate(qc, 2, coeff)
-        # Apply CNOT q_0 → q_2 to map X1⊕X3 onto q_2
-        qc.cx(0, 2)
-        monitor.apply_cnot(0, 2)
-        
+        print(f"Step {monitor.step_counter}: Direct phase gate for X1⊕X3 (coeff = {coeff})")
         apply_phase_gate(qc, 2, coeff)
         print(f"  Current states: {monitor.get_current_states()}\n")
         monitor.step_counter += 1
-
     
     # X1⊕X2 (a = "110")
     if "110" in coefficients and abs(coefficients["110"]) > 1e-10:
@@ -269,12 +258,12 @@ def main():
     quantum_circuit = build_quantum_circuit_with_intelligent_monitoring(coefficients)
     
     # Display results
-    # print(f"\nFINAL CIRCUIT STATISTICS:")
-    # print(f"Qubits: {quantum_circuit.num_qubits}")
-    # print(f"Depth: {quantum_circuit.depth()}")
-    # print(f"Gates: {quantum_circuit.count_ops()}")
+    print(f"\nFINAL CIRCUIT STATISTICS:")
+    print(f"Qubits: {quantum_circuit.num_qubits}")
+    print(f"Depth: {quantum_circuit.depth()}")
+    print(f"Gates: {quantum_circuit.count_ops()}")
     
-    # print(f"\nCircuit Diagram:")
+    print(f"\nCircuit Diagram:")
     print(quantum_circuit.draw(output='text'))
     
     return quantum_circuit
