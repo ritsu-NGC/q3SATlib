@@ -28,6 +28,33 @@ def compute_standard_inner_product(func_expr):
         coeffs["".join(map(str, a_bits))] = coeff
     
     return coeffs
+def canonical_xor(expr):
+    """Return a canonical (sorted) XOR expression, e.g., 'X2⊕X1⊕X3' -> 'X1⊕X2⊕X3'."""
+    parts = expr.split('⊕')
+    parts = [p for p in parts if p != "0"]
+    parts.sort()
+    return '⊕'.join(parts)
+
+def a_string_to_logical_state(a_string):
+    """Convert a key like '101' to a logical state string like 'X1⊕X3'."""
+    terms = []
+    for i, bit in enumerate(a_string):
+        if bit == '1':
+            terms.append(f"X{i+1}")
+    if not terms:
+        return "0"  # For zero coefficients, we'll use "0" anyway, but this is for consistency
+    return "⊕".join(terms)
+
+def get_state_list_with_zeros(coefficients, tol=1e-10):
+    """Return a list where each entry is '0' for zero coefficients, otherwise the logical state."""
+    state_list = []
+    for a_string in coefficients.keys():
+        if abs(coefficients[a_string]) > tol:
+            state_list.append(a_string_to_logical_state(a_string))
+        else:
+            state_list.append("0")
+    return state_list
+
 
 def apply_phase_gate(qc, qubit, coeff):
     """Apply appropriate phase gate based on coefficient value"""
@@ -51,6 +78,12 @@ def apply_phase_gate(qc, qubit, coeff):
         qc.sdg(qubit)
         qc.tdg(qubit)
         print(f"  Apply S† then T† gate to q_{qubit} (-3π/4 phase)")
+    elif abs(coeff - 1.0) < 1e-10:
+        qc.z(qubit)
+        print(f"  Apply Identity gate to q_{qubit} (no phase change)")
+    elif abs(coeff + 1.0) < 1e-10:
+        qc.z(qubit)
+        print(f"  Apply Identity gate to q_{qubit} (no phase change)")
 
 class IntelligentQubitMonitor:
     """Intelligent monitoring with strategic CNOT tracking"""
@@ -60,7 +93,10 @@ class IntelligentQubitMonitor:
         self.original_states = ["X1", "X2", "X3"]  # Target states
         self.step_counter = 1
         self.cnot_history = []  # Track CNOTs for intelligent restoration
-    
+        self.state_history = [
+            [self.qubit_states[0]],
+            [self.qubit_states[1]],
+            [self.qubit_states[2]]]
     def apply_cnot(self, control, target):
         """Apply CNOT and update state tracking"""
         control_var = f"X{control+1}"
@@ -83,7 +119,8 @@ class IntelligentQubitMonitor:
                 self.qubit_states[target] = f"X{control+1}⊕{current_target}"
         
         print(f"  State update: q_{target} becomes {self.qubit_states[target]}")
-    
+        for i in range(3):
+            self.state_history[i].append(self.qubit_states[i])
     def _remove_xor_variable(self, expression, var_to_remove):
         """Remove variable from XOR expression"""
         parts = expression.split('⊕')
@@ -184,17 +221,30 @@ def build_quantum_circuit_with_intelligent_monitoring(coefficients):
     # Step 2: Process multi-qubit terms strategically
     print("STEP 2: Processing multi-qubit coefficients")
     print("-" * 50)
-    
+    print(abs(coefficients["000"]))
+    print(abs(coefficients["001"]))
+    print(abs(coefficients["010"]))
+    print(abs(coefficients["011"]))
+    print(abs(coefficients["100"]))
+    print(abs(coefficients["101"]))
+    print(abs(coefficients["110"]))
+    print(abs(coefficients["111"]))
     # X2⊕X3 (a = "011")
     if "011" in coefficients and abs(coefficients["011"]) > 1e-10:
         coeff = coefficients["011"]
         print(f"Step {monitor.step_counter}: CNOT q_1 → q_2 for X2⊕X3")
         qc.cx(1, 2)
         monitor.apply_cnot(1, 2)
-        
-        apply_phase_gate(qc, 2, coeff)
-        print(f"  Current states: {monitor.get_current_states()}\n")
-        monitor.step_counter += 1
+
+        # Check if current q_2 state is as expected (e.g., "X2⊕X3")
+        if canonical_xor(monitor.qubit_states[2]) == "X2⊕X3":
+            
+            apply_phase_gate(qc, 2, coeff)
+            print(f"  Current states: {monitor.get_current_states()}\n")
+            monitor.step_counter += 1
+        else:
+            print(f"  Skipping phase gate for q_2 as state condition not met")
+
     
     # X1⊕X2⊕X3 (a = "111")
     if "111" in coefficients and abs(coefficients["111"]) > 1e-10:
@@ -202,10 +252,15 @@ def build_quantum_circuit_with_intelligent_monitoring(coefficients):
         print(f"Step {monitor.step_counter}: CNOT q_0 → q_2 for X1⊕X2⊕X3")
         qc.cx(0, 2)
         monitor.apply_cnot(0, 2)
-        
-        apply_phase_gate(qc, 2, coeff)
-        print(f"  Current states: {monitor.get_current_states()}\n")
-        monitor.step_counter += 1
+
+        # Check if current q_2 state is "X1⊕X2⊕X3"
+        if canonical_xor(monitor.qubit_states[2]) == "X1⊕X2⊕X3":
+            apply_phase_gate(qc, 2, coeff)
+            print(f"  Current states: {monitor.get_current_states()}\n")
+            monitor.step_counter += 1
+        else:
+            print(f"  Skipping phase gate for q_2 as state condition not met")
+
     
     # Strategic optimization CNOT for X1⊕X3 preparation
     if "111" in coefficients and abs(coefficients["111"]) > 1e-10:
@@ -213,15 +268,33 @@ def build_quantum_circuit_with_intelligent_monitoring(coefficients):
         qc.cx(1, 2)
         monitor.apply_cnot(1, 2)
         print(f"  Current states: {monitor.get_current_states()}\n")
-        monitor.step_counter += 1
+
+        # Check if q_2 is in the expected state (e.g., "X1⊕X2⊕X3" or whatever is expected here)
+        # For "111", after the CNOT, q_2's state should be "X1⊕X2⊕X3"? 
+        # Or if this is just a strategic CNOT, maybe check if it is the state you want for the next step.
+        # For example: if you want to ensure q_2 is in state "X1⊕X3" for the next step, check that.
+        # Here, we check if q_2 is "X1⊕X2⊕X3" (assuming that is the purpose of the "111" CNOT)
+        if canonical_xor(monitor.qubit_states[2]) == "X1⊕X2⊕X3":
+            apply_phase_gate(qc, 2, coeff)
+            monitor.step_counter += 1
+        else:
+            print("  Warning: q_2 state does not match expectation, step not incremented")
+
+    
     
     # X1⊕X3 coefficient (a = "101") - can be applied directly now
     if "101" in coefficients and abs(coefficients["101"]) > 1e-10:
         coeff = coefficients["101"]
         print(f"Step {monitor.step_counter}: Direct phase gate for X1⊕X3 (coeff = {coeff})")
-        apply_phase_gate(qc, 2, coeff)
-        print(f"  Current states: {monitor.get_current_states()}\n")
-        monitor.step_counter += 1
+
+        # Check if current q_2 state is "X1⊕X3"
+        if canonical_xor(monitor.qubit_states[2]) == "X1⊕X3":
+            apply_phase_gate(qc, 2, coeff)
+            print(f"  Current states: {monitor.get_current_states()}\n")
+            monitor.step_counter += 1
+        else:
+            print(f"  Skipping phase gate for q_2 as state condition not met")
+
     
     # X1⊕X2 (a = "110")
     if "110" in coefficients and abs(coefficients["110"]) > 1e-10:
@@ -229,16 +302,21 @@ def build_quantum_circuit_with_intelligent_monitoring(coefficients):
         print(f"Step {monitor.step_counter}: CNOT q_0 → q_1 for X1⊕X2")
         qc.cx(0, 1)
         monitor.apply_cnot(0, 1)
-        
-        apply_phase_gate(qc, 1, coeff)
-        print(f"  Current states: {monitor.get_current_states()}\n")
-        monitor.step_counter += 1
+
+        # Check if current q_1 state is "X1⊕X2"
+        if canonical_xor(monitor.qubit_states[1]) == "X1⊕X2":
+            apply_phase_gate(qc, 1, coeff)
+            print(f"  Current states: {monitor.get_current_states()}\n")
+            monitor.step_counter += 1
+        else:
+            print(f"  Skipping phase gate for q_1 as state condition not met")
+
     
     # INTELLIGENT RESTORATION - Only restore qubits that need it
     qc = monitor.analyze_and_restore(qc)
     
     print("="*70)
-    return qc
+    return qc, monitor
 
 def main():
     """Main function with intelligent monitoring"""
@@ -248,14 +326,18 @@ def main():
     print("\nGenerating Walsh-Hadamard coefficients...")
     coefficients = compute_standard_inner_product(func_input)
     
-    # Display non-zero coefficients
+        # Display non-zero coefficients
     print("\nNon-zero coefficients:")
     for a, c in coefficients.items():
         if abs(c) > 1e-10:
             print(f"a = {a} → {c}")
-    
+
+    state_list = get_state_list_with_zeros(coefficients)
+    print("\nCoefficient logical state list (with zeros):")
+    print(state_list)
+
     # Build circuit with intelligent monitoring
-    quantum_circuit = build_quantum_circuit_with_intelligent_monitoring(coefficients)
+    quantum_circuit, monitor = build_quantum_circuit_with_intelligent_monitoring(coefficients)
     
     # Display results
     print(f"\nFINAL CIRCUIT STATISTICS:")
@@ -265,7 +347,11 @@ def main():
     
     print(f"\nCircuit Diagram:")
     print(quantum_circuit.draw(output='text'))
-    
+
+    print("\nQubit logical state history:")
+    for i, hist in enumerate(monitor.state_history):
+        print(f"q_{i}: {hist}")
+
     return quantum_circuit
 
 if __name__ == "__main__":
