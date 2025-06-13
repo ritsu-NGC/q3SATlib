@@ -1,8 +1,10 @@
 import itertools
 
 def evaluate_function(expr, xa, xb, xc):
+    expr = expr.replace("~", "not ").replace("*", " and ").replace("|", " or ")
     # Replace variables in string and evaluate the Boolean expression
     expr_eval = expr.replace("Xa", str(xa)).replace("Xb", str(xb)).replace("Xc", str(xc))
+    # print(f"Evaluating expression: {expr_eval}")  # Debugging output
     return eval(expr_eval) % 2 
 
 def compute_standard_inner_product(func_expr):
@@ -14,6 +16,7 @@ def compute_standard_inner_product(func_expr):
         for x_bits in itertools.product([0, 1], repeat=n):
             xa, xb, xc = x_bits
             f_x = evaluate_function(func_expr, xa, xb, xc)
+            # print(f"Evaluating f({xa}, {xb}, {xc}) = {f_x}")
             f_sign = (-1) ** f_x
 
             a_dot_x = (a_bits[0] * xa) ^ (a_bits[1] * xb) ^ (a_bits[2] * xc)
