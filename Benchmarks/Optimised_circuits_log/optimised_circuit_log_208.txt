@@ -1,0 +1,24 @@
+# Original circuit
+#   qubits: 3
+#   qubits used: 3
+#   H: 0
+#   cnot: 6
+#   X: 0
+#   T: 7
+#   P: 1
+#   Z: 0
+#   tdepth (by partitions): 5
+#   depth  (by critical paths): 10
+#   tdepth (by critical paths): 4
+# Optimized circuit
+#   qubits: 3
+#   qubits used: 3
+#   H: 0
+#   cnot: 15
+#   X: 0
+#   T: 7
+#   P: 1
+#   Z: 0
+#   tdepth (by partitions): 3
+#   depth  (by critical paths): 19
+#   tdepth (by critical paths): 3

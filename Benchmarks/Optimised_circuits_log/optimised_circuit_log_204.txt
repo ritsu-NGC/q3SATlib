@@ -1,0 +1,12 @@
+# Original circuit
+#   qubits: 3
+#   qubits used: 1
+#   H: 0
+#   cnot: 0
+#   X: 0
+#   T: 0
+#   P: 0
+#   Z: 1
+#   tdepth (by partitions): 0
+#   depth  (by critical paths): 1
+#   tdepth (by critical paths): 0
