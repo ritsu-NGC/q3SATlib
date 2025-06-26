@@ -1,0 +1,85 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{float}
+\usepackage{cite}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath,amssymb,amsfonts,amstext}
+% \usepackage{algorithmic}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage[T1]{fontenc}
+\usepackage{mdframed}
+\usepackage{algorithm, algpseudocode} % texlive-science
+\usepackage[braket, qm]{qcircuit}
+\usepackage{newtxtext}
+\usepackage[normalem]{ulem}
+
+\usepackage{nameref}
+\usepackage[braket, qm]{qcircuit}
+\usepackage{tikz}
+%
+\input{img/defs}
+
+\begin{document}
+
+\title{Synthesis of Phase Oracles Using CNOT+T Circuits and ESOP Minimization}
+
+\author{
+    \IEEEauthorblockN{Your Name}
+    \IEEEauthorblockA{Your Institution \\
+    Email: your@email.com}
+}
+
+\maketitle
+
+\begin{abstract}
+Phase oracles are essential components of quantum algorithms such as Grover's algorithm. These circuits apply a phase of $-1$ to an input state when a particular Boolean function $f$ is true. For functions of fewer than 3 variables, these are well known to be exactly implementable using only the CNOT, T, and T$^\dagger$ gates. Amy~\cite{amy2018} established that this class of circuits can be provably optimized for T-count and T-depth. We identify a class of Boolean functions of 4 or more variables which can be synthesized using such a circuit, by way of a library of circuits that implement phase oracles of 3 or fewer variables. We then use this to synthesize Boolean functions of 4 or more variables, by minimizing the number of ESOP terms of more than 3 variables. We then synthesize the rest using a modification of a previously proposed method to synthesize arbitrary Boolean functions as single-target Boolean gates. We compare the results against Qiskit's \texttt{PhaseOracle} method.
+\end{abstract}
+
+\section{Introduction}
+One of quantum computing's most significant results is the development of Grover's algorithm. This algorithm performs an unstructured search in the theoretical lower bound of such a search. Various applications have been proposed for such an algorithm, including the acceleration of solving NP-hard problems.
+
+Grover's algorithm uses a phase oracle, a quantum circuit that applies a phase of $-1$ when the Boolean function it implements is true, to increase the probability of returning a fulfilling assignment.
+
+Phase oracles are interesting because a restricted class of them can be implemented using only the T, T$^\dagger$, and CNOT gates (hereafter referred to as CNOT+T). In fact, phase oracles of 3 or fewer variables can all be implemented exactly using this set of gates, and these circuits can be calculated exactly using the Boolean Fourier transform. Amy~\cite{amy2018} demonstrates that CNOT+T circuits can be optimized for both T-count and T-depth~\cite{amy_matroid}.
+
+However, in general, it is impossible to implement Boolean functions of 4 or more variables using only this gate set. There will inevitably be a need to use a Hadamard (H) gate. The addition of this gate makes optimal solutions non-unique, and several methods to optimize for T-count and T-depth when including the H gate are only heuristic.
+
+Phase oracles are well known to be efficiently synthesizable from an Exclusive Sum of Products (ESOP) expression. Since each product maps to a Boolean function, it is easy to see that any such function expressible with product terms of at most 3 variables can be implemented as a CNOT+T circuit. We utilize this observation in our proposal.
+
+In this work, we propose a solution that utilizes CNOT+T circuits to reduce the T-count and T-depth for general Boolean functions of arbitrary variable count. Our contributions include:
+
+\begin{itemize}
+    \item A precomputed library of circuits that implement all Boolean functions of 3 variables or fewer.
+    \item A synthesis method that uses ESOP minimization to limit the number of product terms involving 4 or more variables.
+\end{itemize}
+
+We find that our solution... [DCTODO: complete with results]
+
+\section{Preliminaries}
+
+\subsection{Quantum Gates and Circuits}
+CNOT+T circuits consist only of the CNOT, T, and T$^\dagger$ gates. Such circuits can be represented by a path-sum, which captures the algebraic structure of the circuit. Two circuits sharing the same path-sum are functionally equivalent~\cite{pathsum2018}. This property enables a resynthesis process where T gates can be merged.
+
+One complication in this process is the treatment of negated variables. As demonstrated in Fig.~[DCTODO], certain T-gates can be merged more easily using the Boolean Fourier transform of a function rather than by explicitly negating its inputs. A library of such decompositions aids this combination.
+
+\subsection{Phase Oracles}
+A phase oracle applies a phase $(-1)$ to any input that satisfies a Boolean function $f$. A common method of synthesizing phase oracles is via an ESOP representation, expressing the function as an XOR of product terms (ANDs) of variables. Given the mapping $|x\rangle|y\rangle \mapsto (-1)^{x \oplus y}|x\rangle|y\rangle$, such circuits can be synthesized using known quantum subroutines (see Fig.~[DCTODO]).
+
+\section{Proposal}
+
+A sum-of-paths representation of a Boolean function can be derived from the Boolean Fourier decomposition~\cite{odonnell}. However, this decomposition forms a complete basis for functions with 3 variables or fewer when using the CNOT+T gate set. We demonstrate that composing such decompositions enables the exact implementation of a subset of $k$-variable Boolean functions.
+
+We use a modified Boolean Fourier decomposition approach, based on~\cite{amy_duality}, to construct our 3-qubit-or-less library. Our synthesis is ancilla-free and schedules T gates following~\cite{amy2018} to minimize T-depth.
+
+We then apply a modified form of the relative phase function synthesis described in~\cite{amy_relphase} to complete our circuit synthesis.
+
+% DCTODO: Add Evaluation, Results, and Conclusion Sections
+
+\bibliographystyle{IEEEtran}
+\bibliography{ref}
+
+\end{document}
