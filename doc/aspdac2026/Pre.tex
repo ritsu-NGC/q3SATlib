@@ -1,0 +1,9 @@
+\section{Preliminaries}
+
+\subsection{Quantum Gates and Circuits}
+CNOT+T circuits consist only of the CNOT, T, and T$^\dagger$ gates. Such circuits can be represented by a path-sum, which captures the algebraic structure of the circuit. Two circuits sharing the same path-sum are functionally equivalent~\cite{pathsum2018}. This property enables a resynthesis process where T gates can be merged.
+
+One complication in this process is the treatment of negated variables. As demonstrated in Fig.~[DCTODO], certain T-gates can be merged more easily using the Boolean Fourier transform of a function rather than by explicitly negating its inputs. A library of such decompositions aids this combination.
+
+\subsection{Phase Oracles}
+A phase oracle applies a phase $(-1)$ to any input that satisfies a Boolean function $f$. A common method of synthesizing phase oracles is via an ESOP representation, expressing the function as an XOR of product terms (ANDs) of variables. Given the mapping $|x\rangle|y\rangle \mapsto (-1)^{x \oplus y}|x\rangle|y\rangle$, such circuits can be synthesized using known quantum subroutines (see Fig.~[DCTODO]).

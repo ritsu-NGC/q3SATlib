@@ -1,0 +1,197 @@
+\section{Proposal}
+
+A sum-of-paths representation of a Boolean function can be derived from the Boolean Fourier decomposition~\cite{odonnell}. However, this decomposition forms a complete basis for functions with 3 variables or fewer when using the CNOT+T gate set. We demonstrate that composing such decompositions enables the exact implementation of a subset of $k$-variable Boolean functions.
+
+We use a modified Boolean Fourier decomposition approach, based on~\cite{amy_duality}, to construct our 3-qubit-or-less library. Our synthesis is ancilla-free and schedules T gates following~\cite{amy2018} to minimize T-depth.
+
+We then apply a modified form of the relative phase function synthesis described in~\cite{amy_relphase} to complete our circuit synthesis.
+
+\section{Pseudo-Boolean Functions and the Boolean Fourier Transform}
+
+One way to realize a Boolean AND is to implement what's called a {\it pseudo-Boolean}
+representation~\cite{bib-barenco-elementary,bib-amy-cnot}, which uses a mix of
+Boolean values, integer coefficients, and arithmetic to create a mapping $\{0,1\}^n \mapsto \{0,1\}$~\cite{bib-amy-rm}.
+
+Before defining the concept mathematically, first observe Equation~\ref{eq-toff-bool} to see an example of a
+pseudo-Boolean function. Here, real-valued coefficients are multiplied with Boolean functions of $x_a$, $x_b$,
+and $y$, creating a real number, and those real numbers are then summed together using arithmetic operations
+$+$ and $-$. Table~\ref{table-pseudo-toff} shows the values of $x_a \cdot x_b \cdot y$ with respect to
+its components, where $T(f)$ is as defined in Equation~\ref{eq-toff-bool}. It can be proven by inspection of
+Table~\ref{table-pseudo-toff} that the pseudo-Boolean expression in~\ref{eq-toff-bool} indeed implements
+$x_a \cdot x_b \cdot y$. 
+\begin{equation}
+  \label{eq-toff-bool}
+  \begin{aligned}
+    &x_a \cdot x_b \cdot y &= &x_a + x_b + y \\\nonumber
+    &&&+ 7(x_a \oplus x_b) + 7(x_a \oplus y) + 7(x_b \oplus y) \\\nonumber
+    &&&+ (x_a \oplus x_b \oplus y)\\\nonumber
+    &&= & (T_{x_a} + T_{x_b} + T_{y} + T_{x_a \oplus x_b} \\\nonumber
+    &&&T_{x_a \oplus y} T_{x_b \oplus y} + T_{x_a \oplus x_b \oplus y})
+  \end{aligned}
+\end{equation}
+\begin{table*}[t]
+  \begin{minipage}{\textwidth}
+    \begin{center}
+      \scalebox{1.0} {
+        \begin{tabular}{c|c|c|c|c|c|c|c|c|c|c}
+          $x_a$ & $x_b$ & $y$ & $T_{x_a}$ & $T_{x_b}$ & $T_{y}$ & $T_{x_a \oplus x_b}$ & $T_{x_a \oplus y}$ & $T_{x_b \oplus y}$ & $T_{x_a \oplus x_b \oplus y}$ & $4x_a \cdot x_b \cdot y$\\\hline
+          0     & 0     & 0   & 0         & 0         & 0       & 0                    & 0                  & 0                  & 0                             & 0            \\\hline
+          0     & 0     & 1   & 0         & 0         & $1$   & 0                    & $7$             & $7$
+                       & $1$                         & 0            \\\hline
+          0     & 1     & 0   & 0         & $1$     & 0       & $7$               & $7$             & 0                  & $1$                         & 0            \\\hline
+          0     & 1     & 1   & 0         & $1$     & $1$   & $7$               & 0                  & $7$             & 0                             & 0            \\\hline
+          1     & 0     & 0   & $1$     & 0         & 0       & $7$               & 0                  & $7$             & $1$                         & 0            \\\hline
+          1     & 0     & 1   & $1$     & 0         & $1$   & $7$               & $7$             & 0                  & 0                             & 0            \\\hline
+          1     & 1     & 0   & $1$     & $1$     & 0       & 0                    & $7$             & $7$             & 0                             & 0            \\\hline
+          1     & 1     & 1   & $1$     & $1$     & $1$   & 0                    & 0                  & 0                  & $1$                         & 4            \\\hline
+        \end{tabular}
+      }
+      \caption{Truth table-like values of the pseudo-Boolean representation of $x_a \cdot x_b \cdot y$}
+      \label{table-pseudo-toff}
+    \end{center}
+  \end{minipage}
+  
+\end{table*}
+
+\begin{figure*}[t]
+  \centering
+  \scalebox{0.8} {
+    \input{img/fig-toff-mark}
+  }
+  \caption{Implementing $x_a \cdot x_b \cdot y$ using CNOTs and T gates}
+  \label{fig-toff-mark}
+\end{figure*}
+
+
+In general, a pseudo-Boolean function is a function such that
+\begin{equation}
+  \label{eq-pseudo-boolean}
+  F(\mathbf{x}) = \sum_{\mathbf{k}} c_a \cdot f_k(\mathbf{x}), c_a \in \mathbb{R}, f_k : \{0,1\}^n \mapsto \{0,1\}
+  F(\mathbf{x}) \in \{0,1\}
+\end{equation}
+
+In plain language, it is the arithmetic sum of the products of Boolean functions with real valued coefficients, such that
+the values of the sum are in the set of binary values $\{0,1\}$~\cite{bib-barenco-elementary}. This
+representation is also often referred to in the context of the phases of quantum circuits as the
+{\it phase polynomial}~\cite{bib-amy-cnot}.
+
+Phase polynomials and pseudo-Boolean functions important because phase polynomials can be calculated
+using the {\it Boolean Fourier transform}, which is shown in Equation~\ref{eq-boolean-fourier}.
+\begin{equation}
+  \label{eq-boolean-fourier}
+  \begin{aligned}
+    f(\mathbf{x}) = \sum_{\mathbf{a} \neq 0} \hat{f}(\mathbf{a}) \cdot ( a_0 \cdot x_0 \oplus a_1 \cdot x_1 \cdots \oplus a_{n-1} \cdot x_{n-1}),\\\nonumber
+    \hat{f}(\mathbf{a}) \in \mathbb{R} , a_0,a_1,\cdots a_{n-1} \in [0,1]
+  \end{aligned}
+\end{equation}
+
+$\hat{f}(\mathbf{a})$ is a set of $2^{n}-1$ coefficients (one for each $\mathbf{a}$, except for the trivial
+case $\mathbf{a} = 0$) associated with the pseudo-Boolean function, and
+$( a_0 \cdot x_0 \oplus a_1 \cdot x_1 \cdots \oplus a_{n-1} \cdot x_{n-1}) $ are linear functions
+that form a basis for the pseudo-Boolean function, and are maps $[0,1]^n \mapsto [0,1]$. $\hat{f}$ is referred to
+as the {\it phase polynomial} of the quantum Boolean circuit.
+
+Observe that a T-gate adds to the phase no matter which qubit it acts on.
+For example, a T-gate acting on bit 0 creates the mapping $\ket{1}_0\ket{1}_1 \mapsto \ket{1}_0\ket{1}_1$ while
+a T-gate acting on bit 1 also creates the same mapping. Therefore, $\hat{f}(\mathbf{a})$ sets the number of
+phase gates, such as T-gates and T$^{\dagger}$ gates, that are used in the circuit. A Boolean function thus can
+have a T-count up to $2^{n}-1$.
+
+It is easy to see then that the $\hat{f}(\mathbf{a})$ that has the minimal number of odd entries for each
+$\mathbf{a}$ also minimizes the T-count~\cite{bib-amy-rm}. Observe also, that the linear functions
+$( a_0 \cdot x_0 \oplus a_1 \cdot x_1 \cdots \oplus a_{n-1} \cdot x_{n-1}) $ can be implemented
+entirely by CNOT gates. This means that Equation~\ref{eq-boolean-fourier} can be realized entirely by
+CNOT gates and phase gates, known as a {\it CNOT+T network}~\cite{bib-amy-cnot}. 
+
+Optimizing the T-depth of such a CNOT+T network is done using the method in~\cite{bib-amy-matroid}.
+
+\section{Phase Polynomial Calculation for the Three Qubit Case}
+\label{Chap:Bool-pbool3q}
+
+This section demonstrates how to calculate the phase polynomial for a three input Boolean function, using the
+Boolean Fourier transform~\cite{bib-odonnell}. This section uses only a simplified version
+of the Boolean Fourier transform introduced in~\cite{bib-odonnell}, but with notation taken from
+\cite{bib-barenco-elementary} and~\cite{bib-amy-cnot}. The notation is chosen to more clearly demonstrate how
+the equation may be implemented using quantum gates defined in the CNOT+T basis. 
+
+First, the inner product to be used for the Boolean Fourier transform is defined below
+
+\begin{equation}
+  \label{eq-inner-prod}
+  \langle f(\mathbf{x}) , g(\mathbf{x}) \rangle = \sum_{\mathbf{x}} \text{INNPROD}(f(\mathbf{x}),g(\mathbf{x})), \mathbf{x} \in \{0,1\}^n
+\end{equation}
+\begin{equation}  
+  \text{INNPROD}(f(\mathbf{x}),g(\mathbf{x})) =
+  \begin{cases}
+    7 & \text{if $f(\mathbf{x})\neq g(\mathbf{x})$} \\
+    1 & \text{if  $f(\mathbf{x})= g(\mathbf{x})$} 
+  \end{cases}
+\end{equation}
+
+\cite{bib-odonnell} states that the {\it parity functions}, the set of exclusive sums of the input variables
+$\chi(x_0,x_1,\cdots,x_n)$ shown in Equation~\ref{eq-bool-basis}, form an orthogonal basis with respect to the
+inner product defined in Equation~\ref{eq-inner-prod}. In this equation, there is a factor of $\frac{1}{2^n}$ so
+that $\langle f(\mathbf{x}), f(\mathbf{x}) \rangle = 1$, making the basis orthonormal.
+\begin{equation}
+  \label{eq-bool-basis}
+  \begin{split}
+  \chi(x_0,x_1,\cdots,x_n)_{\mathbf{a}} = a_0 \cdot x_0 \oplus a_1 \cdot x_1 \cdots \oplus a_{n-1} \cdot x_{n-1},\\
+  a_0,a_1,\cdots a_{n-1} \in [0,1]
+  \end{split}
+\end{equation}
+
+Because for each $\chi_{\mathbf{a}}$ and $\chi_{\mathbf{b}}$, there is
+$\langle \chi_{\mathbf{a}}, \chi_{\mathbf{b}} \rangle = 0$, calculating $\hat{f}(\mathbf{a})$ for a specific
+value of $\mathbf{a}$ simply involves taking the inner product of the full function $f(\mathbf{x})$ and the
+basis state $\chi(\mathbf{x})_{\mathbf{a}}$ as shown in Equation~\ref{eq-fhat-prod}. This multiplication is
+repeated for every value of $\mathbf{a}$ until all of $\hat{f}(\mathbf{a})$ is calculated.
+\begin{equation}
+  \label{eq-fhat-prod}
+  \hat{f}(\mathbf{a}) = \langle f(\mathbf{x}), \chi(\mathbf{x})_{\mathbf{a}} \rangle
+\end{equation}
+
+\begin{example}
+  As an example, let's try to derive the coefficients from Equation~\ref{eq-toff-bool}. Here
+  $\mathbf{a} = (a_{x_a}, a_{x_b}, a_y)$.
+
+  Because the trivial case ($\mathbf{a}= 000$) is not included, let's start with $\mathbf{a} = 100$ with
+  $\chi_{100} = x_a$.
+  Table~\ref{table-ex-100} enumerates its values in truth table form for convenience, as well as the
+  value of each of the $(-1)^{f(\mathbf{x})} (-1)^{\chi_{001}(\mathbf{x})}$ terms in the inner product
+  $\langle f(\mathbf{x}), \chi_{001} \rangle$
+
+  \begin{table}[h]
+    \begin{center}
+      \begin{tabular}{c|c|c|c|c|c}
+        \hline
+        $x_a$ & $x_b$ & $y$ & $f(\mathbf{x})$ & $\chi_{100}$ & INNPROD($\chi_{100},f(\mathbf{x}$) \\\hline
+        0 & 0 & 0 & 0 & 0 & 1\\\hline
+        0 & 0 & 1 & 0 & 0 & 1\\\hline
+        0 & 1 & 0 & 0 & 0 & 1\\\hline
+        0 & 1 & 1 & 0 & 0 & 1\\\hline
+        1 & 0 & 0 & 0 & 1 & 7\\\hline
+        1 & 0 & 1 & 0 & 1 & 7\\\hline
+        1 & 1 & 0 & 0 & 1 & 7\\\hline      
+        1 & 1 & 1 & 1 & 1 & 1\\\hline
+      \end{tabular}
+      \caption{The value of $\chi_{100}$ and the inner product $\langle f(\mathbf{x}), \chi_{100} \rangle$}
+      \label{table-ex-100}
+    \end{center}
+  \end{table}
+
+  
+  The terms in the right most column can then be summed just like in Equation~\ref{eq-inner-prod}:
+  \begin{align}
+      &\hat{f}(100) = &\langle f(\mathbf{x}), \chi_{100} \rangle = &( 1 + 1 + 1 + 1 - 1 - 1 - 1 + 1) \\\nonumber
+      &&& = ( 2 ) = 1\nonumber\\\nonumber
+  \end{align}
+  This then gives:
+  \begin{equation}
+    f(\mathbf{x}) = x_a + \sum_{\mathbf{a} \neq 000,100} \hat{f}(\mathbf{a}) \cdot \chi_{\mathbf{a}}
+  \end{equation}
+
+  In the interest of conciseness, the rest of the calculation is omitted. But the reader can easily perform the
+  rest to verify its equivalence with Equation~\ref{eq-toff-bool}.
+\end{example}
+
+The pseudo-Boolean function from Eq.~\ref{eq-toff-bool} is implemented as a circuit in Fig~\ref{fig-toff-mark}.
