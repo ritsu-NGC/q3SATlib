@@ -1,11 +1,11 @@
 from skbuild import setup
 
 setup(
-    name="hello-cmake-package",
+    name="pyexorcism-cmake-package",
     version="0.1.0",
-    packages=["hello"],
+    packages=["pyexorcism"],
     package_dir={"": "src"},
-    cmake_install_dir="src/hello",
+    cmake_install_dir="src/pyexorcism",
 )
 
 # When building extension modules `cmake_install_dir` should always be set to the
