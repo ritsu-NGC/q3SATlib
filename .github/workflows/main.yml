@@ -1,6 +1,7 @@
-name: Build LaTeX PDF
+name: Build ASPDAC 2026 LaTeX PDF
 
 on:
+  workflow_dispatch:  
   push:
     paths:
       - 'doc/aspdac2026/**'
