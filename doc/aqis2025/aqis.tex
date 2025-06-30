@@ -29,21 +29,15 @@
 %
 \input{img/defs}
 
-%\newcommand{\sublabel}[1]{\protected@edef\@currentlabel{\thefigure(\thesubfigure)}\label{#1}}
-
 \makeatletter
 \newcommand{\sublabel}[1]{\protected@edef\@currentlabel{\thefigure(\thesubfigure)}\label{#1}}
 \makeatother
 \captionsetup{subrefformat=parens}
 \algrenewcommand\algorithmicindent{0.5em}%
-%\newtheorem{definition}{Definition}
-%\newtheorem{example}{Example}
 \newcommand{\thickhline}{%
     \noalign {\ifnum 0=`}\fi \hrule height 1pt
     \futurelet \reserved@a \@xhline
 }
-%\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
-%    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \newcommand{\figcaption}[1]{\def\@captype{figure}\caption{#1}}
 \newcommand{\tblcaption}[1]{\def\@captype{table}\caption{#1}}
 
@@ -68,7 +62,7 @@
   \newcommand{\magentaout}[1]{#1}
   \newcommand{\yellowout}[1]{#1}
 \fi
-\renewcommand{\baselinestretch}{1.11}
+\renewcommand{\baselinestretch}{1.05}
 
 \begin{document}
 
@@ -105,12 +99,21 @@ Phase oracles are essential components of quantum algorithms for implementing Bo
 
 \maketitle
 
+\vspace{0.5cm}
+
 %########### body
 
 \section{Introduction and Preliminary Knowledge}
+
+\vspace{0.3cm}
+
 A {\it phase oracle} implements a Boolean function as a quantum circuit, applying a phase of $-1$ when the Boolean function outputs true. Phase oracles are key elements in algorithms such as Grover's Algorithm.
 
+\vspace{0.2cm}
+
 Previous research has demonstrated that phase oracles can be implemented using only CNOT and $T$/$T^{\dagger}$ gates (CNOT+T)~\cite{bib-amy-cnot}. Figure~\ref{fig-gates} shows these gates, where $\omega = e^{i\frac{\pi}{4}}$.
+
+\vspace{0.3cm}
 
 \begin{figure}[t]
   \begin{minipage}{0.45\linewidth}
@@ -143,24 +146,38 @@ Previous research has demonstrated that phase oracles can be implemented using o
     }
     \subcaption{$T^{\dagger}$-gate}
     \sublabel{fig-tdgate}
-    \vspace{2cm}
+    \vspace{0.5cm}
   \end{minipage}
   \caption{The CNOT and T-gates}
   \label{fig-gates}
 \end{figure}
 
+\vspace{0.3cm}
+
 These circuits are notable because, for the 3-input case, it is straightforward to optimize the {\it T-count}, i.e., the number of T-gates and $T^{\dagger}$-gates~\cite{amy-meet-in-middle}. Optimizing T-count is crucial for fault-tolerant circuit implementation, as T-gates are expensive in most encodings~\cite{bib-herr-lattice,bib-fowler-bridge}. The {\it T-depth} is the longest sequence of T-gates in a circuit, which is also important since many modern encodings can execute T-gates in parallel for cost savings~\cite{bib-google-ecc}.
+
+\vspace{0.3cm}
 
 The 3-input case is interesting because it is the largest class of Boolean functions representable by a CNOT+T circuit. Since there are only 256 such Boolean functions, there are potential uses for a library of such oracles.
 
+\vspace{0.3cm}
+
 \noindent {\bf Our Contribution.} 
-We generate a library of T-count and T-depth optimal circuits to be used as benchmarks. T-count optimality is achieved by adapting the 3-bit Boolean Fourier Transform, and T-depth optimality by matroid partitioning~\cite{bib-amy-matroid}.
+We generate a library of T-count and T-depth optimal circuits to be used as benchmarks. T-count optimality is achieved by adapting the 3-bit Boolean Fourier Transform, and T-depth optimality by matroid partitioning~\cite{bib-amy-matroid}. We find some interesting properties about them that may inform future synthesis techniques.
+
+\vspace{0.5cm}
 
 \section{Pseudo-Boolean Functions and the Boolean Fourier Transform}
 
+\vspace{0.3cm}
+
 One way to realize a Boolean AND is through a {\it pseudo-Boolean} representation~\cite{bib-barenco-elementary,bib-amy-cnot}, which combines Boolean values and integer coefficients to create a mapping $\{0,1\}^n \mapsto \{0,1\}$~\cite{bib-amy-rm}.
 
+\vspace{0.3cm}
+
 As an example, consider Equation~\ref{eq-toff-bool}, which shows a pseudo-Boolean function. Real-valued coefficients are multiplied with Boolean functions of $x_a$, $x_b$, and $y$, then summed. Table~\ref{table-pseudo-toff} displays the values of $x_a \cdot x_b \cdot y$ and its components.
+
+\vspace{0.2cm}
 
 \begin{equation}
   \label{eq-toff-bool}
@@ -169,6 +186,9 @@ As an example, consider Equation~\ref{eq-toff-bool}, which shows a pseudo-Boolea
     &\qquad -\frac{1}{4}(x_a \oplus y) - \frac{1}{4}(x_b \oplus y) + \frac{1}{4}(x_a \oplus x_b \oplus y)
   \end{aligned}
 \end{equation}
+
+\vspace{0.2cm}
+
 \begin{table*}[h]
   \begin{minipage}{\textwidth}
     \begin{center}
@@ -190,6 +210,9 @@ As an example, consider Equation~\ref{eq-toff-bool}, which shows a pseudo-Boolea
     \end{center}
   \end{minipage}
 \end{table*}
+
+\vspace{0.2cm}
+
 \begin{figure}[t]
   \centering
   \scalebox{0.7} {
@@ -199,44 +222,61 @@ As an example, consider Equation~\ref{eq-toff-bool}, which shows a pseudo-Boolea
   \label{fig-toff-mark}
 \end{figure}
 
+\vspace{0.3cm}
+
 In general, a pseudo-Boolean function is defined as
 \begin{equation}
   \label{eq-pseudo-boolean}
   F(\mathbf{x}) = \sum_{\mathbf{k}} c_k \cdot f_k(\mathbf{x}), \quad c_k \in \mathbb{R},\ f_k : \{0,1\}^n \to \{0,1\}
 \end{equation}
 In plain terms, it is a sum of products of Boolean functions with real coefficients, resulting in binary values~\cite{bib-barenco-elementary}. This representation is also known as a {\it phase polynomial}~\cite{bib-amy-cnot}.
-\vspace{1cm}
+
+\vspace{0.5cm}
+
 Phase polynomials are important because they can be calculated using the {\it Boolean Fourier transform}:
 \begin{equation}
   \label{eq-boolean-fourier}
   f(\mathbf{x}) = \sum_{\mathbf{a} \neq 0} \hat{f}(\mathbf{a}) \cdot ( a_0 x_0 \oplus a_1 x_1 \oplus \cdots \oplus a_{n-1} x_{n-1}), \quad \hat{f}(\mathbf{a}) \in \mathbb{R}
 \end{equation}
 
+\vspace{0.3cm}
+
 The coefficients $\hat{f}(\mathbf{a})$ (for all nontrivial $\mathbf{a}$) specify the phase polynomial, and the linear functions $( a_0 x_0 \oplus a_1 x_1 \oplus \cdots \oplus a_{n-1} x_{n-1})$ form a basis.
 
 Such a phase polynomial can be realized using a CNOT+T network, as in Fig.~\ref{fig-toff-mark}. Minimizing the number of odd multiples of $\frac{\pi}{4}$ in $\hat{f}(\mathbf{a})$ also minimizes the T-count~\cite{bib-amy-rm}. Optimizing T-depth is done as in~\cite{bib-amy-matroid}.
 
+\vspace{0.4cm}
+
 \section{Phase Polynomial Calculation for the Three Qubit Case}
 \label{Chap:Bool-pbool3q}
 
+\vspace{0.3cm}
+
 This section shows how to calculate the phase polynomial for a three-input Boolean function, using the Boolean Fourier transform~\cite{bib-odonnell}. The notation is chosen to clarify how the equation may be implemented using quantum gates in the CNOT+T basis. 
+
+\vspace{0.3cm}
 
 The inner product for the Boolean Fourier transform is
 \begin{equation}
   \label{eq-inner-prod}
   \langle f(\mathbf{x}) , g(\mathbf{x}) \rangle = \frac{1}{2^n} \sum_{\mathbf{x}} (-1)^{f(\mathbf{x})} (-1)^{g(\mathbf{x})}, \quad \mathbf{x} \in \{0,1\}^n
 \end{equation}
+
 The {\it parity functions}, i.e., exclusive sums of input variables $\chi(x_0,\ldots,x_n)$ as in Eq.~\ref{eq-bool-basis}, form an orthogonal basis with respect to this product:
 \begin{equation}
   \label{eq-bool-basis}
   \chi(x_0,\ldots,x_n)_{\mathbf{a}} = a_0 x_0 \oplus a_1 x_1 \oplus \cdots \oplus a_{n-1} x_{n-1},\quad a_i \in \{0,1\}
 \end{equation}
 
+\vspace{0.2cm}
+
 Since $\langle \chi_{\mathbf{a}}, \chi_{\mathbf{b}} \rangle = 0$ for $\mathbf{a} \neq \mathbf{b}$, the coefficient $\hat{f}(\mathbf{a})$ is computed as
 \begin{equation}
   \label{eq-fhat-prod}
   \hat{f}(\mathbf{a}) = \langle f(\mathbf{x}), \chi(\mathbf{x})_{\mathbf{a}} \rangle
 \end{equation}
+
+\vspace{0.2cm}
 
 \begin{example}
 As an example, let's derive the coefficients for Eq.~\ref{eq-toff-bool} with $\mathbf{a} = (a_{x_a}, a_{x_b}, a_y)$.
@@ -271,7 +311,11 @@ Thus,
 The rest of the calculation is omitted for brevity, but readers can verify equivalence with Eq.~\ref{eq-toff-bool}.
 \end{example}
 
+\vspace{0.4cm}
+
 \section{Analysis}
+
+\vspace{0.3cm}
 
 On analysis of the T-count and T-depth of the generated library, perhaps surprisingly, we found
 that every circuit fell into two categories: {\it even-weighted} (even number of fulfilling
@@ -279,12 +323,19 @@ assignments) functions that had 0 T-count and 0 T-depth, and {\it odd-weighted} 
 of fulfilling assignments) functions, with a T-count of 7 and T-depth of 3. We offer an
 explanation below.
 
+\vspace{0.2cm}
+
 \subsection{Even-Weight Functions}
+
+\vspace{0.2cm}
 
 Observe from Eq.~\ref{eq-inner-prod} that when $n=2$ i.e. for Boolean functions
 of two variables, the coefficients are at most $1/2$, meaning all such functions
 can be implemented using only CNOT and S gates, with 0 T-count. One such circuit
 is displayed in Fig.~\ref{fig:phase_x1x2}.
+
+\vspace{0.2cm}
+
 \begin{figure}[h]
   \centering
   \[
@@ -296,6 +347,9 @@ is displayed in Fig.~\ref{fig:phase_x1x2}.
   \caption{Circuit that implements a phase of $x_1 \cdot x_2$.}
   \label{fig:phase_x1x2}
 \end{figure}
+
+\vspace{0.3cm}
+
 Functions $f$ with an even number of satisfying assignments can be expressed as:
 \[
 f(x) = g(x_i, x_j \oplus x_k)
@@ -306,9 +360,15 @@ for some $i,j,k$, where $g$ is a two-variable Boolean function. This can be conf
 quickly from calculating all such 3 variable functions. They are {\it affine} with
 two variable functions up to an XOR with one of the inputs or the output.
 
+\vspace{0.3cm}
+
 \subsection{Odd-Weight Functions}
 
+\vspace{0.2cm}
+
 For a function $f$ such that $f(x) = 1$ for exactly one input (e.g., $f(x) = x_0 x_1 x_2$), the $T$-count is known to be 7.
+
+\vspace{0.2cm}
 
 Any function with an odd number of true assignments can be decomposed as:
 \[
@@ -317,13 +377,19 @@ f = f_{\text{even}} \oplus f_{\text{single}}
 where $f_{\text{even}}$ has an even number of satisfying assignments, and $f_{\text{single}}$ has exactly one. Thus, the
 $T$-count of an odd-weighted such $f$ is 7.
 
+\vspace{0.4cm}
+
 \section{Conclusion}
 \label{Sec:concl}
+
+\vspace{0.3cm}
 
 We produced T-count and T-depth optimal 3-qubit phase oracles to implement 3-bit Boolean functions
 such as those required in Grover's Algorithm. Upon analyzing the produced library, we realized that
 even-weighted functions required no T-gates to implement, while odd-weighted functions required at least 7.
 Future work involves using this library to construct arbitrary $n$-bit phase oracles.
+
+\vspace{0.2cm}
 
 It informs some interesting future avenues of inquiry.
 \begin{itemize}
@@ -336,14 +402,19 @@ It informs some interesting future avenues of inquiry.
   synthesis of circuits in general by integrating usage of the library produced in this work?
 \end{itemize}
 
+\vspace{0.3cm}
+
 While the usages of 3 variable phase oracles themselves may be limited, there could be further applications for
 phase oracles of 4 or more variables by composing them. This will be interesting future research.
+
+\vspace{0.5cm}
 
 \section*{Acknowledgments}                                                     
 This work was supported by JSPS KAKENHI Grant Numbers 24K22298 and JST, CREST Grant Number JPMJCR24I4, Japan.
 
+\vspace{0.5cm}
 
-\bibliographystyle{plain}
+\bibliographystyle{unsrt}
 \bibliography{ref}
 
 \end{document}
