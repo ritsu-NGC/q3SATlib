@@ -13,19 +13,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Debug: list files
+        run: |
+          ls -lR doc/aspdac2026
+          cat doc/aspdac2026/img/defs.tex || echo "defs.tex not found"
+
       - name: Clean build directory
         run: |
           rm -rf doc/aspdac2026/*.aux doc/aspdac2026/*.log doc/aspdac2026/*.pdf
-      - name: Checkout repository
-        uses: actions/checkout@v4
+
       - name: Set up TeX Live
         uses: xu-cheng/latex-action@v3
         with:
           root_file: doc/aspdac2026/main.tex
-      - name: Debug list files
-        run: |
-          ls -lR doc/aspdac2026
-          cat doc/aspdac2026/img/defs.tex
+
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
         with:
