@@ -22,7 +22,7 @@ jobs:
         uses: xu-cheng/latex-action@v3
         with:
           root_file: doc/aspdac2026/main.tex
-      - name: Debug: list files
+      - name: Debug list files
         run: |
           ls -lR doc/aspdac2026
           cat doc/aspdac2026/img/defs.tex
