@@ -1,0 +1,53 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{float}
+\usepackage{cite}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath,amssymb,amsfonts,amstext}
+% \usepackage{algorithmic}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage[T1]{fontenc}
+\usepackage{mdframed}
+\usepackage{algorithm, algpseudocode} % texlive-science
+\usepackage[braket, qm]{qcircuit}
+\usepackage{newtxtext}
+\usepackage[normalem]{ulem}
+
+\usepackage{nameref}
+\usepackage[braket, qm]{qcircuit}
+\usepackage{tikz}
+%
+\input{img/defs}
+
+\begin{document}
+
+\title{Synthesis of Phase Oracles Using CNOT+T Circuits and ESOP Minimization}
+
+\author{
+    \IEEEauthorblockN{Your Name}
+    \IEEEauthorblockA{Your Institution \\
+    Email: your@email.com}
+}
+
+\maketitle
+
+\begin{abstract}
+Phase oracles are essential components of quantum algorithms such as Grover's algorithm. These circuits apply a phase of $-1$ to an input state when a particular Boolean function $f$ is true. For functions of fewer than 3 variables, these are well known to be exactly implementable using only the CNOT, T, and T$^\dagger$ gates. Amy~\cite{amy2018} established that this class of circuits can be provably optimized for T-count and T-depth. We identify a class of Boolean functions of 4 or more variables which can be synthesized using such a circuit, by way of a library of circuits that implement phase oracles of 3 or fewer variables. We then use this to synthesize Boolean functions of 4 or more variables, by minimizing the number of ESOP terms of more than 3 variables. We then synthesize the rest using a modification of a previously proposed method to synthesize arbitrary Boolean functions as single-target Boolean gates. We compare the results against Qiskit's \texttt{PhaseOracle} method.
+\end{abstract}
+
+\input{Intro}
+
+\input{Pre}
+
+\input{Pro}
+
+% DCTODO: Add Evaluation, Results, and Conclusion Sections
+
+\bibliographystyle{IEEEtran}
+\bibliography{ref}
+
+\end{document}
