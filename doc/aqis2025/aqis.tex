@@ -81,9 +81,14 @@
   \and
   Shigeru Yamashita
    \affiliation{1}
-  \email{ger@cs.ritsumei.ac.jp}
-}
-   
+   \email{ger@cs.ritsumei.ac.jp}
+   \and
+  Zanhe Qi
+   \affiliation{1}
+  \email{goose@cs.ritsumei.ac.jp}
+  }
+  
+
 \address{1}{
   Ritsumeikan University, Graduate School of Information Science and Engineering
 }
@@ -146,7 +151,7 @@ Previous research has demonstrated that phase oracles can be implemented using o
     }
     \subcaption{$T^{\dagger}$-gate}
     \sublabel{fig-tdgate}
-    \vspace{0.5cm}
+    \vspace{2cm}
   \end{minipage}
   \caption{The CNOT and T-gates}
   \label{fig-gates}
@@ -235,15 +240,18 @@ In plain terms, it is a sum of products of Boolean functions with real coefficie
 
 Phase polynomials are important because they can be calculated using the {\it Boolean Fourier transform}:
 \begin{equation}
-  \label{eq-boolean-fourier}
-  f(\mathbf{x}) = \sum_{\mathbf{a} \neq 0} \hat{f}(\mathbf{a}) \cdot ( a_0 x_0 \oplus a_1 x_1 \oplus \cdots \oplus a_{n-1} x_{n-1}), \quad \hat{f}(\mathbf{a}) \in \mathbb{R}
+  \begin{aligned}
+    \label{eq-boolean-fourier}
+    f(\mathbf{x}) = \sum_{\mathbf{k} \neq 0} \hat{f}(\mathbf{k}) \cdot ( k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1}), \\\nonumber
+    \hat{f}(\mathbf{k}) \in \mathbb{R} \quad \mathbf{k} \in \{0,1\}^{n}
+  \end{aligned}
 \end{equation}
 
 \vspace{0.3cm}
 
-The coefficients $\hat{f}(\mathbf{a})$ (for all nontrivial $\mathbf{a}$) specify the phase polynomial, and the linear functions $( a_0 x_0 \oplus a_1 x_1 \oplus \cdots \oplus a_{n-1} x_{n-1})$ form a basis.
+The coefficients $\hat{f}(\mathbf{k})$ (for all nontrivial $\mathbf{k}$) specify the phase polynomial, and the linear functions $( k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1})$ form a basis.
 
-Such a phase polynomial can be realized using a CNOT+T network, as in Fig.~\ref{fig-toff-mark}. Minimizing the number of odd multiples of $\frac{\pi}{4}$ in $\hat{f}(\mathbf{a})$ also minimizes the T-count~\cite{bib-amy-rm}. Optimizing T-depth is done as in~\cite{bib-amy-matroid}.
+Such a phase polynomial can be realized using a CNOT+T network, as in Fig.~\ref{fig-toff-mark}. Minimizing the number of odd multiples of $\frac{\pi}{4}$ in $\hat{f}(\mathbf{k})$ also minimizes the T-count~\cite{bib-amy-rm}. Optimizing T-depth is done as in~\cite{bib-amy-matroid}.
 
 \vspace{0.4cm}
 
@@ -265,22 +273,22 @@ The inner product for the Boolean Fourier transform is
 The {\it parity functions}, i.e., exclusive sums of input variables $\chi(x_0,\ldots,x_n)$ as in Eq.~\ref{eq-bool-basis}, form an orthogonal basis with respect to this product:
 \begin{equation}
   \label{eq-bool-basis}
-  \chi(x_0,\ldots,x_n)_{\mathbf{a}} = a_0 x_0 \oplus a_1 x_1 \oplus \cdots \oplus a_{n-1} x_{n-1},\quad a_i \in \{0,1\}
+  \chi(x_0,\ldots,x_n)_{\mathbf{k}} = k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1},\quad k_i \in \{0,1\}
 \end{equation}
 
 \vspace{0.2cm}
 
-Since $\langle \chi_{\mathbf{a}}, \chi_{\mathbf{b}} \rangle = 0$ for $\mathbf{a} \neq \mathbf{b}$, the coefficient $\hat{f}(\mathbf{a})$ is computed as
+Since $\langle \chi_{\mathbf{k}}, \chi_{\mathbf{b}} \rangle = 0$ for $\mathbf{k} \neq \mathbf{b}$, the coefficient $\hat{f}(\mathbf{k})$ is computed as
 \begin{equation}
   \label{eq-fhat-prod}
-  \hat{f}(\mathbf{a}) = \langle f(\mathbf{x}), \chi(\mathbf{x})_{\mathbf{a}} \rangle
+  \hat{f}(\mathbf{k}) = \langle f(\mathbf{x}), \chi(\mathbf{x})_{\mathbf{k}} \rangle
 \end{equation}
 
 \vspace{0.2cm}
 
 \begin{example}
-As an example, let's derive the coefficients for Eq.~\ref{eq-toff-bool} with $\mathbf{a} = (a_{x_a}, a_{x_b}, a_y)$.
-For $\mathbf{a} = 100$, $\chi_{100} = x_a$. Table~\ref{table-ex-100} enumerates the values and the term $(-1)^{f(\mathbf{x})} (-1)^{\chi_{100}(\mathbf{x})}$ for the inner product.
+As an example, let's derive the coefficients for Eq.~\ref{eq-toff-bool} with $\mathbf{k} = (k_{x_a}, k_{x_b}, k_y)$.
+For $\mathbf{k} = 100$, $\chi_{100} = x_a$. Table~\ref{table-ex-100} enumerates the values and the term $(-1)^{f(\mathbf{x})} (-1)^{\chi_{100}(\mathbf{x})}$ for the inner product.
 \begin{table}[h]
   \begin{center}
     \begin{tabular}{c|c|c|c|c|c}
@@ -306,9 +314,9 @@ Summing the rightmost column, as in Eq.~\ref{eq-inner-prod}:
 \end{align}
 Thus,
 \begin{equation}
-  f(\mathbf{x}) = \frac{1}{4}x_a + \sum_{\mathbf{a} \neq 000,100} \hat{f}(\mathbf{a}) \cdot \chi_{\mathbf{a}}
+  f(\mathbf{x}) = \frac{1}{4}x_a + \sum_{\mathbf{k} \neq 000,100} \hat{f}(\mathbf{k}) \cdot \chi_{\mathbf{k}}
 \end{equation}
-The rest of the calculation is omitted for brevity, but readers can verify equivalence with Eq.~\ref{eq-toff-bool}.
+The rest of the calculation is omitted for brevity, but readers can verify that it results in Eq.~\ref{eq-toff-bool}.
 \end{example}
 
 \vspace{0.4cm}
