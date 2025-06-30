@@ -126,15 +126,25 @@ This basis set of quantum gates consists of the CNOT gate and the T-gate and $T^
 whose function is demonstrated in Fig.~\ref{fig-gates}, where $\omega = e^{i\frac{\pi}{4}}$.
 
 \begin{figure}[t]
-  \begin{minipage}{0.45\textwidth}
+  \begin{minipage}{0.45\linewidth}
     \centering
+    \scalebox{1.0} {
+      \input{img/Sgate}
+    }
+    \subcaption{S-gate}
+    \sublabel{fig-sgate}
+    \scalebox{1.0} {
+      \input{img/Sdgate}
+    }
+    \subcaption{S$^{\dagger}$-gate}
+    \sublabel{fig-sdgate}
     \scalebox{1.0}{
       \input{img/cnot}
     }
     \subcaption{CNOT-gate}
     \sublabel{fig-cnot}
   \end{minipage}
-  \begin{minipage}{0.45\textwidth}
+  \begin{minipage}{0.45\linewidth}
   \centering
     \scalebox{1.0} {
       \input{img/Tgate}
@@ -186,45 +196,44 @@ $x_a \cdot x_b \cdot y$.
 \begin{equation}
   \label{eq-toff-bool}
   \begin{aligned}
-    &x_a \cdot x_b \cdot y &= &x_a + x_b + y \\\nonumber
-    &&&+ 7(x_a \oplus x_b) + 7(x_a \oplus y) + 7(x_b \oplus y) \\\nonumber
-    &&&+ (x_a \oplus x_b \oplus y)\\\nonumber
-    &&= & (T_{x_a} + T_{x_b} + T_{y} + T_{x_a \oplus x_b} \\\nonumber
-    &&&T_{x_a \oplus y} T_{x_b \oplus y} + T_{x_a \oplus x_b \oplus y})
+    &x_a \cdot x_b \cdot y &= &\frac{1}{4}x_a + \frac{1}{4}x_b + \frac{1}{4}y - \frac{1}{4}(x_a \oplus x_b)
+    -\frac{1}{4}(x_a \oplus y) \\\nonumber
+    &&&- \frac{1}{4}(x_b \oplus y) + \frac{1}{4}(x_a \oplus x_b \oplus y)\\\nonumber
+    &&= &\frac{1}{4} (T_{x_a} + T_{x_b} + T_{y} + T_{x_a \oplus x_b} 
+    T_{x_a \oplus y} T_{x_b \oplus y} \\\nonumber
+    &&&+ T_{x_a \oplus x_b \oplus y})
   \end{aligned}
 \end{equation}
-\begin{table*}[t]
+\begin{table*}[h]
   \begin{minipage}{\textwidth}
     \begin{center}
       \scalebox{1.0} {
-        \begin{tabular}{c|c|c|c|c|c|c|c|c|c|c}
-          $x_a$ & $x_b$ & $y$ & $T_{x_a}$ & $T_{x_b}$ & $T_{y}$ & $T_{x_a \oplus x_b}$ & $T_{x_a \oplus y}$ & $T_{x_b \oplus y}$ & $T_{x_a \oplus x_b \oplus y}$ & $4x_a \cdot x_b \cdot y$\\\hline
+        \begin{tabular}{c|c|c|c|c|c|c|c|c|c|c}\hline
+          $x_a$ & $x_b$ & $y$ & $T_{x_a}$ & $T_{x_b}$ & $T_{y}$ & $T_{x_a \oplus x_b}$ & $T_{x_a \oplus y}$ & $T_{x_b \oplus y}$ & $T_{x_a \oplus x_b \oplus y}$ & $x_a \cdot x_b \cdot y$\\\hline
           0     & 0     & 0   & 0         & 0         & 0       & 0                    & 0                  & 0                  & 0                             & 0            \\\hline
-          0     & 0     & 1   & 0         & 0         & $1$   & 0                    & $7$             & $7$
-                       & $1$                         & 0            \\\hline
-          0     & 1     & 0   & 0         & $1$     & 0       & $7$               & $7$             & 0                  & $1$                         & 0            \\\hline
-          0     & 1     & 1   & 0         & $1$     & $1$   & $7$               & 0                  & $7$             & 0                             & 0            \\\hline
-          1     & 0     & 0   & $1$     & 0         & 0       & $7$               & 0                  & $7$             & $1$                         & 0            \\\hline
-          1     & 0     & 1   & $1$     & 0         & $1$   & $7$               & $7$             & 0                  & 0                             & 0            \\\hline
-          1     & 1     & 0   & $1$     & $1$     & 0       & 0                    & $7$             & $7$             & 0                             & 0            \\\hline
-          1     & 1     & 1   & $1$     & $1$     & $1$   & 0                    & 0                  & 0                  & $1$                         & 4            \\\hline
+          0     & 0     & 1   & 0         & 0         & $1/4$   & 0                    & $-1/4$             & $-1/4$             & $1/4$                         & 0            \\\hline
+          0     & 1     & 0   & 0         & $1/4$     & 0       & $-1/4$               & $-1/4$             & 0                  & $1/4$                         & 0            \\\hline
+          0     & 1     & 1   & 0         & $1/4$     & $1/4$   & $-1/4$               & 0                  & $-1/4$             & 0                             & 0            \\\hline
+          1     & 0     & 0   & $1/4$     & 0         & 0       & $-1/4$               & 0                  & $-1/4$             & $1/4$                         & 0            \\\hline
+          1     & 0     & 1   & $1/4$     & 0         & $1/4$   & $-1/4$               & $-1/4$             & 0                  & 0                             & 0            \\\hline
+          1     & 1     & 0   & $1/4$     & $1/4$     & 0       & 0                    & $-1/4$             & $-1/4$             & 0                             & 0            \\\hline
+          1     & 1     & 1   & $1/4$     & $1/4$     & $1/4$   & 0                    & 0                  & 0                  & $1/4$                         & 1            \\\hline
         \end{tabular}
       }
       \caption{Truth table-like values of the pseudo-Boolean representation of $x_a \cdot x_b \cdot y$}
       \label{table-pseudo-toff}
     \end{center}
   \end{minipage}
-  
+\vspace{-0.5cm}
 \end{table*}
-
-\begin{figure*}[t]
+\begin{figure}[t]
   \centering
-  \scalebox{0.8} {
+  \scalebox{0.7} {
     \input{img/fig-toff-mark}
   }
   \caption{Implementing $x_a \cdot x_b \cdot y$ using CNOTs and T gates}
   \label{fig-toff-mark}
-\end{figure*}
+\end{figure}
 
 
 In general, a pseudo-Boolean function is a function such that
@@ -254,15 +263,15 @@ case $\mathbf{a} = 0$) associated with the pseudo-Boolean function, and
 $( a_0 \cdot x_0 \oplus a_1 \cdot x_1 \cdots \oplus a_{n-1} \cdot x_{n-1}) $ are linear functions
 that form a basis for the pseudo-Boolean function, and are maps $[0,1]^n \mapsto [0,1]$. 
 
-Such a phase polynomial can be realized using a 
+Such a phase polynomial can be realized using a CNOT+T network, as demonstrated in Fig.~\ref{fig-toff-mark}.
+It is easy to see then that the $\hat{f}(\mathbf{a})$ that has the minimal number of odd multiples of $\frac{\pi}{4}$
+for each $\mathbf{a}$ also minimizes the T-count~\cite{bib-amy-rm}. Optimizing the T-depth of such a CNOT+T network is
+done using the method in~\cite{bib-amy-matroid}.
+%% Observe also, that the linear functions
+%% $( a_0 \cdot x_0 \oplus a_1 \cdot x_1 \cdots \oplus a_{n-1} \cdot x_{n-1}) $ can be implemented
+%% entirely by CNOT gates. This means that Equation~\ref{eq-boolean-fourier} can be realized entirely by
+%% CNOT gates and phase gates, known as a {\it CNOT+T network}~\cite{bib-amy-cnot}. 
 
-It is easy to see then that the $\hat{f}(\mathbf{a})$ that has the minimal number of odd multiples of $\frac{\pi}{4}
-for each $\mathbf{a}$ also minimizes the T-count~\cite{bib-amy-rm}. Observe also, that the linear functions
-$( a_0 \cdot x_0 \oplus a_1 \cdot x_1 \cdots \oplus a_{n-1} \cdot x_{n-1}) $ can be implemented
-entirely by CNOT gates. This means that Equation~\ref{eq-boolean-fourier} can be realized entirely by
-CNOT gates and phase gates, known as a {\it CNOT+T network}~\cite{bib-amy-cnot}. 
-
-Optimizing the T-depth of such a CNOT+T network is done using the method in~\cite{bib-amy-matroid}.
 
 \section{Phase Polynomial Calculation for the Three Qubit Case}
 \label{Chap:Bool-pbool3q}
@@ -277,15 +286,20 @@ First, the inner product to be used for the Boolean Fourier transform is defined
 
 \begin{equation}
   \label{eq-inner-prod}
-  \langle f(\mathbf{x}) , g(\mathbf{x}) \rangle = \sum_{\mathbf{x}} \text{INNPROD}(f(\mathbf{x}),g(\mathbf{x})), \mathbf{x} \in \{0,1\}^n
+  \langle f(\mathbf{x}) , g(\mathbf{x}) \rangle = \frac{1}{2^n} \sum_{\mathbf{x}} (-1)^{f(\mathbf{x})}\cdot
+  (-1)^{g(\mathbf{x})}, \mathbf{x} \in \{0,1\}^n
 \end{equation}
-\begin{equation}  
-  \text{INNPROD}(f(\mathbf{x}),g(\mathbf{x})) =
-  \begin{cases}
-    7 & \text{if $f(\mathbf{x})\neq g(\mathbf{x})$} \\
-    1 & \text{if  $f(\mathbf{x})= g(\mathbf{x})$} 
-  \end{cases}
-\end{equation}
+%% \begin{equation}
+%%   \label{eq-inner-prod}
+%%   \langle f(\mathbf{x}) , g(\mathbf{x}) \rangle = \sum_{\mathbf{x}} \text{INNPROD}(f(\mathbf{x}),g(\mathbf{x})), \mathbf{x} \in \{0,1\}^n
+%% \end{equation}
+%% \begin{equation}  
+%%   \text{INNPROD}(f(\mathbf{x}),g(\mathbf{x})) =
+%%   \begin{cases}
+%%     7 & \text{if $f(\mathbf{x})\neq g(\mathbf{x})$} \\
+%%     1 & \text{if  $f(\mathbf{x})= g(\mathbf{x})$} 
+%%   \end{cases}
+%% \end{equation}
 
 \cite{bib-odonnell} states that the {\it parity functions}, the set of exclusive sums of the input variables
 $\chi(x_0,x_1,\cdots,x_n)$ shown in Equation~\ref{eq-bool-basis}, form an orthogonal basis with respect to the
@@ -323,64 +337,75 @@ repeated for every value of $\mathbf{a}$ until all of $\hat{f}(\mathbf{a})$ is c
     \begin{center}
       \begin{tabular}{c|c|c|c|c|c}
         \hline
-        $x_a$ & $x_b$ & $y$ & $f(\mathbf{x})$ & $\chi_{100}$ & INNPROD($\chi_{100},f(\mathbf{x}$) \\\hline
+        $x_a$ & $x_b$ & $y$ & $f(\mathbf{x})$ & $\chi_{100}$ & $(-1)^{\chi_{100}(\mathbf{x})} (-1)^{f(\mathbf{x}}$ \\\hline
         0 & 0 & 0 & 0 & 0 & 1\\\hline
         0 & 0 & 1 & 0 & 0 & 1\\\hline
         0 & 1 & 0 & 0 & 0 & 1\\\hline
         0 & 1 & 1 & 0 & 0 & 1\\\hline
-        1 & 0 & 0 & 0 & 1 & 7\\\hline
-        1 & 0 & 1 & 0 & 1 & 7\\\hline
-        1 & 1 & 0 & 0 & 1 & 7\\\hline      
+        1 & 0 & 0 & 0 & 1 & -1\\\hline
+        1 & 0 & 1 & 0 & 1 & -1\\\hline
+        1 & 1 & 0 & 0 & 1 & -1\\\hline      
         1 & 1 & 1 & 1 & 1 & 1\\\hline
       \end{tabular}
       \caption{The value of $\chi_{100}$ and the inner product $\langle f(\mathbf{x}), \chi_{100} \rangle$}
       \label{table-ex-100}
     \end{center}
+    \vspace{-0.5cm}
   \end{table}
-
   
   The terms in the right most column can then be summed just like in Equation~\ref{eq-inner-prod}:
   \begin{align}
-      &\hat{f}(100) = &\langle f(\mathbf{x}), \chi_{100} \rangle = &( 1 + 1 + 1 + 1 - 1 - 1 - 1 + 1) \\\nonumber
-      &&& = ( 2 ) = 1\nonumber\\\nonumber
+      &\hat{f}(100) = &\langle f(\mathbf{x}), \chi_{100} \rangle = &\frac{1}{8} ( 1 + 1 + 1 + 1 - 1 - 1 - 1 + 1) \\\nonumber
+      &&& = \frac{1}{8} ( 2 ) = \frac{1}{4}\nonumber\\\nonumber
   \end{align}
   This then gives:
   \begin{equation}
-    f(\mathbf{x}) = x_a + \sum_{\mathbf{a} \neq 000,100} \hat{f}(\mathbf{a}) \cdot \chi_{\mathbf{a}}
+    f(\mathbf{x}) = \frac{1}{4}x_a + \sum_{\mathbf{a} \neq 000,100} \hat{f}(\mathbf{a}) \cdot \chi_{\mathbf{a}}
   \end{equation}
 
   In the interest of conciseness, the rest of the calculation is omitted. But the reader can easily perform the
   rest to verify its equivalence with Equation~\ref{eq-toff-bool}.
 \end{example}
 
-The pseudo-Boolean function from Eq.~\ref{eq-toff-bool} is implemented as a circuit in Fig~\ref{fig-toff-mark}.
-
 \section{Analysis}
 
-We examine how Boolean functions $f:\{0,1\}^3 \to \{0,1\}$ behave under phase oracle synthesis, particularly in terms of $T$-count and $T$-depth.
+On analysis of the T-count and T-depth of the generated library, perhaps surprisingly, we found
+that every circuit fell into two categories: {\it even-weighted} (even number of fulfilling
+assignments) functions that had 0 T-count and 0 T-depth, and {\it odd-weighted} (odd number
+of fulfilling assignments) functions, with a T-count of 7 and T-depth of 3. We offer an
+explanation below.
 
 \subsection{Even-Weight Functions}
 
+Observe from Eq.~\ref{eq-inner-prod} that when $n=2$ i.e. for Boolean functions
+of two variables, the coefficients are at most $1/2$, meaning all such functions
+can be implemented using only CNOT and S gates, with 0 T-count. One such circuit
+is displayed in Fig.~\ref{fig:phase_x1x2}.
+\vspace{-0.5cm}
+\begin{figure}[h]
+  \centering
+  \[
+  \Qcircuit @C=1em @R=1em {
+    \lstick{\ket{x_1}} & \gate{S} & \ctrl{1} & \qw              & \ctrl{1} &   \\
+    \lstick{\ket{x_2}} & \gate{S} & \targ    & \gate{S^\dagger} & \targ    & \qw
+  }
+  \]
+  \vspace{-0.5cm}
+  \caption{Circuit that implements a phase of $x_1 \cdot x_2$.}
+  \label{fig:phase_x1x2}
+  \vspace{-0.5cm}
+\end{figure}
 Functions $f$ with an even number of satisfying assignments can be expressed as:
 \[
 f(x) = g(x_i, x_j \oplus x_k)
 \quad \text{or} \quad 
 f(x) = g(x_i \oplus x_j, x_k)
 \]
-for some $i,j,k$, where $g$ is a two-variable Boolean function.
+for some $i,j,k$, where $g$ is a two-variable Boolean function. This can be confirmed
+quickly from calculating all such 3 variable functions. They are {\it affine} with
+two variable functions up to an XOR with one of the inputs or the output.
 
-Such functions can be implemented using only CNOT and S gates, which means they have $T$-count zero.
-
-\[
-\Qcircuit @C=1em @R=1em {
-\lstick{x_i} & \ctrl{1} & \qw \\
-\lstick{x_j} & \targ    & \gate{S} & \qw
-}
-\]
-
-This circuit implements a controlled-phase for $f(x) = x_i x_j$.
-
-\subsection{Functions with One True Assignment}
+\subsection{Odd-Weight Functions}
 
 For a function $f$ such that $f(x) = 1$ for exactly one input (e.g., $f(x) = x_0 x_1 x_2$), the $T$-count is known to be 7.
 
@@ -388,36 +413,30 @@ Any function with an odd number of true assignments can be decomposed as:
 \[
 f = f_{\text{even}} \oplus f_{\text{single}}
 \]
-where $f_{\text{even}}$ has an even number of satisfying assignments, and $f_{\text{single}}$ has exactly one. Thus, the $T$-count of $f$ is at least 7.
+where $f_{\text{even}}$ has an even number of satisfying assignments, and $f_{\text{single}}$ has exactly one. Thus, the
+$T$-count of an odd-weighted such $f$ is 7.
 
 \section{Conclusion}
 \label{Sec:concl}
 
-This method produces T-count and T-depth optimal 3-qubit phase oracles to implement 3-bit Boolean functions
-such as those required in Grover's Algorithm. Future work involves using this library to construct arbitrary
-$n$-bit phase oracles.
+We produced T-count and T-depth optimal 3-qubit phase oracles to implement 3-bit Boolean functions
+such as those required in Grover's Algorithm. Upon analyzing the produced library, we realized that
+even-weighted functions required no T-gates to implement, while odd-weighted functions required at least 7.
+Future work involves using this library to construct arbitrary $n$-bit phase oracles.
 
-We find that:
+It informs some interesting future avenues of inquiry.
 \begin{itemize}
-  \item Functions with even-weight truth tables can be implemented with the same cost as some $f'$ of $n-1$ variables.
-  \item The synthesis cost for $n \geq 4$ grows rapidly in $T$-depth, suggesting the need for optimized decomposition.
-  \item Hypothesis: functions of the form
+  \item Can functions with even-weight truth tables in general be implemented with the same cost as some $f'$ of $n-1$ variables?
+  \item Can functions of the form
   \[
   f(x_0,\ldots,x_n) = g(x_{i_1} \oplus x_{i_2} \oplus \cdots, x_{j_1} \oplus x_{j_2} \oplus \cdots, x_{k_1} \oplus \cdots)
   \]
-  where $g$ depends on $\leq 3$ variables, can be synthesized exactly with only CNOT+T gates.
+  where $g$ depends on $\leq 3$ variables, be synthesized exactly with only CNOT+T gates? If so, can we use this fact to optimize
+  synthesis of circuits in general by integrating usage of the library produced in this work?
 \end{itemize}
 
-We propose an algorithm that:
-\begin{enumerate}
-  \item Decomposes $f$ into an ESOP expression.
-  \item Reorders variables to minimize the number of terms with more than 3 variables.
-  \item Maps $n \leq 3$ terms to a precomputed 3-qubit library.
-  \item Synthesizes remaining $n \geq 4$ terms directly, optimizing for $T$-count and $T$-depth.
-\end{enumerate}
-
-Further work is required to address relative phase issues and mitigate exponential T-depth scaling in $n \geq 4$ synthesis.
-
+While the usages of 3 variable phase oracles themselves may be limited, there could be further applications for
+phase oracles of 4 or more variables by composing them. This will be interesting future research.
 
 \section*{Acknowledgments}                                                     
 This work was supported by JSPS KAKENHI Grant Numbers 24K22298 and JST, CREST Grant Number JPMJCR24I4, Japan.
