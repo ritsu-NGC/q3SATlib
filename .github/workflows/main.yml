@@ -15,10 +15,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Debug: list files
-        run: |
-          ls -lR doc/aspdac2026
-          cat doc/aspdac2026/img/defs.tex
       - name: Set up TeX Live
         uses: xu-cheng/latex-action@v3
         with:
