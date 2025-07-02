@@ -21,7 +21,7 @@
 CNOT+T circuits are notable because, it is straightforward to optimize the T-count.
 Note that because the phase is a scalar, the actions of phase gates on different
 qubits all multiply together into the same scalar (essentially adding the powers
-of $e^{i \pi}$. Therefore, the result of all phase gates in a circuit
+of $e^{i \pi}$). Therefore, the result of all phase gates in a circuit
 can be computed thus:
 
 \begin{itemize}
@@ -103,6 +103,9 @@ using the phase polynomial in Eq.~\ref{eq-toff-bool2}. We use this in the next e
   did not require any T-gates to implement at all.
 \end{example}
 
+A library of such Boolean function decompositions could enable easier sum of paths
+optimization for a particular quantum circuit.
+
 The reader may have already noticed that in this simplistic example, a simple Boolean
 simplification may have dispensed with the need to even calculate the phase polynomial
 in the first place. We utilize a similar observation in our next section.
@@ -128,7 +131,7 @@ sum of paths simplification in Sec.~\ref{Mot:CnotOpt} and matroid partitioning f
   This new circuit has a T-count of 0. In the next section, we will go over how to
   get as close as possible to something like this for a given Boolean function.
 
-  \begin{figure}[h]
+  \begin{figure}[t]
     \centering
     \scalebox{1.0}{
       \input{img/fig-esop-synth2.tex}

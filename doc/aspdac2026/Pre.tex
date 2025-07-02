@@ -86,16 +86,17 @@ These computational basis states can similarly be in linear superposition.
 \sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}} = 1
 \end{equation}
 
-{\it Quantum gates} describe transformations in qubits. The main ones that concern this work are
-demonstrated in Fig.~\ref{fig-gates}. The $T/T^{\dagger}$, $S/S^{\dagger}$, and $Z$ gates will be
-referred to as {\it phase gates}.
+{\it Quantum gates} describe transformations in qubits. The main ones that concern this work
+are demonstrated in Fig.~\ref{fig-gates}. The $T/T^{\dagger}$, $S/S^{\dagger}$, and $Z$
+gates will be referred to as {\it phase gates}.
 
 All of these gates besides $T/T^{\dagger}$ are known as {\it Clifford gates}. For
 fault-tolerant quantum computers, Clifford gates are relatively inexpensive to implement.
 However, without $T/T^{\dagger}$-gates, computations that display quantum advantage
 cannot be implemented. Thus, {\it T-count}, the number of $T/T^{\dagger}$-gates, and
 {\it T-depth}, the longest such serial chain of them in a circuit, are often used as a
-cost metric~\cite{amy-meet-in-middle}.
+cost metric~\cite{amy-meet-in-middle}. The set of gates in Fig.~\ref{fig-gates} is known
+as the {\it Clifford+T} gates, which are universal for fault tolerant quantum computing.
 
 In addition, controlled versions of each of these gates exist, which means the phase is
 applied when all the control bits are 1. One such example is the two-bit Control-Z gate,
@@ -103,17 +104,21 @@ which is 1 when its control bit and target bit are 1, implementing
 $\ket{x}\ket{y} \rightarrow (-1)^{x \cdot y}\ket{x}\ket{y}$. We will see how this is
 constructed from the gates in Fig.~\ref{fig-gates} later.
 
-All of the gates in Fig.~\ref{fig-gates} can in turn be composed into {\it quantum circuits}. 
+All of the gates in Fig.~\ref{fig-gates} can in turn be composed into
+{\it quantum circuits}. 
 
 \subsection{Phase Oracles and Phase Polynomials}
 \label{Pre:oracle}
-A {\it phase oracle} is one such quantum circuit that implements a Boolean function as a quantum circuit, implementing
-a mapping of a computational basis state $\ket{\mathbf{x}} \mapsto e^{i \pi f(\mathbf{x})}\ket{\mathbf{x}}$, where $f(\mathbf{x})$
-is a Boolean function $\{0,1\}^n \rightarrow \{0,1\}$. Phase oracles are key elements in algorithms such as
-Grover's Algorithm.
+A {\it phase oracle} is one such quantum circuit that implements a Boolean function as a
+quantum circuit, implementing a mapping of a computational basis state
+$\ket{\mathbf{x}} \mapsto e^{i \pi f(\mathbf{x})}\ket{\mathbf{x}}$, where $f(\mathbf{x})$
+is a Boolean function $\{0,1\}^n \rightarrow \{0,1\}$. Phase oracles are key elements in
+algorithms such as Grover's Algorithm.
 
-Previous research has demonstrated that some phase oracles can be implemented using only CNOT and phase gates
-(CNOT+T)~\cite{bib-amy-cnot}. When done in such a manner, $f(\mathbf{x})$ can be expressed as a {\it phase polynomial},
+Previous research has demonstrated that some phase oracles can be implemented using only
+CNOT and phase gates
+(CNOT+T)~\cite{bib-amy-cnot}. When done in such a manner, $f(\mathbf{x})$ can be expressed
+as a {\it phase polynomial},
 defined in Eq.~\ref{eq-boolean-fourier}.
 
 \begin{equation}
@@ -124,11 +129,11 @@ defined in Eq.~\ref{eq-boolean-fourier}.
   \end{aligned}
 \end{equation}
 
-Where $\chi_k(\mathbf{x}) = ( k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1})$ for some
-$\mathbf{k} \in \{0,1\}^{n}$.
+Where $\chi_k(\mathbf{x}) = ( k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1})$
+for some $\mathbf{k} \in \{0,1\}^{n}$.
 
-Eq.~\ref{eq-toff-bool} demonstrates one such phase polynomial. It can be verified from Table~\ref{table-pseudo-toff} that
-this is indeed true.
+Eq.~\ref{eq-toff-bool} demonstrates one such phase polynomial. It can be verified from
+Table~\ref{table-pseudo-toff} that this is indeed true.
 
 \begin{equation}
   \label{eq-toff-bool}
@@ -153,7 +158,7 @@ this is indeed true.
 \def\arraystretch{1.1}
 
 Such a phase polynomial can be implemented as a phase oracle using the following
-method.
+method~\cite{amy-meet-in-middle}.
 
 \begin{itemize}
 \item Coefficients of the phase polynomial describe the phase that needs to be driven
