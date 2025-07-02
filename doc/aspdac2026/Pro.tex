@@ -8,7 +8,7 @@ represent precomputation, while tan boxes represent runtime.
 
 \begin{itemize}
 \item \textbf{(Generate 3bit phase polynomials)} : Precompute library of phase polynomials of Boolean functions of
-  3 qubits or fewer using the Boolean Fourier transform.
+  3 bits or fewer using the Boolean Fourier transform.
 \item \textbf{(Synthesize 3bit phase subcircuits)} : The phase polynomials are then sequenced using matroid
   partitioning from~\ref{bib-amy-matroid} and synthesized as subcircuits. The results are stored in hard disk,
   to be loaded into memory at runtime.
@@ -17,8 +17,8 @@ represent precomputation, while tan boxes represent runtime.
 \item \textbf{(Minimize the number of $n \geq 4$ cubes in ESOP)} : The ESOP is optimized by adapting
   EXORCISM-4~\cite{bib-exorcism} to reduce the number of cubes of more than 4 literals. This method is explained
   in Sec.~\ref{Pro:Minimize}.
-\item \textbf{(Map the $n \leq 3$ cubes to the 3 qubit library)} : Takes all cubes of $n \leq 3$ and maps them to 
-  appropriate functions from the 3 qubit library, inserting the corresponding subcircuit into the phase oracle.
+\item \textbf{(Map the $n \leq 3$ cubes to the 3 bit library)} : Takes all cubes of $n \leq 3$ and maps them to 
+  appropriate functions from the 3 bit library, inserting the corresponding subcircuit into the phase oracle.
 \item \textbf{(Synthesize $n \geq 4$ cubes)} : Synthesizes all cubes of $n \geq 4$ using the method labeled in
   Sec.~\ref{Pro:n4}.
 \item \textbf{(Combine $n \geq 4$ and $n \leq 3$)} : The results of the above two steps are combined into one
@@ -59,6 +59,7 @@ implementation of such $F$-controlled-NOT gates without any ancilla bits. We def
 of that method to the cited paper.
 
 \begin{figure}[t]
+  \centering
   \scalebox{1.0} {
     \input{img/fig-phase-n4}
   }
