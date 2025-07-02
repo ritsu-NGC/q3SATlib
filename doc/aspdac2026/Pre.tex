@@ -92,11 +92,11 @@ All of the gates in Fig.~\ref{fig-gates} can in turn be composed into {\it quant
 
 \subsection{Phase Oracles and Phase Polynomials}
 A {\it phase oracle} is one such quantum circuit that implements a Boolean function as a quantum circuit, implementing
-a mapping of a computational basis state $\ket{\mathbf{x}} \mapsto (-1)^{f(\mathbf{x})}\ket{\mathbf{x}}$, where $f(\mathbf{x})$
+a mapping of a computational basis state $\ket{\mathbf{x}} \mapsto e^{i \pi f(\mathbf{x})}\ket{\mathbf{x}}$, where $f(\mathbf{x})$
 is a Boolean function $\{0,1\}^n \rightarrow \{0,1\}$. Phase oracles are key elements in algorithms such as
 Grover's Algorithm.
 
-Previous research has demonstrated that phase oracles can be implemented using only CNOT and phase gates
+Previous research has demonstrated that some phase oracles can be implemented using only CNOT and phase gates
 (CNOT+T)~\cite{bib-amy-cnot}. When done in such a manner, $f(\mathbf{x})$ can be expressed as a {\it phase polynomial},
 defined in Eq.~\ref{eq-boolean-fourier}.
 
@@ -104,11 +104,12 @@ defined in Eq.~\ref{eq-boolean-fourier}.
   \begin{aligned}
     \label{eq-boolean-fourier}
     f(\mathbf{x}) = \sum_{\mathbf{k} \neq 0} \hat{f}(\mathbf{k}) \cdot \chi_k(\mathbf{x}), \\\nonumber
-    \hat{f}(\mathbf{k}) \in \mathbb{R} \quad \mathbf{k} \in \{0,1\}^{n}
+    \hat{f}(\mathbf{k}) \in \mathbb{R}
   \end{aligned}
 \end{equation}
 
-Where $( k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1}) = \chi_k(\mathbf{x})$
+Where $\chi_k(\mathbf{x}) = ( k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1})$ for some
+$\mathbf{k} \in \{0,1\}^{n}$.
 
 Eq.~\ref{eq-toff-bool} demonstrates one such phase polynomial. It can be verified from Table~\ref{table-pseudo-toff} that
 this is indeed true.
@@ -153,80 +154,51 @@ method.
   as multiples of $i\pi$ (i.e. $3/4$ will be driven as an $S$-gate followed by $T$-gate).
 \item The corresponding $\chi_k(\mathbf{x})$ functions can be implemented as a network
   of CNOT and X gates.
-\item The phase gates are sequenced by their corresponding $\chi_k(\mathbf{x})$ functions.
+\item The phase gates are scheduled according to their corresponding $\chi_k(\mathbf{x})$
+  functions.
 \item CNOT and X networks are synthesized to drive each phase gate's corresponding
   $\chi_k(\mathbf{x})$ function
 \item additional CNOT and X logic is added to return the state to the input state.
 \end{itemize}
 
-
+Scheduling these T-gates can be done using the matroid partitioning algorithm described in
+~\ref{bib-amy-matroid}. This guarantees a minimal T-depth for CNOT+T circuits.
+The terms in Eq.~\ref{eq-toff-bool} are synthesized and scheduled using that algorithm as
+demonstrated in Fig.~\ref{fig-toff-mark-matroid}.
 \begin{figure}[t]
   \centering
   \scalebox{0.7} {
-    \input{img/fig-toff-mark}
+    \input{img/fig-toff-mark-matroid}
   }
-  \caption{Implementing $x_a \cdot x_b \cdot y$ using CNOT and T gates}
-  \label{fig-toff-mark}
+  \caption{Implementing $x_a \cdot x_b \cdot y$ using CNOT and T gates, sequenced using~\cite{bib-amy-matroid}}
+  \label{fig-toff-mark-matroid}
 \end{figure}
-
 
 The next section shows how $\hat{f}(\mathbf{k})$ may be obtained for the three or fewer qubit case using the
 Boolean Fourier transform.
 
 \section{Boolean Fourier Transform}
 
+Observe that the $\chi_k(\mathbf{x})$ from Eq.~\ref{eq-boolean-fourier} form an orthonormal basis with respect
+to the below inner product.
 
-In plain terms, it is a sum of products of Boolean functions with real coefficients, resulting in binary values~\cite{bib-barenco-elementary}. This representation is also known as a {\it phase polynomial}~\cite{bib-amy-cnot}.
-
-\vspace{0.5cm}
-
-Phase polynomials are important because they can be calculated using the {\it Boolean Fourier transform}:
-\begin{equation}
-  \begin{aligned}
-    \label{eq-boolean-fourier}
-    f(\mathbf{x}) = \sum_{\mathbf{k} \neq 0} \hat{f}(\mathbf{k}) \cdot ( k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1}), \\\nonumber
-    \hat{f}(\mathbf{k}) \in \mathbb{R} \quad \mathbf{k} \in \{0,1\}^{n}
-  \end{aligned}
-\end{equation}
-
-\vspace{0.3cm}
-
-%DCTODO The coefficients $\hat{f}(\mathbf{k})$ (for all nontrivial $\mathbf{k}$) specify the phase polynomial, and the linear functions  form a basis.
-
-Such a phase polynomial can be realized using a CNOT+T network, as in Fig.~\ref{fig-toff-mark}. Minimizing the number of odd multiples of $\frac{\pi}{4}$ in $\hat{f}(\mathbf{k})$ also minimizes the T-count~\cite{bib-amy-rm}. Optimizing T-depth is done as in~\cite{bib-amy-matroid}.
-
-\vspace{0.4cm}
-
-\section{Phase Polynomial Calculation for the Three Qubit Case}
-\label{Chap:Bool-pbool3q}
-
-\vspace{0.3cm}
-
-This section shows how to calculate the phase polynomial for a three-input Boolean function, using the Boolean Fourier transform~\cite{bib-odonnell}. The notation is chosen to clarify how the equation may be implemented using quantum gates in the CNOT+T basis. 
-
-\vspace{0.3cm}
-
-The inner product for the Boolean Fourier transform is
 \begin{equation}
   \label{eq-inner-prod}
   \langle f(\mathbf{x}) , g(\mathbf{x}) \rangle = \frac{1}{2^n} \sum_{\mathbf{x}} (-1)^{f(\mathbf{x})} (-1)^{g(\mathbf{x})}, \quad \mathbf{x} \in \{0,1\}^n
 \end{equation}
 
-The {\it parity functions}, i.e., exclusive sums of input variables $\chi(x_0,\ldots,x_n)$ as in Eq.~\ref{eq-bool-basis}, form an orthogonal basis with respect to this product:
-\begin{equation}
-  \label{eq-bool-basis}
-  \chi(x_0,\ldots,x_n)_{\mathbf{k}} = k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1},\quad k_i \in \{0,1\}
-\end{equation}
+for $n = |\mathbf{x}| \leq 3$.
 
-\vspace{0.2cm}
+That means, we can calculate $\hat{f}(\mathbf{k})$ using the below inner product
 
-Since $\langle \chi_{\mathbf{k}}, \chi_{\mathbf{b}} \rangle = 0$ for $\mathbf{k} \neq \mathbf{b}$, the coefficient $\hat{f}(\mathbf{k})$ is computed as
 \begin{equation}
   \label{eq-fhat-prod}
-  \hat{f}(\mathbf{k}) = \langle f(\mathbf{x}), \chi(\mathbf{x})_{\mathbf{k}} \rangle
+  \hat{f}(\mathbf{k}) = \langle f(\mathbf{x}), \chi(\mathbf{x})_{\mathbf{k}} \rangle \forall \mathbf{k} 
 \end{equation}
 
-\vspace{0.2cm}
+$\hat{f}(\mathbf{k})$ is also known as the Boolean Fourier transform of $f(\mathbf{x})$~\cite{bib-odonnell}
+\footnote{All equations that are taken from ~\cite{bib-odonnell} are written here
+in terms of the \{0,1\} basis and \chi(\mathbf{x})_{\mathbf{k}} functions from ~\cite{bib-amy-matroid}}.
 
 \begin{example}
 As an example, let's derive the coefficients for Eq.~\ref{eq-toff-bool} with $\mathbf{k} = (k_{x_a}, k_{x_b}, k_y)$.
@@ -261,6 +233,34 @@ Thus,
 The rest of the calculation is omitted for brevity, but readers can verify that it results in Eq.~\ref{eq-toff-bool}.
 \end{example}
 
-These circuits are notable because, for the 3-input case, it is straightforward to optimize the {\it T-count}, i.e., the number of T-gates and $T^{\dagger}$-gates~\cite{amy-meet-in-middle}. Optimizing T-count is crucial for fault-tolerant circuit implementation, as T-gates are expensive in most encodings~\cite{bib-herr-lattice,bib-fowler-bridge}. The {\it T-depth} is the longest sequence of T-gates in a circuit, which is also important since many modern encodings can execute T-gates in parallel for cost savings~\cite{bib-google-ecc}.
+Synthesizing the phase polynomial of a Boolean function using the Boolean Fourier
+transform for 3 variables or fewer has an interesting consequence. First, the
+number of odd multiples of $i\frac{\pi}{4}$ of $\hat{f}(\mathbf{k})$ corresponds to
+the T-count needed to implement $f(\mathbf{x})$~\cite{bib-amy-rm}. This is easy to
+check, since any even multiple of $i\frac{\pi}{4}$ can be implemented using only
+S and Z gates, which do not take any T-cost, and any odd multiple can be realized
+using S and Z gates, plus one T-gate. Since each $\hat{f}(\mathbf{k})$
+corresponds one to one with $f(\mathbf{x})$, $\hat{f}(\mathbf{k})$ has the
+optimal T-count needed to implement $f(\mathbf{x})$ as a phase oracle.
 
-The 3-input case is interesting because it is the largest class of Boolean functions representable by a CNOT+T circuit. Since there are only 256 such Boolean functions, there are potential uses for a library of such oracles.
+\subsection{Synthesizing Phase Oracles from ESOP}
+
+A transformation $\ket{x}\ket{y} \rightarrow (-1)^{x \oplus y}\ket{x}\ket{y}$ can be realized using
+the below circuit
+\begin{figure}[h]
+  \scalebox{1.0} {
+    \Qcircuit @C=0.5em @R=0.2em @!R {
+      \lstick{\ket{x}} & \qw & \gate{Z} & \qw  \\
+      \lstick{\ket{y}} & \qw & \gate{Z} & \qw
+    }
+  }
+\end{figure}
+
+Thus, given an Exclusive Sum of Products expression of a Boolean function
+$f(\mathbf{x}) = x_a x_b \cdots x_g \oplus x_i x_j \cdots x_m \oplus \cdots$, we
+can implement its phase oracle as controlled phase gates of the following form
+[DCTODO diagram]
+
+This method is used by Qiskit's Phase Oracle [DCTODO ref]. Our proposal revolves around
+the effective use of such an Exclusive Sum of Products to implement such a phase oracle.
+
