@@ -1,6 +1,58 @@
+\begin{figure}[t]
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \scalebox{1.0} {
+      \input{img/Sgate}
+    }
+    \subcaption{S-gate}
+    \sublabel{fig-sgate}
+    \scalebox{1.0} {
+      \input{img/Sdgate}
+    }
+    \subcaption{S$^{\dagger}$-gate}
+    \sublabel{fig-sdgate}
+    \scalebox{1.0}{
+      \input{img/cnot}
+    }
+    \subcaption{CNOT-gate}
+    \sublabel{fig-cnot}
+    \scalebox{1.0} {
+      \input{img/Zgate}
+    }
+    \subcaption{Z-gate}
+    \sublabel{fig-zgate}
+  \end{minipage}
+  \begin{minipage}{0.45\linewidth}
+  \centering
+    \scalebox{1.0} {
+      \input{img/Tgate}
+    }
+    \subcaption{T-gate}
+    \sublabel{fig-tgate}
+    \scalebox{1.0} {
+      \input{img/Tdgate}
+    }
+    \subcaption{$T^{\dagger}$-gate}
+    \sublabel{fig-tdgate}
+    \scalebox{1.0} {
+      \input{img/Hgate}
+    }
+    \subcaption{H-gate}
+    \sublabel{fig-hgate}
+    \scalebox{1.0} {
+      \input{img/Xgate}
+    }
+    \subcaption{X-gate}
+    \sublabel{fig-xgate}
+  \end{minipage}
+  \caption{Quantum gates}
+  \label{fig-gates}
+\end{figure}
+
+
 \section{Preliminaries}
 
-\section{Quantum Bits}
+\subsection{Quantum Bits and Quantum Gates}
 \label{Chap:Pre-qubits}
 Quantum computers internally represent data as \emph{qubits}, which are quantum systems that can
 take on the quantum states $\ket{0}$ and $\ket{1}$,
@@ -30,499 +82,185 @@ and is written as a bit string consisting of the values in the component tensor 
 
 These computational basis states can similarly be in linear superposition.
 \begin{equation}
-\ket{\psi} = \sum_{\mathbf{a} \in \{0,1\}^n} \alpha_{\mathbf{a}}\ket{\mathbf{a}},
-\sum_{\mathbf{a} \in \{0,1\}^n} \alpha_{\mathbf{a}} = 1
+\ket{\psi} = \sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}}\ket{\mathbf{k}},
+\sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}} = 1
 \end{equation}
 
-Multiqubit states can also have equivalence up to a global phase, as well as a relative phase.
+{\it Quantum gates} describe transformations in qubits. The main ones that concern this work are demonstrated
+in Fig.~\ref{fig-gates}. The $T/T^{\dagger}$, $S/S^{\dagger}$, and $Z$ gates will be referred to as {\it phase gates}.
+All of the gates in Fig.~\ref{fig-gates} can in turn be composed into {\it quantum circuits}. 
 
-Because computational basis states are analogous to classical bit strings, quantum operations that map
-between basis states are analogous to Boolean functions. This work focuses mainly on operations
-that map between computational basis states.
+\subsection{Phase Oracles and Phase Polynomials}
+A {\it phase oracle} is one such quantum circuit that implements a Boolean function as a quantum circuit, implementing
+a mapping of a computational basis state $\ket{\mathbf{x}} \mapsto (-1)^{f(\mathbf{x})}\ket{\mathbf{x}}$, where $f(\mathbf{x})$
+is a Boolean function $\{0,1\}^n \rightarrow \{0,1\}$. Phase oracles are key elements in algorithms such as
+Grover's Algorithm.
 
-One additional property is when two qubits $q_0$ and $q_1$ are in a two-qubit state $\ket{\psi}$,
-then they are said to be {\it entangled} if there exists no $\ket{\psi_a}_{0}$ and $\ket{\psi_b}_{1}$
-such that
+Previous research has demonstrated that phase oracles can be implemented using only CNOT and phase gates
+(CNOT+T)~\cite{bib-amy-cnot}. When done in such a manner, $f(\mathbf{x})$ can be expressed as a {\it phase polynomial},
+defined in Eq.~\ref{eq-boolean-fourier}.
+
 \begin{equation}
-        \ket{\psi} = \ket{\psi_a}_{0} \otimes \ket{\psi_b}_{1}
+  \begin{aligned}
+    \label{eq-boolean-fourier}
+    f(\mathbf{x}) = \sum_{\mathbf{k} \neq 0} \hat{f}(\mathbf{k}) \cdot \chi_k(\mathbf{x}), \\\nonumber
+    \hat{f}(\mathbf{k}) \in \mathbb{R} \quad \mathbf{k} \in \{0,1\}^{n}
+  \end{aligned}
 \end{equation}
 
-An example of such an entangled state is a {\it Bell pair}
-\begin{equation}
-        \ket{\psi} = \frac{1}{\sqrt{2}} (\ket{01} + \ket{10})
-\end{equation}
+Where $( k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1}) = \chi_k(\mathbf{x})$
 
+Eq.~\ref{eq-toff-bool} demonstrates one such phase polynomial. It can be verified from Table~\ref{table-pseudo-toff} that
+this is indeed true.
 
-\subsection{Quantum Bits and Quantum Gates}
-\section{Quantum Bits}
-\label{Chap:Pre-qubits}
-Quantum computers internally represent data as \emph{qubits}, which are quantum systems that can
-take on the quantum states $\ket{0}$ and $\ket{1}$, where $\ket{}$ is known as the Dirac
-notation for indicating a quantum state~\cite{bib-mike-and-ike}. Translating these quantum states to classically understandable values like $0$ and $1$ requires an operation called a
-{\it measurement}. Measurement, for the purposes of this dissertation, measures a $\ket{0}$ state and returns
-the value $0$, and the $\ket{1}$ state and returns the value $1$.
-
-Additionally, qubits can also exist in quantum states that are a linear combination of $\ket{0}$ and
-$\ket{1}$, which is called {\it superposition}:
-\begin{equation}
-\ket{\psi} = \alpha_0 \ket{0} + \alpha_1 \ket{1}, \alpha_0, \alpha_1 \in \mathbb{C}
-\end{equation}
-
-Where the coefficients $\alpha_0$ and $\alpha_1$ are constrained by the equation $\alpha_0^2 + \alpha_1^2 = 1$.
-As such, $\ket{0}$ and $\ket{1}$ represent a {\it basis} for this quantum state. The coefficients on these basis
-states are important because for a qubit in linear superposition, $\alpha_0^2$ is the probability of measuring
-$\ket{\psi}$ as $0$, and $\alpha_1^2$ is the probability of measuring $\ket{\psi}$ as $1$. Because these
-coefficients are complex numbers, they can also be expressed as a complex exponential $a\cdot e^{i \theta}$.
-$\theta$ in this exponential is often referred to as a {\it phase}.
-
-When comparing two quantum states, if $\ket{\psi_0}$ is related to $\ket{\psi_1}$ by the following relation:
-\begin{equation}
-        \ket{\psi_1} = e^{i \theta_g} \ket{\psi_0}
-\end{equation}
-then $\ket{\psi_0}$ and $\ket{\psi_1}$ are equivalent up to a {\it global phase} $\theta_g$.
-
-In contrast, if instead the relation between $\ket{\psi_0}$ and $\ket{\psi_1}$ can only be expressed as a
-function $\theta(k)$ in the way shown in the equation below:
-\begin{equation}
-        \ket{\psi_0} = \sum_{k \in \{0,1\}} a_k e^{i \theta_0} \ket{k}
-        \ket{\psi_1} = \sum_{k \in \{0,1\}} a_k e^{i \theta_0 + \theta(k)} \ket{k}        
-\end{equation}
-then $\ket{psi_0}$ and $\ket{\psi_1}$ are equivalent up to {\it relative phase}.
-
-The distinction between global phase and relative phase is important. In general, global phases are
-invariant under most quantum operations, including measurement. However, the same cannot be said
-for those equivalent up to a relative phase. In general, states that are equivalent up to a relative
-phase cannot be considered equivalent in most cases. This dissertation attempts to find cases which
-can tolerate this relative phase to effect the same quantum operations.
-
-\section{Multiqubit States}
-Qubits can be taken together as tensor products to create multiqubit states.
-\begin{equation}
-\label{eq-multi-qb}
-\ket{\psi} = \ket{\psi}_0 \otimes \ket{\psi}_1 =(\alpha_{00} \ket{0}_0 + \alpha_{01} \ket{1}_0) \otimes
-(\alpha_{10} \ket{0}_1 + \alpha_{11} \ket{1}_1)
-\end{equation}
-Note in Equation~\ref{eq-multi-qb} that In particular, the tensor product of several basis states is known as a \emph{computational basis state},
-and is written as a bit string consisting of the values in the component tensor multiplicands. 
-\begin{equation}
-\ket{x_0}\otimes\ket{x_1}\otimes\cdots\otimes\ket{x_{n-1}}=\ket{x_0 x_1 \cdots x_{n-1}}=\ket{\mathbf{x}},
-\mathbf{x} \in \{0,1\}^n
-\end{equation}
-
-Additionally, many of the properties in Section~\ref{Chap:Pre-qubits} generalize to the multiqubit case.
-Observe that computational basis states can similarly be in linear superposition.
-\begin{equation}
-\ket{\psi} = \sum_{\mathbf{a} \in \{0,1\}^n} \alpha_{\mathbf{a}}\ket{\mathbf{a}},
-\sum_{\mathbf{a} \in \{0,1\}^n} \alpha_{\mathbf{a}} = 1
-\end{equation}
-
-Multiqubit states can also have equivalence up to a global phase, as well as a relative phase.
-
-Because computational basis states are analogous to classical bit strings, quantum operations that map
-between basis states are analogous to Boolean functions. This work focuses mainly on operations
-that map between computational basis states.
-
-One additional property is when two qubits $q_0$ and $q_1$ are in a two-qubit state $\ket{\psi}$,
-then they are said to be {\it entangled} if there exists no $\ket{\psi_a}_{0}$ and $\ket{\psi_b}_{1}$
-such that
-\begin{equation}
-        \ket{\psi} = \ket{\psi_a}_{0} \otimes \ket{\psi_b}_{1}
-\end{equation}
-
-An example of such an entangled state is a {\it Bell pair}
-\begin{equation}
-        \ket{\psi} = \frac{1}{\sqrt{2}} (\ket{01} + \ket{10})
-\end{equation}
-
-
-\section{Quantum Gates}
-
-In general, quantum operations are depicted using {\it quantum gates}, which effect the mapping
-shown below:
-
-\begin{figure}[h]
-  \begin{center}
-  \scalebox{1.25} {
-    \Qcircuit @C=0.5em @R=0.5em @!R { \\                         
-      \lstick{\ket{\mathbf{x}}} & \qw   & \gate{U}   & \qw & \push{\sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}}(\mathbf{x}) e^{i \theta_{\mathbf{k}}(\mathbf{x})} \ket{\mathbf{k}}}
-    }
-  }
-  \end{center}
-\end{figure}
-
-Because quantum gates are unitary operations as dictated by the laws of quantum mechanics, each quantum gate
-also has corresponding {\it inverse} that effects the reverse mapping, marked by the symbol $^{\dagger}$.
-Replacing a quantum gate with its inverse is called {\it conjugation}:
-\begin{figure}[h]
-  \begin{center}
-  \hspace{4cm}
-  \scalebox{1.25} {
-    \Qcircuit @C=0.5em @R=0.5em @!R { \\                         
-      \lstick{\sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}}(\mathbf{x}) e^{i \theta_{\mathbf{k}}(\mathbf{x})}
-      \ket{\mathbf{k}}} & \qw   & \gate{U^{\dagger}}   & \qw & \push{\ket{\mathbf{x}}}
-    }
-  }
-  \end{center}
-\end{figure}
-\begin{figure}[t]
-  \begin{minipage}[t]{0.45\textwidth}
-    \centering
-    \scalebox{1.0}{
-      \input{img/cnot}
-    }
-    \subcaption{CNOT-gate}
-    \sublabel{fig-cnot}
-    \centering
-    \scalebox{1.0} {
-      \input{img/Tgate}
-    }
-    \subcaption{T-gate}
-    \sublabel{fig-tgate}
-    \centering
-    \scalebox{1.0} {
-      \input{img/Sgate}
-    }
-    \subcaption{S-gate}
-    \sublabel{fig-sgate}
-  \end{minipage}
-  \begin{minipage}[t]{.45\textwidth}
-    \vspace{5mm}
-    \centering
-    \hspace{5mm}
-    \centering
-    \scalebox{1.0} {
-      \input{img/Hgate}
-    }
-    \subcaption{H-gate}
-    \sublabel{fig-hgate}
-    \centering
-    \scalebox{1.0} {
-      \input{img/Tdgate}
-    }
-    \subcaption{$T^{\dagger}$-gate}
-    \sublabel{fig-tdgate}
-    \centering
-    \scalebox{1.0} {
-      \input{img/Sdgate}
-    }
-    \subcaption{$S^{\dagger}$-gate}
-    \sublabel{fig-sdgate}
-  \end{minipage}
-  \caption{The H, CNOT, T, S (Clifford+T) basis gate set}
-  \label{fig-basis}
-\end{figure}
-
-Figure~\ref{fig-basis} enumerates the elementary gate set consisting of the $H$-gate, $\mathit{CNOT}$,
-$T$-gate, $T^{\dagger}$-gate (the inverse of the $T$-gate), $S$-gate, and $S^{\dagger}$-gate (the
-inverse of the $S$-gate), known as the \emph{Clifford+T basis gate set}. As mentioned in
-Chapter~\ref{Chap:Intro}, this gate set is enough to implement universal quantum computing,
-including operations that have a quantum advantage~\cite{bib-solovay-kitaev}.
-The implication, therefore, is that a finite set of gates is enough to express any quantum operation up
-to a finite error with minimal overhead. This means the Clifford+T gate set can be used as a basis set for
-fault-tolerant quantum computing, provided each of the gates can be implemented fault-tolerantly.
-
-In the fault-tolerant paradigm, $T$-gates and $T^{\dagger}$-gates are much more expensive to implement than
-$H$-gate,$CNOT$, $S$-gate, and $S^{\dagger}$-gates~\cite{bib-bravyi-kitaev-magic-distillation}. This means
-that the number of T-gates is key to lowering the cost of the implementation. Hereafter, 
-the set of the T-gate and the T$^{\dagger}$-gate are referred to as ``T-gates'', and the set of the S-gate and the
-S$^{\dagger}$-gate ``S-gates'', unless otherwise noted.
-
-When this set of gates is assembled into a network, the result is called a \emph{quantum circuit}. In a
-quantum circuit, inputs come in from the left, gates are applied in order from left to right, and outputs
-go out from the right. Quantum circuits also have \emph{output qubits}, which are the qubits that output
-quantum states to be measured or used by other quantum circuits. 
-
-In general, quantum operations are depicted using {\it quantum gates}, which effect the mapping
-shown below:
-
-\begin{figure}[h]
-  \begin{center}
-  \scalebox{1.25} {
-    \Qcircuit @C=0.5em @R=0.5em @!R { \\                         
-      \lstick{\ket{\mathbf{x}}} & \qw   & \gate{U}   & \qw & \push{\sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}}(\mathbf{x}) e^{i \theta_{\mathbf{k}}(\mathbf{x})} \ket{\mathbf{k}}}
-    }
-  }
-  \end{center}
-\end{figure}
-
-Because quantum gates are unitary operations as dictated by the laws of quantum mechanics, each quantum gate
-also has corresponding {\it inverse} that effects the reverse mapping, marked by the symbol $^{\dagger}$.
-Replacing a quantum gate with its inverse is called {\it conjugation}:
-\begin{figure}[h]
-  \begin{center}
-  \hspace{4cm}
-  \scalebox{1.25} {
-    \Qcircuit @C=0.5em @R=0.5em @!R { \\                         
-      \lstick{\sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}}(\mathbf{x}) e^{i \theta_{\mathbf{k}}(\mathbf{x})}
-      \ket{\mathbf{k}}} & \qw   & \gate{U^{\dagger}}   & \qw & \push{\ket{\mathbf{x}}}
-    }
-  }
-  \end{center}
-\end{figure}
-\begin{figure}[t]
-  \begin{minipage}[t]{0.45\textwidth}
-    \centering
-    \scalebox{1.0}{
-      \input{img/cnot}
-    }
-    \subcaption{CNOT-gate}
-    \sublabel{fig-cnot}
-    \centering
-    \scalebox{1.0} {
-      \input{img/Tgate}
-    }
-    \subcaption{T-gate}
-    \sublabel{fig-tgate}
-    \centering
-    \scalebox{1.0} {
-      \input{img/Sgate}
-    }
-    \subcaption{S-gate}
-    \sublabel{fig-sgate}
-  \end{minipage}
-  \begin{minipage}[t]{.45\textwidth}
-    \vspace{5mm}
-    \centering
-    \hspace{5mm}
-    \centering
-    \scalebox{1.0} {
-      \input{img/Hgate}
-    }
-    \subcaption{H-gate}
-    \sublabel{fig-hgate}
-    \centering
-    \scalebox{1.0} {
-      \input{img/Tdgate}
-    }
-    \subcaption{$T^{\dagger}$-gate}
-    \sublabel{fig-tdgate}
-    \centering
-    \scalebox{1.0} {
-      \input{img/Sdgate}
-    }
-    \subcaption{$S^{\dagger}$-gate}
-    \sublabel{fig-sdgate}
-  \end{minipage}
-  \caption{The H, CNOT, T, S (Clifford+T) basis gate set}
-  \label{fig-basis}
-\end{figure}
-
-Figure~\ref{fig-basis} enumerates the elementary gate set consisting of the $H$-gate, $\mathit{CNOT}$,
-$T$-gate, $T^{\dagger}$-gate (the inverse of the $T$-gate), $S$-gate, and $S^{\dagger}$-gate (the
-inverse of the $S$-gate), known as the \emph{Clifford+T basis gate set}. As mentioned in
-Chapter~\ref{Chap:Intro}, this gate set is enough to implement universal quantum computing,
-including operations that have a quantum advantage~\cite{bib-solovay-kitaev}.
-The implication, therefore, is that a finite set of gates is enough to express any quantum operation up
-to a finite error with minimal overhead. This means the Clifford+T gate set can be used as a basis set for
-fault-tolerant quantum computing, provided each of the gates can be implemented fault-tolerantly.
-
-In the fault-tolerant paradigm, $T$-gates and $T^{\dagger}$-gates are much more expensive to implement than
-$H$-gate,$CNOT$, $S$-gate, and $S^{\dagger}$-gates~\cite{bib-bravyi-kitaev-magic-distillation}. This means
-that the number of T-gates is key to lowering the cost of the implementation. Hereafter, 
-the set of the T-gate and the T$^{\dagger}$-gate are referred to as ``T-gates'', and the set of the S-gate and the
-S$^{\dagger}$-gate ``S-gates'', unless otherwise noted.
-
-When this set of gates is assembled into a network, the result is called a \emph{quantum circuit}. In a
-quantum circuit, inputs come in from the left, gates are applied in order from left to right, and outputs
-go out from the right. Quantum circuits also have \emph{output qubits}, which are the qubits that output
-quantum states to be measured or used by other quantum circuits. 
-
-
-\subsection{Quantum Gates and Circuits}
-CNOT+T circuits consist only of the CNOT, T, and T$^\dagger$ gates. Such circuits can be represented by a path-sum, which captures the algebraic structure of the circuit. Two circuits sharing the same path-sum are functionally equivalent~\cite{pathsum2018}. This property enables a resynthesis process where T gates can be merged.
-
-One complication in this process is the treatment of negated variables. As demonstrated in Fig.~[DCTODO], certain T-gates can be merged more easily using the Boolean Fourier transform of a function rather than by explicitly negating its inputs. A library of such decompositions aids this combination.
-
-\subsection{Phase Oracles}
-A phase oracle applies a phase $(-1)$ to any input that satisfies a Boolean function $f$. A common method of synthesizing phase oracles is via an ESOP representation, expressing the function as an XOR of product terms (ANDs) of variables. Given the mapping $|x\rangle|y\rangle \mapsto (-1)^{x \oplus y}|x\rangle|y\rangle$, such circuits can be synthesized using known quantum subroutines (see Fig.~[DCTODO]).
-
-
-\section{Pseudo-Boolean Functions and the Boolean Fourier Transform}
-
-One way to realize a Boolean AND is to implement what's called a {\it pseudo-Boolean}
-representation~\cite{bib-barenco-elementary,bib-amy-cnot}, which uses a mix of
-Boolean values, integer coefficients, and arithmetic to create a mapping $\{0,1\}^n \mapsto \{0,1\}$~\cite{bib-amy-rm}.
-
-Before defining the concept mathematically, first observe Equation~\ref{eq-toff-bool} to see an example of a
-pseudo-Boolean function. Here, real-valued coefficients are multiplied with Boolean functions of $x_a$, $x_b$,
-and $y$, creating a real number, and those real numbers are then summed together using arithmetic operations
-$+$ and $-$. Table~\ref{table-pseudo-toff} shows the values of $x_a \cdot x_b \cdot y$ with respect to
-its components, where $T(f)$ is as defined in Equation~\ref{eq-toff-bool}. It can be proven by inspection of
-Table~\ref{table-pseudo-toff} that the pseudo-Boolean expression in~\ref{eq-toff-bool} indeed implements
-$x_a \cdot x_b \cdot y$. 
 \begin{equation}
   \label{eq-toff-bool}
   \begin{aligned}
-    &x_a \cdot x_b \cdot y &= &x_a + x_b + y \\\nonumber
-    &&&+ 7(x_a \oplus x_b) + 7(x_a \oplus y) + 7(x_b \oplus y) \\\nonumber
-    &&&+ (x_a \oplus x_b \oplus y)\\\nonumber
-    &&= & (T_{x_a} + T_{x_b} + T_{y} + T_{x_a \oplus x_b} \\\nonumber
-    &&&T_{x_a \oplus y} T_{x_b \oplus y} + T_{x_a \oplus x_b \oplus y})
+    &x_a \cdot x_b \cdot y = \frac{1}{4}x_a + \frac{1}{4}x_b + \frac{1}{4}y - \frac{1}{4}(x_a \oplus x_b) \\
+    &\qquad -\frac{1}{4}(x_a \oplus y) - \frac{1}{4}(x_b \oplus y) + \frac{1}{4}(x_a \oplus x_b \oplus y)
   \end{aligned}
 \end{equation}
-\begin{table*}[t]
+
+\def\arraystretch{1.3}
+\begin{table*}[h]
   \begin{minipage}{\textwidth}
     \begin{center}
       \scalebox{1.0} {
-        \begin{tabular}{c|c|c|c|c|c|c|c|c|c|c}
-          $x_a$ & $x_b$ & $y$ & $T_{x_a}$ & $T_{x_b}$ & $T_{y}$ & $T_{x_a \oplus x_b}$ & $T_{x_a \oplus y}$ & $T_{x_b \oplus y}$ & $T_{x_a \oplus x_b \oplus y}$ & $4x_a \cdot x_b \cdot y$\\\hline
-          0     & 0     & 0   & 0         & 0         & 0       & 0                    & 0                  & 0                  & 0                             & 0            \\\hline
-          0     & 0     & 1   & 0         & 0         & $1$   & 0                    & $7$             & $7$
-                       & $1$                         & 0            \\\hline
-          0     & 1     & 0   & 0         & $1$     & 0       & $7$               & $7$             & 0                  & $1$                         & 0            \\\hline
-          0     & 1     & 1   & 0         & $1$     & $1$   & $7$               & 0                  & $7$             & 0                             & 0            \\\hline
-          1     & 0     & 0   & $1$     & 0         & 0       & $7$               & 0                  & $7$             & $1$                         & 0            \\\hline
-          1     & 0     & 1   & $1$     & 0         & $1$   & $7$               & $7$             & 0                  & 0                             & 0            \\\hline
-          1     & 1     & 0   & $1$     & $1$     & 0       & 0                    & $7$             & $7$             & 0                             & 0            \\\hline
-          1     & 1     & 1   & $1$     & $1$     & $1$   & 0                    & 0                  & 0                  & $1$                         & 4            \\\hline
+        \begin{tabular}{c|c|c|c|c|c|c|c|c|c|c}\hline
+          $x_a$ & $x_b$ & $y$ & $T_{x_a}$         & $T_{x_b}$         & $T_{y}$         & $T_{x_a \oplus x_b}$ & $T_{x_a \oplus y}$ & $T_{x_b \oplus y}$ & $T_{x_a \oplus x_b \oplus y}$ & $x_a \cdot x_b \cdot y$\\\hline
+          0     & 0     & 0   & 0                 & 0                 & 0               & 0                    & 0                  & 0                  & 0                             & 0            \\\hline
+          0     & 0     & 1   & 0                 & 0                 & $\frac{1}{4}$   & 0                    & $-\frac{1}{4}$     & $-\frac{1}{4}$     & $\frac{1}{4}$                 & 0            \\\hline
+          0     & 1     & 0   & 0                 & $\frac{1}{4}$     & 0               & $-\frac{1}{4}$       & 0                  & $-\frac{1}{4}$     & $\frac{1}{4}$                 & 0            \\\hline
+          0     & 1     & 1   & 0                 & $\frac{1}{4}$     & $\frac{1}{4}$   & $-\frac{1}{4}$       & $-\frac{1}{4}$     & 0                  & 0                             & 0            \\\hline
+          1     & 0     & 0   & $\frac{1}{4}$     & 0                 & 0               & $-\frac{1}{4}$       & $-\frac{1}{4}$     & 0                  & $\frac{1}{4}$                 & 0            \\\hline
+          1     & 0     & 1   & $\frac{1}{4}$     & 0                 & $\frac{1}{4}$   & $-\frac{1}{4}$       & 0                  & $-\frac{1}{4}$     & 0                             & 0            \\\hline
+          1     & 1     & 0   & $\frac{1}{4}$     & $\frac{1}{4}$     & 0               & 0                    & $-\frac{1}{4}$     & $-\frac{1}{4}$     & 0                             & 0            \\\hline
+          1     & 1     & 1   & $\frac{1}{4}$     & $\frac{1}{4}$     & $\frac{1}{4}$   & 0                    & 0                  & 0                  & $\frac{1}{4}$                 & 1            \\\hline
         \end{tabular}
       }
       \caption{Truth table-like values of the pseudo-Boolean representation of $x_a \cdot x_b \cdot y$}
       \label{table-pseudo-toff}
     \end{center}
   \end{minipage}
-  
 \end{table*}
+\def\arraystretch{1.1}
 
-\begin{figure*}[t]
+Such a phase polynomial can be implemented as a phase oracle using the following
+method.
+
+\begin{itemize}
+\item Coefficients of the phase polynomial describe the phase that needs to be driven
+  as multiples of $i\pi$ (i.e. $3/4$ will be driven as an $S$-gate followed by $T$-gate).
+\item The corresponding $\chi_k(\mathbf{x})$ functions can be implemented as a network
+  of CNOT and X gates.
+\item The phase gates are sequenced by their corresponding $\chi_k(\mathbf{x})$ functions.
+\item CNOT and X networks are synthesized to drive each phase gate's corresponding
+  $\chi_k(\mathbf{x})$ function
+\item additional CNOT and X logic is added to return the state to the input state.
+\end{itemize}
+
+
+\begin{figure}[t]
   \centering
-  \scalebox{0.8} {
+  \scalebox{0.7} {
     \input{img/fig-toff-mark}
   }
-  \caption{Implementing $x_a \cdot x_b \cdot y$ using CNOTs and T gates}
+  \caption{Implementing $x_a \cdot x_b \cdot y$ using CNOT and T gates}
   \label{fig-toff-mark}
-\end{figure*}
+\end{figure}
 
 
-In general, a pseudo-Boolean function is a function such that
+The next section shows how $\hat{f}(\mathbf{k})$ may be obtained for the three or fewer qubit case using the
+Boolean Fourier transform.
+
+\section{Boolean Fourier Transform}
+
+
+In plain terms, it is a sum of products of Boolean functions with real coefficients, resulting in binary values~\cite{bib-barenco-elementary}. This representation is also known as a {\it phase polynomial}~\cite{bib-amy-cnot}.
+
+\vspace{0.5cm}
+
+Phase polynomials are important because they can be calculated using the {\it Boolean Fourier transform}:
 \begin{equation}
-  \label{eq-pseudo-boolean}
-  F(\mathbf{x}) = \sum_{\mathbf{k}} c_a \cdot f_k(\mathbf{x}), c_a \in \mathbb{R}, f_k : \{0,1\}^n \mapsto \{0,1\}
-  F(\mathbf{x}) \in \{0,1\}
-\end{equation}
-
-In plain language, it is the arithmetic sum of the products of Boolean functions with real valued coefficients, such that
-the values of the sum are in the set of binary values $\{0,1\}$~\cite{bib-barenco-elementary}. This
-representation is also often referred to in the context of the phases of quantum circuits as the
-{\it phase polynomial}~\cite{bib-amy-cnot}.
-
-Phase polynomials and pseudo-Boolean functions important because phase polynomials can be calculated
-using the {\it Boolean Fourier transform}, which is shown in Equation~\ref{eq-boolean-fourier}.
-\begin{equation}
-  \label{eq-boolean-fourier}
   \begin{aligned}
-    f(\mathbf{x}) = \sum_{\mathbf{a} \neq 0} \hat{f}(\mathbf{a}) \cdot ( a_0 \cdot x_0 \oplus a_1 \cdot x_1 \cdots \oplus a_{n-1} \cdot x_{n-1}),\\\nonumber
-    \hat{f}(\mathbf{a}) \in \mathbb{R} , a_0,a_1,\cdots a_{n-1} \in [0,1]
+    \label{eq-boolean-fourier}
+    f(\mathbf{x}) = \sum_{\mathbf{k} \neq 0} \hat{f}(\mathbf{k}) \cdot ( k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1}), \\\nonumber
+    \hat{f}(\mathbf{k}) \in \mathbb{R} \quad \mathbf{k} \in \{0,1\}^{n}
   \end{aligned}
 \end{equation}
 
-$\hat{f}(\mathbf{a})$ is a set of $2^{n}-1$ coefficients (one for each $\mathbf{a}$, except for the trivial
-case $\mathbf{a} = 0$) associated with the pseudo-Boolean function, and
-$( a_0 \cdot x_0 \oplus a_1 \cdot x_1 \cdots \oplus a_{n-1} \cdot x_{n-1}) $ are linear functions
-that form a basis for the pseudo-Boolean function, and are maps $[0,1]^n \mapsto [0,1]$. $\hat{f}$ is referred to
-as the {\it phase polynomial} of the quantum Boolean circuit.
+\vspace{0.3cm}
 
-Observe that a T-gate adds to the phase no matter which qubit it acts on.
-For example, a T-gate acting on bit 0 creates the mapping $\ket{1}_0\ket{1}_1 \mapsto \ket{1}_0\ket{1}_1$ while
-a T-gate acting on bit 1 also creates the same mapping. Therefore, $\hat{f}(\mathbf{a})$ sets the number of
-phase gates, such as T-gates and T$^{\dagger}$ gates, that are used in the circuit. A Boolean function thus can
-have a T-count up to $2^{n}-1$.
+%DCTODO The coefficients $\hat{f}(\mathbf{k})$ (for all nontrivial $\mathbf{k}$) specify the phase polynomial, and the linear functions  form a basis.
 
-It is easy to see then that the $\hat{f}(\mathbf{a})$ that has the minimal number of odd entries for each
-$\mathbf{a}$ also minimizes the T-count~\cite{bib-amy-rm}. Observe also, that the linear functions
-$( a_0 \cdot x_0 \oplus a_1 \cdot x_1 \cdots \oplus a_{n-1} \cdot x_{n-1}) $ can be implemented
-entirely by CNOT gates. This means that Equation~\ref{eq-boolean-fourier} can be realized entirely by
-CNOT gates and phase gates, known as a {\it CNOT+T network}~\cite{bib-amy-cnot}. 
+Such a phase polynomial can be realized using a CNOT+T network, as in Fig.~\ref{fig-toff-mark}. Minimizing the number of odd multiples of $\frac{\pi}{4}$ in $\hat{f}(\mathbf{k})$ also minimizes the T-count~\cite{bib-amy-rm}. Optimizing T-depth is done as in~\cite{bib-amy-matroid}.
 
-Optimizing the T-depth of such a CNOT+T network is done using the method in~\cite{bib-amy-matroid}.
+\vspace{0.4cm}
 
 \section{Phase Polynomial Calculation for the Three Qubit Case}
 \label{Chap:Bool-pbool3q}
 
-This section demonstrates how to calculate the phase polynomial for a three input Boolean function, using the
-Boolean Fourier transform~\cite{bib-odonnell}. This section uses only a simplified version
-of the Boolean Fourier transform introduced in~\cite{bib-odonnell}, but with notation taken from
-\cite{bib-barenco-elementary} and~\cite{bib-amy-cnot}. The notation is chosen to more clearly demonstrate how
-the equation may be implemented using quantum gates defined in the CNOT+T basis. 
+\vspace{0.3cm}
 
-First, the inner product to be used for the Boolean Fourier transform is defined below
+This section shows how to calculate the phase polynomial for a three-input Boolean function, using the Boolean Fourier transform~\cite{bib-odonnell}. The notation is chosen to clarify how the equation may be implemented using quantum gates in the CNOT+T basis. 
 
+\vspace{0.3cm}
+
+The inner product for the Boolean Fourier transform is
 \begin{equation}
   \label{eq-inner-prod}
-  \langle f(\mathbf{x}) , g(\mathbf{x}) \rangle = \sum_{\mathbf{x}} \text{INNPROD}(f(\mathbf{x}),g(\mathbf{x})), \mathbf{x} \in \{0,1\}^n
-\end{equation}
-\begin{equation}  
-  \text{INNPROD}(f(\mathbf{x}),g(\mathbf{x})) =
-  \begin{cases}
-    7 & \text{if $f(\mathbf{x})\neq g(\mathbf{x})$} \\
-    1 & \text{if  $f(\mathbf{x})= g(\mathbf{x})$} 
-  \end{cases}
+  \langle f(\mathbf{x}) , g(\mathbf{x}) \rangle = \frac{1}{2^n} \sum_{\mathbf{x}} (-1)^{f(\mathbf{x})} (-1)^{g(\mathbf{x})}, \quad \mathbf{x} \in \{0,1\}^n
 \end{equation}
 
-\cite{bib-odonnell} states that the {\it parity functions}, the set of exclusive sums of the input variables
-$\chi(x_0,x_1,\cdots,x_n)$ shown in Equation~\ref{eq-bool-basis}, form an orthogonal basis with respect to the
-inner product defined in Equation~\ref{eq-inner-prod}. In this equation, there is a factor of $\frac{1}{2^n}$ so
-that $\langle f(\mathbf{x}), f(\mathbf{x}) \rangle = 1$, making the basis orthonormal.
+The {\it parity functions}, i.e., exclusive sums of input variables $\chi(x_0,\ldots,x_n)$ as in Eq.~\ref{eq-bool-basis}, form an orthogonal basis with respect to this product:
 \begin{equation}
   \label{eq-bool-basis}
-  \begin{split}
-  \chi(x_0,x_1,\cdots,x_n)_{\mathbf{a}} = a_0 \cdot x_0 \oplus a_1 \cdot x_1 \cdots \oplus a_{n-1} \cdot x_{n-1},\\
-  a_0,a_1,\cdots a_{n-1} \in [0,1]
-  \end{split}
+  \chi(x_0,\ldots,x_n)_{\mathbf{k}} = k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1},\quad k_i \in \{0,1\}
 \end{equation}
 
-Because for each $\chi_{\mathbf{a}}$ and $\chi_{\mathbf{b}}$, there is
-$\langle \chi_{\mathbf{a}}, \chi_{\mathbf{b}} \rangle = 0$, calculating $\hat{f}(\mathbf{a})$ for a specific
-value of $\mathbf{a}$ simply involves taking the inner product of the full function $f(\mathbf{x})$ and the
-basis state $\chi(\mathbf{x})_{\mathbf{a}}$ as shown in Equation~\ref{eq-fhat-prod}. This multiplication is
-repeated for every value of $\mathbf{a}$ until all of $\hat{f}(\mathbf{a})$ is calculated.
+\vspace{0.2cm}
+
+Since $\langle \chi_{\mathbf{k}}, \chi_{\mathbf{b}} \rangle = 0$ for $\mathbf{k} \neq \mathbf{b}$, the coefficient $\hat{f}(\mathbf{k})$ is computed as
 \begin{equation}
   \label{eq-fhat-prod}
-  \hat{f}(\mathbf{a}) = \langle f(\mathbf{x}), \chi(\mathbf{x})_{\mathbf{a}} \rangle
+  \hat{f}(\mathbf{k}) = \langle f(\mathbf{x}), \chi(\mathbf{x})_{\mathbf{k}} \rangle
 \end{equation}
 
+\vspace{0.2cm}
+
 \begin{example}
-  As an example, let's try to derive the coefficients from Equation~\ref{eq-toff-bool}. Here
-  $\mathbf{a} = (a_{x_a}, a_{x_b}, a_y)$.
+As an example, let's derive the coefficients for Eq.~\ref{eq-toff-bool} with $\mathbf{k} = (k_{x_a}, k_{x_b}, k_y)$.
+For $\mathbf{k} = 100$, $\chi_{100} = x_a$. Table~\ref{table-ex-100} enumerates the values and the term $(-1)^{f(\mathbf{x})} (-1)^{\chi_{100}(\mathbf{x})}$ for the inner product.
+\begin{table}[h]
+  \begin{center}
+    \begin{tabular}{c|c|c|c|c|c}
+      \hline
+      $x_a$ & $x_b$ & $y$ & $f(\mathbf{x})$ & $\chi_{100}$ & $(-1)^{\chi_{100}(\mathbf{x})} (-1)^{f(\mathbf{x})}$ \\\hline
+      0 & 0 & 0 & 0 & 0 & 1\\\hline
+      0 & 0 & 1 & 0 & 0 & 1\\\hline
+      0 & 1 & 0 & 0 & 0 & 1\\\hline
+      0 & 1 & 1 & 0 & 0 & 1\\\hline
+      1 & 0 & 0 & 0 & 1 & -1\\\hline
+      1 & 0 & 1 & 0 & 1 & -1\\\hline
+      1 & 1 & 0 & 0 & 1 & -1\\\hline      
+      1 & 1 & 1 & 1 & 1 & 1\\\hline
+    \end{tabular}
+    \caption{The value of $\chi_{100}$ and the inner product $\langle f(\mathbf{x}), \chi_{100} \rangle$}
+    \label{table-ex-100}
+  \end{center}
+\end{table}
 
-  Because the trivial case ($\mathbf{a}= 000$) is not included, let's start with $\mathbf{a} = 100$ with
-  $\chi_{100} = x_a$.
-  Table~\ref{table-ex-100} enumerates its values in truth table form for convenience, as well as the
-  value of each of the $(-1)^{f(\mathbf{x})} (-1)^{\chi_{001}(\mathbf{x})}$ terms in the inner product
-  $\langle f(\mathbf{x}), \chi_{001} \rangle$
-
-  \begin{table}[h]
-    \begin{center}
-      \begin{tabular}{c|c|c|c|c|c}
-        \hline
-        $x_a$ & $x_b$ & $y$ & $f(\mathbf{x})$ & $\chi_{100}$ & INNPROD($\chi_{100},f(\mathbf{x}$) \\\hline
-        0 & 0 & 0 & 0 & 0 & 1\\\hline
-        0 & 0 & 1 & 0 & 0 & 1\\\hline
-        0 & 1 & 0 & 0 & 0 & 1\\\hline
-        0 & 1 & 1 & 0 & 0 & 1\\\hline
-        1 & 0 & 0 & 0 & 1 & 7\\\hline
-        1 & 0 & 1 & 0 & 1 & 7\\\hline
-        1 & 1 & 0 & 0 & 1 & 7\\\hline      
-        1 & 1 & 1 & 1 & 1 & 1\\\hline
-      \end{tabular}
-      \caption{The value of $\chi_{100}$ and the inner product $\langle f(\mathbf{x}), \chi_{100} \rangle$}
-      \label{table-ex-100}
-    \end{center}
-  \end{table}
-
-  
-  The terms in the right most column can then be summed just like in Equation~\ref{eq-inner-prod}:
-  \begin{align}
-      &\hat{f}(100) = &\langle f(\mathbf{x}), \chi_{100} \rangle = &( 1 + 1 + 1 + 1 - 1 - 1 - 1 + 1) \\\nonumber
-      &&& = ( 2 ) = 1\nonumber\\\nonumber
-  \end{align}
-  This then gives:
-  \begin{equation}
-    f(\mathbf{x}) = x_a + \sum_{\mathbf{a} \neq 000,100} \hat{f}(\mathbf{a}) \cdot \chi_{\mathbf{a}}
-  \end{equation}
-
-  In the interest of conciseness, the rest of the calculation is omitted. But the reader can easily perform the
-  rest to verify its equivalence with Equation~\ref{eq-toff-bool}.
+Summing the rightmost column, as in Eq.~\ref{eq-inner-prod}:
+\begin{align}
+    &\hat{f}(100) = \langle f(\mathbf{x}), \chi_{100} \rangle = \frac{1}{8} ( 1 + 1 + 1 + 1 - 1 - 1 - 1 + 1 ) = \frac{1}{4}
+\end{align}
+Thus,
+\begin{equation}
+  f(\mathbf{x}) = \frac{1}{4}x_a + \sum_{\mathbf{k} \neq 000,100} \hat{f}(\mathbf{k}) \cdot \chi_{\mathbf{k}}
+\end{equation}
+The rest of the calculation is omitted for brevity, but readers can verify that it results in Eq.~\ref{eq-toff-bool}.
 \end{example}
 
-The pseudo-Boolean function from Eq.~\ref{eq-toff-bool} is implemented as a circuit in Fig~\ref{fig-toff-mark}.
+These circuits are notable because, for the 3-input case, it is straightforward to optimize the {\it T-count}, i.e., the number of T-gates and $T^{\dagger}$-gates~\cite{amy-meet-in-middle}. Optimizing T-count is crucial for fault-tolerant circuit implementation, as T-gates are expensive in most encodings~\cite{bib-herr-lattice,bib-fowler-bridge}. The {\it T-depth} is the longest sequence of T-gates in a circuit, which is also important since many modern encodings can execute T-gates in parallel for cost savings~\cite{bib-google-ecc}.
+
+The 3-input case is interesting because it is the largest class of Boolean functions representable by a CNOT+T circuit. Since there are only 256 such Boolean functions, there are potential uses for a library of such oracles.

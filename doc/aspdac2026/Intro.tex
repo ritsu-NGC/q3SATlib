@@ -3,7 +3,7 @@ One of quantum computing's most significant results is the development of Grover
 
 Grover's algorithm uses a phase oracle, a quantum circuit that applies a phase of $-1$ when the Boolean function it implements is true, to increase the probability of returning a fulfilling assignment.
 
-Phase oracles are interesting because a restricted class of them can be implemented using only the T, T$^\dagger$, and CNOT gates (hereafter referred to as CNOT+T). In fact, phase oracles of 3 or fewer variables can all be implemented exactly using this set of gates, and these circuits can be calculated exactly using the Boolean Fourier transform. Amy~\cite{amy2018} demonstrates that CNOT+T circuits can be optimized for both T-count and T-depth~\cite{amy_matroid}.
+Phase oracles are interesting because a restricted class of them can be implemented using only the T, T$^\dagger$, and CNOT gates (hereafter referred to as CNOT+T). In fact, phase oracles of 3 or fewer variables can all be implemented exactly using this set of gates, and these circuits can be calculated exactly using the Boolean Fourier transform. Amy et al.~\cite{amy-meet-in-middle} demonstrates that CNOT+T circuits can be optimized for both T-count and T-depth~\cite{bib-amy-matroid}.
 
 However, in general, it is impossible to implement Boolean functions of 4 or more variables using only this gate set. There will inevitably be a need to use a Hadamard (H) gate. The addition of this gate makes optimal solutions non-unique, and several methods to optimize for T-count and T-depth when including the H gate are only heuristic.
 
