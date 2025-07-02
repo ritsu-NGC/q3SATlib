@@ -18,7 +18,10 @@
 \label{Mot}
 \subsection{CNOT+T Circuit Optimization}
 \label{Mot:CnotOpt}
-CNOT+T circuits are notable because, it is straightforward to optimize the T-count.
+CNOT+T circuits are notable because matroid partitioning guarantees an optimal T-depth
+for them.
+
+Additionally, there is a straightforward way to reduce the T-count for such circuits.
 Note that because the phase is a scalar, the actions of phase gates on different
 qubits all multiply together into the same scalar (essentially adding the powers
 of $e^{i \pi}$). Therefore, the result of all phase gates in a circuit

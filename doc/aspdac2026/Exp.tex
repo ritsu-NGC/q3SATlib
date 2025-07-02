@@ -23,7 +23,7 @@ We test these for $n=4-12$ literals. The ESOP expressions are randomly generated
 based on the number of cubes $k$ in them.
 
 \begin{itemize}
-\item ($k=2^(n-1)$) This increases the chances that inserted subcircuits will have common literals that allow them
+\item ($k=2^{n-1}$) This increases the chances that inserted subcircuits will have common literals that allow them
   to be simplified and have reduced T-count, , while making it harder for T-par to partition any cubes $n \geq 4$
   for T-depth scheduling.
 \item ($k=n$) This makes the arrangements sparser, allowing for better parallelization by T-par, but making
@@ -34,10 +34,10 @@ based on the number of cubes $k$ in them.
 \label{Exp:Res}
 \begin{table}[t]
   \begin{center}
-    \begin{tabular}{c|c|c|c|c|c}\hline
-               & $k=2^(n-1)$ & $k=n$ & \\
-      N3       &             &       & \\
-      Scramble &             &       & 
+    \begin{tabular}{c|c|c}\hline
+               & $k=2^(n-1)$ & $k=n$ \\\hline
+      N3       &             &       \\\hline
+      Scramble &             &       \\\hline
     \end{tabular}
   \end{center}
 \end{table}
