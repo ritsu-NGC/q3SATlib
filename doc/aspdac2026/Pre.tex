@@ -51,7 +51,7 @@
 
 
 \section{Preliminaries}
-
+\label{Pre}
 \subsection{Quantum Bits and Quantum Gates}
 \label{Chap:Pre-qubits}
 Quantum computers internally represent data as \emph{qubits}, which are quantum systems that can
@@ -86,11 +86,27 @@ These computational basis states can similarly be in linear superposition.
 \sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}} = 1
 \end{equation}
 
-{\it Quantum gates} describe transformations in qubits. The main ones that concern this work are demonstrated
-in Fig.~\ref{fig-gates}. The $T/T^{\dagger}$, $S/S^{\dagger}$, and $Z$ gates will be referred to as {\it phase gates}.
+{\it Quantum gates} describe transformations in qubits. The main ones that concern this work are
+demonstrated in Fig.~\ref{fig-gates}. The $T/T^{\dagger}$, $S/S^{\dagger}$, and $Z$ gates will be
+referred to as {\it phase gates}.
+
+All of these gates besides $T/T^{\dagger}$ are known as {\it Clifford gates}. For
+fault-tolerant quantum computers, Clifford gates are relatively inexpensive to implement.
+However, without $T/T^{\dagger}$-gates, computations that display quantum advantage
+cannot be implemented. Thus, {\it T-count}, the number of $T/T^{\dagger}$-gates, and
+{\it T-depth}, the longest such serial chain of them in a circuit, are often used as a
+cost metric~\cite{amy-meet-in-middle}.
+
+In addition, controlled versions of each of these gates exist, which means the phase is
+applied when all the control bits are 1. One such example is the two-bit Control-Z gate,
+which is 1 when its control bit and target bit are 1, implementing
+$\ket{x}\ket{y} \rightarrow (-1)^{x \cdot y}\ket{x}\ket{y}$. We will see how this is
+constructed from the gates in Fig.~\ref{fig-gates} later.
+
 All of the gates in Fig.~\ref{fig-gates} can in turn be composed into {\it quantum circuits}. 
 
 \subsection{Phase Oracles and Phase Polynomials}
+\label{Pre:oracle}
 A {\it phase oracle} is one such quantum circuit that implements a Boolean function as a quantum circuit, implementing
 a mapping of a computational basis state $\ket{\mathbf{x}} \mapsto e^{i \pi f(\mathbf{x})}\ket{\mathbf{x}}$, where $f(\mathbf{x})$
 is a Boolean function $\{0,1\}^n \rightarrow \{0,1\}$. Phase oracles are key elements in algorithms such as
@@ -127,17 +143,7 @@ this is indeed true.
   \begin{minipage}{\textwidth}
     \begin{center}
       \scalebox{1.0} {
-        \begin{tabular}{c|c|c|c|c|c|c|c|c|c|c}\hline
-          $x_a$ & $x_b$ & $y$ & $T_{x_a}$         & $T_{x_b}$         & $T_{y}$         & $T_{x_a \oplus x_b}$ & $T_{x_a \oplus y}$ & $T_{x_b \oplus y}$ & $T_{x_a \oplus x_b \oplus y}$ & $x_a \cdot x_b \cdot y$\\\hline
-          0     & 0     & 0   & 0                 & 0                 & 0               & 0                    & 0                  & 0                  & 0                             & 0            \\\hline
-          0     & 0     & 1   & 0                 & 0                 & $\frac{1}{4}$   & 0                    & $-\frac{1}{4}$     & $-\frac{1}{4}$     & $\frac{1}{4}$                 & 0            \\\hline
-          0     & 1     & 0   & 0                 & $\frac{1}{4}$     & 0               & $-\frac{1}{4}$       & 0                  & $-\frac{1}{4}$     & $\frac{1}{4}$                 & 0            \\\hline
-          0     & 1     & 1   & 0                 & $\frac{1}{4}$     & $\frac{1}{4}$   & $-\frac{1}{4}$       & $-\frac{1}{4}$     & 0                  & 0                             & 0            \\\hline
-          1     & 0     & 0   & $\frac{1}{4}$     & 0                 & 0               & $-\frac{1}{4}$       & $-\frac{1}{4}$     & 0                  & $\frac{1}{4}$                 & 0            \\\hline
-          1     & 0     & 1   & $\frac{1}{4}$     & 0                 & $\frac{1}{4}$   & $-\frac{1}{4}$       & 0                  & $-\frac{1}{4}$     & 0                             & 0            \\\hline
-          1     & 1     & 0   & $\frac{1}{4}$     & $\frac{1}{4}$     & 0               & 0                    & $-\frac{1}{4}$     & $-\frac{1}{4}$     & 0                             & 0            \\\hline
-          1     & 1     & 1   & $\frac{1}{4}$     & $\frac{1}{4}$     & $\frac{1}{4}$   & 0                    & 0                  & 0                  & $\frac{1}{4}$                 & 1            \\\hline
-        \end{tabular}
+        \input{img/table-pseudo-toff}
       }
       \caption{Truth table-like values of the pseudo-Boolean representation of $x_a \cdot x_b \cdot y$}
       \label{table-pseudo-toff}
@@ -161,14 +167,11 @@ method.
 \item additional CNOT and X logic is added to return the state to the input state.
 \end{itemize}
 
-<<<<<<< Updated upstream
 Scheduling these T-gates can be done using the matroid partitioning algorithm described in
 ~\ref{bib-amy-matroid}. This guarantees a minimal T-depth for CNOT+T circuits.
 The terms in Eq.~\ref{eq-toff-bool} are synthesized and scheduled using that algorithm as
 demonstrated in Fig.~\ref{fig-toff-mark-matroid}.
-=======
-Fig.~\ref{fig-toff-mark}
->>>>>>> Stashed changes
+
 \begin{figure}[t]
   \centering
   \scalebox{0.7} {
@@ -181,8 +184,8 @@ Fig.~\ref{fig-toff-mark}
 The next section shows how $\hat{f}(\mathbf{k})$ may be obtained for the three or fewer qubit case using the
 Boolean Fourier transform.
 
-\section{Boolean Fourier Transform}
-
+\subsection{Boolean Fourier Transform}
+\label{Pre:Four}
 Observe that the $\chi_k(\mathbf{x})$ from Eq.~\ref{eq-boolean-fourier} form an orthonormal basis with respect
 to the below inner product.
 
@@ -249,10 +252,11 @@ $\hat{f}(\mathbf{k})$ has the optimal T-count needed to implement
 $f(\mathbf{x})$ as a phase oracle.
 
 \subsection{Synthesizing Phase Oracles from ESOP}
-
-A transformation $\ket{x}\ket{y} \rightarrow (-1)^{x \oplus y}\ket{x}\ket{y}$ can be realized using
-the below circuit
+\label{Pre:OracleEsop}
+A transformation $\ket{x}\ket{y} \rightarrow (-1)^{x \oplus y}\ket{x}\ket{y}$ can be
+realized using the below circuit
 \begin{figure}[h]
+  \centering
   \scalebox{1.0} {
     \Qcircuit @C=0.5em @R=0.2em @!R {
       \lstick{\ket{x}} & \qw & \gate{Z} & \qw  \\
@@ -269,3 +273,31 @@ can implement its phase oracle as controlled phase gates of the following form
 This method is used by Qiskit's Phase Oracle [DCTODO ref]. Our proposal revolves around
 the effective use of such an Exclusive Sum of Products to implement such a phase oracle.
 
+\begin{example}
+  \label{ex-esop-synth}
+  We attempt to synthesize the Boolean function
+  $x_2 x_3 \oplus x_3 x_4 \oplus x_4 x_5 \oplus x_2 x_4 x_5 x_1$ into a quantum circuit.
+  The first term $x_2x_3$ is merely a two input Controlled-Z gate so we insert such a gate
+  between the qubits containing $x_2$ and $x_3$. We do the same for $x_3x_4$ and $x_4x_5$.
+  For $x_2 x_4 x_5 x_1$ is a 4 input quantum Controlled-Z, which is not implementable
+  using only CNOT+T. Such a gate has a T-count of at least 15. This means that the
+  resulting circuit has T-count of 15. The resulting circuit is depicted in
+  Fig.~\ref{fig-esop-synth}.
+\end{example}
+
+\begin{figure}[h]
+ \centering
+  \scalebox{1.0} {
+    \input{img/fig-esop-synth}
+  }
+  \caption{A phase oracle for $x_2x_3 \oplus x_3x_4 \oplus x_4x_5 \oplus x_2x_4 x_5x_1$}
+  \label{fig-esop-synth}
+\end{figure}
+
+
+%% DCTODO The first term is merely a 3-input AND, which is already seen in
+%%   Fig.~\ref{fig-toff-mark-matroid}. Thus we merely insert this circuit to implement
+%%   the first term. The second term has a negated input, so we insert X on the $x_c$ qubit
+%%   after the first circuit to negate $x_c$, again insert Fig.~\ref{fig-toff-mark-matroid}
+%%   to implement the phase, and finally place another X on $x_c$ to return its value to
+%%   the original.
