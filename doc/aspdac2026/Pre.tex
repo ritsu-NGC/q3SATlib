@@ -55,7 +55,7 @@
 \subsection{Quantum Bits and Quantum Gates}
 \label{Chap:Pre-qubits}
 Quantum computers internally represent data as \emph{qubits}, which are quantum systems that can
-take on the quantum states $\ket{0}$ and $\ket{1}$,
+take on the quantum states $\ket{0}$ and $\ket{1}$.
 
 Additionally, qubits can also exist in quantum states that are a linear combination of $\ket{0}$ and
 $\ket{1}$, which is called {\it superposition}:
@@ -63,9 +63,8 @@ $\ket{1}$, which is called {\it superposition}:
 \ket{\psi} = \alpha_0 \ket{0} + \alpha_1 \ket{1}, \alpha_0, \alpha_1 \in \mathbb{C}
 \end{equation}
 
-Because these coefficients $\alpha_0$ and $\alpha_b$ are complex numbers, they can also be expressed as
-a complex exponential $a\cdot e^{i \theta}$.
-$\theta$ in this exponential is often referred to as a {\it phase}.
+Because these coefficients $\alpha_0$ and $\alpha_1$ are complex numbers, they can also be expressed as
+a complex exponential $a\cdot e^{i \theta}$, where $\theta$ is often referred to as a {\it phase}.
 
 Qubits can be taken together as tensor products to create multiqubit states.
 \begin{equation}
@@ -73,30 +72,30 @@ Qubits can be taken together as tensor products to create multiqubit states.
 \ket{\psi} = \ket{\psi}_0 \otimes \ket{\psi}_1 =(\alpha_{00} \ket{0}_0 + \alpha_{01} \ket{1}_0) \otimes
 (\alpha_{10} \ket{0}_1 + \alpha_{11} \ket{1}_1)
 \end{equation}
-Note in Equation~\ref{eq-multi-qb} that In particular, the tensor product of several basis states is known as a \emph{computational basis state},
-and is written as a bit string consisting of the values in the component tensor multiplicands. 
+Note in Equation~\ref{eq-multi-qb} that, in particular, the tensor product of several basis states is known as a \emph{computational basis state},
+and is written as a bit string consisting of the values in the component tensor multiplicands.
 \begin{equation}
 \ket{x_0}\otimes\ket{x_1}\otimes\cdots\otimes\ket{x_{n-1}}=\ket{x_0 x_1 \cdots x_{n-1}}=\ket{\mathbf{x}},
 \mathbf{x} \in \{0,1\}^n
 \end{equation}
 
-These computational basis states can similarly be in linear superposition.
+These computational basis states can also be in linear superposition.
 \begin{equation}
 \ket{\psi} = \sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}}\ket{\mathbf{k}},
 \sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}} = 1
 \end{equation}
 
-{\it Quantum gates} describe transformations in qubits. The main ones that concern this work
+{\it Quantum gates} describe transformations in qubits. The main ones concerning this work
 are demonstrated in Fig.~\ref{fig-gates}. The $T/T^{\dagger}$, $S/S^{\dagger}$, and $Z$
 gates will be referred to as {\it phase gates}.
 
-All of these gates besides $T/T^{\dagger}$ are known as {\it Clifford gates}. For
+All of these gates except $T/T^{\dagger}$ are known as {\it Clifford gates}. For
 fault-tolerant quantum computers, Clifford gates are relatively inexpensive to implement.
-However, without $T/T^{\dagger}$-gates, computations that display quantum advantage
-cannot be implemented. Thus, {\it T-count}, the number of $T/T^{\dagger}$-gates, and
+However, without $T/T^{\dagger}$ gates, computations that display quantum advantage
+cannot be implemented. Thus, {\it T-count}, the number of $T/T^{\dagger}$ gates, and
 {\it T-depth}, the longest such serial chain of them in a circuit, are often used as a
 cost metric~\cite{amy-meet-in-middle}. The set of gates in Fig.~\ref{fig-gates} is known
-as the {\it Clifford+T} gates, which are universal for fault tolerant quantum computing.
+as the {\it Clifford+T} gates, which are universal for fault-tolerant quantum computing.
 
 In addition, controlled versions of each of these gates exist, which means the phase is
 applied when all the control bits are 1. One such example is the two-bit Control-Z gate,
@@ -104,8 +103,8 @@ which is 1 when its control bit and target bit are 1, implementing
 $\ket{x}\ket{y} \rightarrow (-1)^{x \cdot y}\ket{x}\ket{y}$. We will see how this is
 constructed from the gates in Fig.~\ref{fig-gates} later.
 
-All of the gates in Fig.~\ref{fig-gates} can in turn be composed into
-{\it quantum circuits}. 
+All of the gates in Fig.~\ref{fig-gates} can be composed into
+{\it quantum circuits}.
 
 \subsection{Phase Oracles and Phase Polynomials}
 \label{Pre:oracle}

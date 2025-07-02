@@ -1,5 +1,4 @@
-\begin{figure*}
-  \centering
+\begin{figure*}[t]
   \scalebox{1.0} {
     \input{img/fig-series}
   }
@@ -25,22 +24,22 @@ Additionally, there is a straightforward way to reduce the T-count for such circ
 Note that because the phase is a scalar, the actions of phase gates on different
 qubits all multiply together into the same scalar (essentially adding the powers
 of $e^{i \pi}$). Therefore, the result of all phase gates in a circuit
-can be computed thus:
+can be computed as follows:
 
 \begin{itemize}
 \item For every phase gate, calculate the state driving it as a function of the
   input states, which will be a linear function of the same form as the
   $\chi_{\mathbf{k}}$ from the previous section.
 \item Multiply the phase driven by the phase gate by this function.
-\item Add the phases from all such similar functions
+\item Add the phases from all such similar functions.
 \item Resynthesize the circuit from the resulting phase polynomial using
   the methods from Sec.~\ref{Pre}.
 \end{itemize}
 
 The result (sometimes called a circuit's {\it sum of paths}~\cite{bib-amy-cnot})
 is that any phase gates driven by the same function will merge
-together in the phase polynomial. This means that there is a possibility that T-gates
-can merge together into an S-gate or Z-gate, reducing the total T-count.
+together in the phase polynomial. This means that T-gates
+can combine into an S-gate or Z-gate, reducing the total T-count.
 
 This is important because the matroid partitioning algorithm from~\cite{bib-amy-matroid}
 that was used to sequence Fig.~\ref{fig-toff-mark-matroid} uses this sum of paths
