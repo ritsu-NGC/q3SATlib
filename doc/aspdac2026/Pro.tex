@@ -10,7 +10,7 @@ represent precomputation, while tan boxes represent runtime.
 \item \textbf{(Generate 3bit phase polynomials)} : Precompute library of phase polynomials of Boolean functions of
   3 bits or fewer using the Boolean Fourier transform.
 \item \textbf{(Synthesize 3bit phase subcircuits)} : The phase polynomials are then sequenced using matroid
-  partitioning from~\ref{bib-amy-matroid} and synthesized as subcircuits. The results are stored in hard disk,
+  partitioning from~\cite{bib-amy-matroid} and synthesized as subcircuits. The results are stored in hard disk,
   to be loaded into memory at runtime.
 \item \textbf{(Decompose $f$ into ESOP expression)} : At runtime, a Boolean function is read in and converted to
   an ESOP expression.
@@ -54,7 +54,7 @@ Sec.~\ref{Pro:n4}. This penalizes terms of $n \geq 4$, while terms of $n < 3$ ar
 To synthesize cubes of $n \geq 4$ variables, we utilize the construction in Fig.~\ref{fig-phase-n4}. Here,
 $U_F$ and $U_F^{\dagger}$ are $F$-controlled-NOT gates, meaning that they apply X to the target bit when
 the Boolean function $F$ is true. While in general, implementing such a function needs an extra ancilla bit,
-we utilize the relative-phase Boolean decomposition method used in~\ref{bib-clarino-lut} to enable the
+we utilize the relative-phase Boolean decomposition method used in~\cite{bib-clarino-lut} to enable the
 implementation of such $F$-controlled-NOT gates without any ancilla bits. We defer detailed discussion
 of that method to the cited paper.
 
