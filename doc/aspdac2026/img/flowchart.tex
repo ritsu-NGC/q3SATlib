@@ -40,7 +40,7 @@
 \node[box, below=0.8cm of minimize] (synthesize) {Synthesize $n \geq 4$ cubes};
 
 % Synthesize to the left of map3qubit, aligned with minimize
-\node[box, left=1cm of synthesize] (map3qubit) at ($(synthesize)+( -1,0 )$) {Map the $n \leq 3$ cubes to the \textcolor{blue}{3 qubit} library};
+\node[box, left=1cm of synthesize] (map3qubit) at ($(synthesize)+( -1,0 )$) {Map the $n \leq 3$ cubes to the 3 qubit library};
 
 % 'Combine' below the midpoint of synthesize and map3qubit
 \path let \p1 = (map3qubit), \p2 = (synthesize) in
