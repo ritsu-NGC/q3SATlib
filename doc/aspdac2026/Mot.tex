@@ -1,14 +1,18 @@
 \begin{figure*}[t]
-  \scalebox{1.0} {
-    \input{img/fig-series}
-  }
-  \subcaption{Using negated input $x_a x_b \bar{y}$}
-  \sublabel{fig-series}
-  \scalebox{1.0} {
-    \input{img/fig-series2}
-  }
-  \subcaption{Using Boolean Fourier transform calculated $x_a x_b \bar{y}$}
-  \sublabel{fig-series2}
+  \centering
+  \begin{minipage}{\textwidth}
+    \centering
+    \scalebox{0.9} {
+      \input{img/fig-series}
+    }
+    \subcaption{Using negated input $x_a x_b \bar{y}$}
+    \sublabel{fig-series}
+    \scalebox{0.9} {
+      \input{img/fig-series2}
+    }
+    \subcaption{Using Boolean Fourier transform calculated $x_a x_b \bar{y}$}
+    \sublabel{fig-series2}
+  \end{minipage}
   \caption{Phase oracle for $x_a x_b y \oplus x_a x_b \bar{y}$}
   \label{fig-series-all}
 \end{figure*}
