@@ -58,7 +58,9 @@ $U_F$ and $U_F^{\dagger}$ are $F$-controlled-NOT gates, meaning that they apply 
 the Boolean function $F$ is true. While in general, implementing such a function needs an extra ancilla bit,
 we utilize the relative-phase Boolean decomposition method used in~\cite{bib-clarino-lut} to enable the
 implementation of such $F$-controlled-NOT gates without any ancilla bits. We defer detailed discussion
-of that method to the cited paper.
+of that method to the cited paper. This resulting phase oracle has T-count $2^{n}$, and T-depth $2^{n+1}$.
+Note that this means that larger cubes can dominate the T-depth of a given circuit, so it is imperative
+that the minimum of them be found for any given Boolean function.
 
 \begin{figure}[t]
   \centering
