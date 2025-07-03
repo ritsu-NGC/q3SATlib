@@ -2,12 +2,12 @@ name: Build ASPDAC 2026 LaTeX PDF
 
 on:
   workflow_dispatch:  
-  push:
-    paths:
-      - 'doc/aspdac2026/**'
-  pull_request:
-    paths:
-      - 'doc/aspdac2026/**'
+#  push:
+#    paths:
+#      - 'doc/aspdac2026/**'
+# pull_request:
+#    paths:
+#      - 'doc/aspdac2026/**'
 
 jobs:
   build:
