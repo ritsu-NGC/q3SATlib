@@ -24,7 +24,7 @@ based on the number of cubes $k$ in them.
 
 \begin{itemize}
 \item ($k=2^{n-1}$) This increases the chances that inserted subcircuits will have common literals that allow them
-  to be simplified and have reduced T-count, , while making it harder for T-par to partition any cubes $n \geq 4$
+  to be simplified and have reduced T-count, while making it harder for T-par to partition any cubes $n \geq 4$
   for T-depth scheduling.
 \item ($k=n$) This makes the arrangements sparser, allowing for better parallelization by T-par, but making
   it harder to have common literals that can combine to reduce T-count.
@@ -32,13 +32,16 @@ based on the number of cubes $k$ in them.
 
 \subsection{Results}
 \label{Exp:Res}
+
 \begin{table}[t]
   \begin{center}
-    \begin{tabular}{c|c|c}\hline
-               & $k=2^(n-1)$ & $k=n$ \\\hline
-      N3       &             &       \\\hline
-      Scramble &             &       \\\hline
-    \end{tabular}
+    \scalebox{1.2} {
+      \begin{tabular}{c|c|c}\hline
+        & $k=2^{n-1}$ & $k=n$ \\\hline
+        N3       &             &       \\\hline
+        Scramble &             &       \\\hline
+      \end{tabular}
+    }
   \end{center}
 \end{table}
 

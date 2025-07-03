@@ -16,12 +16,9 @@
 \usepackage[braket, qm]{qcircuit}
 \usepackage{newtxtext}
 \usepackage[normalem]{ulem}
-
 \usepackage{nameref}
-\usepackage[braket, qm]{qcircuit}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, shapes, positioning, calc, fit}
-%
 
 \input{img/defs}
 
@@ -29,7 +26,7 @@
 \newcommand{\sublabel}[1]{\protected@edef\@currentlabel{\thefigure(\thesubfigure)}\label{#1}}
 \makeatother
 \captionsetup{subrefformat=parens}
-\algrenewcommand\algorithmicindent{0.5em}%
+\algrenewcommand\algorithmicindent{0.5em}
 \newtheorem{definition}{Definition}
 \newtheorem{example}{Example}
 \newcommand{\thickhline}{%
@@ -76,32 +73,46 @@
 \begin{document}
 
 \title{Synthesis of Phase Oracles Using CNOT+T Circuits and ESOP Minimization}
-
 \author{
-    \IEEEauthorblockN{David Clarino}
-    \IEEEauthorblockA{Ritsumeikan University \\
-      dclarino@fc.ritsumei.ac.jp}
+    \IEEEauthorblockN{\phantom{David Clarino}}
+    \IEEEauthorblockA{\phantom{Ritsumeikan University} \\
+      \phantom{dclarino@fc.ritsumei.ac.jp}}
     \and 
-    \IEEEauthorblockN{Chitranshu Arya}
-    \IEEEauthorblockA{Netaji Subhas \\
-      University of Technology \\
-      chitranshu.arya.ug22@nsut.ac.in}
+    \IEEEauthorblockN{\phantom{Chitranshu Arya}}
+    \IEEEauthorblockA{\phantom{Netaji Subhas} \\
+      \phantom{University of Technology} \\
+      \phantom{chitranshu.arya.ug22@nsut.ac.in}}
     \and
-    \IEEEauthorblockN{Shigeru Yamashita}
-    \IEEEauthorblockA{Ritsumeikan University \\
-      ger@cs.ritsumei.ac.jp}
+    \IEEEauthorblockN{\phantom{Shigeru Yamashita}}
+    \IEEEauthorblockA{\phantom{Ritsumeikan University} \\
+      \phantom{ger@cs.ritsumei.ac.jp}}
     \and
-    \IEEEauthorblockN{Zanhe Qi}
-    \IEEEauthorblockA{Ritsumeikan University \\
-      goose@ngc.is.ritsumei.ac.jp}
-
-    
+    \IEEEauthorblockN{\phantom{Zanhe Qi}}
+    \IEEEauthorblockA{\phantom{Ritsumeikan University} \\ \phantom{goose@ngc.is.ritsumei.ac.jp}}
 }
+%% \author{
+%%     \IEEEauthorblockN{David Clarino}
+%%     \IEEEauthorblockA{Ritsumeikan University \\
+%%       dclarino@fc.ritsumei.ac.jp}
+%%     \and 
+%%     \IEEEauthorblockN{Chitranshu Arya}
+%%     \IEEEauthorblockA{Netaji Subhas \\
+%%       University of Technology \\
+%%       chitranshu.arya.ug22@nsut.ac.in}
+%%     \and
+%%     \IEEEauthorblockN{Shigeru Yamashita}
+%%     \IEEEauthorblockA{Ritsumeikan University \\
+%%       ger@cs.ritsumei.ac.jp}
+%%     \and
+%%     \IEEEauthorblockN{Zanhe Qi}
+%%     \IEEEauthorblockA{Ritsumeikan University \\
+%%       goose@ngc.is.ritsumei.ac.jp}
+%% }
 
 \maketitle
 
 \begin{abstract}
-Phase oracles are essential components of quantum algorithms such as Grover's algorithm. These circuits apply a phase of $-1$ to an input state when a particular Boolean function $f$ is true. For functions of fewer than 3 variables, these are well known to be exactly implementable using only the CNOT, T, and T$^\dagger$ gates. Amy~\cite{amy2018} established that this class of circuits can be provably optimized for T-count and T-depth. We identify a class of Boolean functions of 4 or more variables which can be synthesized using such a circuit, by way of a library of circuits that implement phase oracles of 3 or fewer variables. We then use this to synthesize Boolean functions of 4 or more variables, by minimizing the number of ESOP terms of more than 3 variables and using a library of CNOT+T 3 variable circuits to synthesize cubes of 3 or fewer. This ensures as much of the circuit is implemented using only CNOT+T as possible. We compare the results against Qiskit's \texttt{PhaseOracle} method and find ...DCTODO
+Phase oracles are essential components of quantum algorithms such as Grover's algorithm. These circuits apply a phase of $-1$ to an input state when a particular Boolean function $f$ is true. For functions of fewer than 3 variables, these are well known to be exactly implementable using only the CNOT, T, and T$^\dagger$ gates. Amy~\cite{bib-amy-matroid} established that this class of circuits can be provably optimized for T-count and T-depth. We identify a class of Boolean functions of 4 or more variables which can be synthesized using such a circuit, by way of a library of circuits that implement phase oracles of 3 or fewer variables. We then use this to synthesize Boolean functions of 4 or more variables, by minimizing the number of ESOP terms of more than 3 variables and using a library of CNOT+T 3 variable circuits to synthesize cubes of 3 or fewer. This ensures as much of the circuit is implemented using only CNOT+T as possible. We compare the results against Qiskit's \texttt{PhaseOracle} method and find ...DCTODO
 \end{abstract}
 
 \input{Intro}

@@ -1,8 +1,9 @@
 \section{Introduction}
 One of quantum computing's most significant results is the development of Grover's
-algorithm DCTODO. This algorithm performs an unstructured search in the theoretical
-lower bound of such a search DCTODO. Various applications have been proposed for
-such an algorithm, including the acceleration of solving NP-hard problems DCTODO.
+algorithm~\cite{bib-grover1996fast}. This algorithm performs an unstructured search
+in optimally~\cite{bib-zaika-grov-opt}. Various applications have
+been proposed for such an algorithm, including the acceleration of solving NP-hard
+problems~\cite{bib-williams-grover-np}.
 
 Grover's algorithm uses a phase oracle, a quantum circuit that applies a phase of
 $-1$ when the Boolean function it implements is true, to increase the probability
@@ -17,19 +18,19 @@ demonstrates that CNOT+T circuits can be optimized for both T-count and
 T-depth~\cite{bib-amy-matroid}.
 
 However, in general, it is impossible to implement Boolean functions of 4 or more
-variables using only this gate set [DCTODO]. There will inevitably be a need to use
+variables using only this gate set~\cite{bib-amy-rm}. There will inevitably be a need to use
 a Hadamard (H) gate. The addition of this gate makes optimal solutions non-unique,
 and several methods to optimize for T-count and T-depth when including the H gate
 are only heuristic ~\cite{amy-meet-in-middle,amy-matroid,bib-amy-rm}.
 
-Phase oracles are well known to be efficiently synthesizable from an Exclusive Sum
-of Products (ESOP) expression. Since each product maps to a Boolean function, it
-is easy to see that any such function expressible with product terms of at most
-3 variables can be implemented as a CNOT+T circuit. We utilize this observation
-in our proposal.
+Phase oracles are straightforward to synthesize from an Exclusive Sum
+of Products (ESOP) expression~\cite{bib-phaseoracle}. Since each cube maps to
+a Boolean function, it is easy to see that any such function expressible with
+cubes of at most 3 variables can be implemented as a CNOT+T circuit. We utilize
+this observation in our proposal.
 
 In this work, we propose a solution that utilizes CNOT+T circuits to reduce the
-T-count and T-depth for general Boolean functions of arbitrary variable count.
+T-count and T-depth for general Boolean functions of arbitrary literal count.
 
 Our contributions include:
 
