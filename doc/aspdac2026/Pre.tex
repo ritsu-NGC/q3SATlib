@@ -84,7 +84,7 @@ and is written as a bit string consisting of the values in the component tensor 
 These computational basis states can also be in linear superposition.
 \begin{equation}
 \ket{\psi} = \sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}}\ket{\mathbf{k}},
-\sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}} = 1
+\sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}}^2 = 1
 \end{equation}
 
 {\it Quantum gates} describe transformations in qubits. The main ones concerning this work
@@ -151,7 +151,7 @@ Table~\ref{table-pseudo-toff} that this is indeed true.
       \scalebox{1.0} {
         \input{img/table-pseudo-toff}
       }
-      \caption{Truth table-like values of the pseudo-Boolean representation of $x_a \cdot x_b \cdot y$}
+      \caption{Truth table-like values of the phase polynomial of $x_a \cdot x_b \cdot y$}
       \label{table-pseudo-toff}
     \end{center}
   \end{minipage}
@@ -174,7 +174,7 @@ method~\cite{amy-meet-in-middle}.
 \end{itemize}
 
 Scheduling these T-gates can be done using the matroid partitioning algorithm described in
-~\cite{bib-amy-matroid}. This guarantees a minimal T-depth for CNOT+T circuits.
+\cite{bib-amy-matroid}. This guarantees a minimal T-depth for CNOT+T circuits.
 The terms in Eq.~\ref{eq-toff-bool} are synthesized and scheduled using that algorithm as
 demonstrated in Fig.~\ref{fig-toff-mark-matroid}.
 
@@ -210,8 +210,8 @@ That means, we can calculate $\hat{f}(\mathbf{k})$ using the below inner product
 \end{equation}
 
 $\hat{f}(\mathbf{k})$ is also known as the Boolean Fourier transform of $f(\mathbf{x})$~\cite{bib-odonnell}
-\footnote{All equations that are taken from ~\cite{bib-odonnell} are written here
-in terms of the $\{0,1\}$ basis and $\chi(\mathbf{x})_{\mathbf{k}}$ functions from ~\cite{bib-amy-matroid}}.
+\footnote{All equations that are taken from~\cite{bib-odonnell} are written here
+in terms of the $\{0,1\}$ basis and $\chi_{\mathbf{k}}(\mathbf{x})$ functions from ~\cite{bib-amy-matroid}}.
 
 \begin{example}
 As an example, let's derive the coefficients for Eq.~\ref{eq-toff-bool} with $\mathbf{k} = (k_{x_a}, k_{x_b}, k_y)$.
@@ -237,7 +237,8 @@ For $\mathbf{k} = 100$, $\chi_{100} = x_a$. Table~\ref{table-ex-100} enumerates 
 
 Summing the rightmost column, as in Eq.~\ref{eq-inner-prod}:
 \begin{align}
-    &\hat{f}(100) = \langle f(\mathbf{x}), \chi_{100} \rangle = \frac{1}{8} ( 1 + 1 + 1 + 1 - 1 - 1 - 1 + 1 ) = \frac{1}{4}
+  &\hat{f}(100) = \langle f(\mathbf{x}), \chi_{100} \rangle *= \frac{1}{8} ( 1 + 1 + 1 + 1 - 1 - 1 - 1 + 1 ) \\
+  &&= \frac{1}{4}\nonumber
 \end{align}
 Thus,
 \begin{equation}
@@ -255,7 +256,7 @@ S and Z gates, which do not take any T-cost, and any odd multiple can be realize
 using S and Z gates, plus one T-gate. Since each $\hat{f}(\mathbf{k})$
 is unique to each $f(\mathbf{x})$ when $|\mathbf{x}| \leq 3$,
 $\hat{f}(\mathbf{k})$ has the optimal T-count needed to implement
-$f(\mathbf{x})$ as a phase oracle.
+$f(\mathbf{x})$ as a phase oracle when $|\mathbf{x}| \leq 3$.
 
 \subsection{Synthesizing Phase Oracles from ESOP}
 \label{Pre:OracleEsop}
@@ -285,7 +286,7 @@ the effective use of such an Exclusive Sum of Products to implement such a phase
   $x_2 x_3 \oplus x_3 x_4 \oplus x_4 x_5 \oplus x_2 x_4 x_5 x_1$ into a quantum circuit.
   The first term $x_2x_3$ is merely a two input Controlled-Z gate so we insert such a gate
   between the qubits containing $x_2$ and $x_3$. We do the same for $x_3x_4$ and $x_4x_5$.
-  For $x_2 x_4 x_5 x_1$ is a 4 input quantum Controlled-Z, which is not implementable
+  $x_2 x_4 x_5 x_1$ is a 4 input quantum Controlled-Z, which is not implementable
   using only CNOT+T. Such a gate has a T-count of at least 15. This means that the
   resulting circuit has T-count of 15. The resulting circuit is depicted in
   Fig.~\ref{fig-esop-synth}.

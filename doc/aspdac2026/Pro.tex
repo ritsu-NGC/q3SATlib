@@ -40,12 +40,14 @@ represent precomputation, while tan boxes represent runtime.
 
 To minimize the number of $n \geq 4$ cubes in the ESOP, the proposal adapts EXORCISM-4~\cite{bib-exorcism}.
 EXORCISM-4 is a heuristic method of minimizing the number of cubes in a given ESOP expression. Extended
-discussion of its details is deffered to the cited paper. We modify it for our purposes by changing
-the cost function \texttt{CountCubesInExactPseudoKro} EXORCISM-4 uses for its heuristic, which uses a plain sum
-of cubes to assess the cost of the arrangement that its heuristic encounters. We instead introduce a cost function
+discussion of its details is defered to the cited paper. 
+
+We modify it for our purposes by changing
+the cost function \texttt{CountCubesInExactPseudoKro} that EXORCISM-4 uses for its heuristic, which uses a plain sum
+of cubes to assess the cost of the arrangement that its heuristic encounters. We introduce a cost function
 that instead uses a weighted sum of the cubes, where each cube is weighted by its T-count (i.e. a 2 literal cube
 has weight 0) for $n \leq 3$ and $2^n$ for $n \geq 4$ (its T-count when synthesized according to the method in
-Sec.~\ref{Pro:n4}. This penalizes terms of $n \geq 4$, while terms of $n < 3$ are free.
+Sec.~\ref{Pro:n4}). This penalizes terms of $n \geq 4$, while terms of $n < 3$ are free.
 
 
 \subsection{Synthesize $n \geq 4$ cubes}

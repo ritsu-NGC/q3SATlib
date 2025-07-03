@@ -22,7 +22,7 @@
 \subsection{CNOT+T Circuit Optimization}
 \label{Mot:CnotOpt}
 CNOT+T circuits are notable because matroid partitioning guarantees an optimal T-depth
-for them.
+for them~\cite{bib-amy-matroid}.
 
 Additionally, there is a straightforward way to reduce the T-count for such circuits.
 Note that because the phase is a scalar, the actions of phase gates on different
@@ -35,13 +35,13 @@ can be computed as follows:
   input states, which will be a linear function of the same form as the
   $\chi_{\mathbf{k}}$ from the previous section.
 \item Multiply the phase driven by the phase gate by this function.
-\item Add the phases from all such similar functions.
+\item Add the phases from all such similar functions 
 \item Resynthesize the circuit from the resulting phase polynomial using
   the methods from Sec.~\ref{Pre}.
 \end{itemize}
 
-The result (sometimes called a circuit's {\it sum of paths}~\cite{bib-amy-cnot})
-is that any phase gates driven by the same function will merge
+The summation invovled in this method is sometimes called a circuit's {\it sum of paths}~\cite{bib-amy-cnot}.
+The result is that any phase gates driven by the same function will merge
 together in the phase polynomial. This means that T-gates
 can combine into an S-gate or Z-gate, reducing the total T-count.
 
@@ -69,11 +69,11 @@ calculation as a preprocessing step.
     \begin{aligned}
       &x_a \cdot x_b \cdot y \oplus x_a \cdot x_b \cdot \bar{y} = \frac{1}{2}x_a +
       \frac{1}{2}x_b +\frac{1}{2}(x_a \oplus x_b) \\
-      & + \frac{1}{4}y \qquad -\frac{1}{4}(x_a \oplus y) - \frac{1}{4}(x_b \oplus y) +
+      & + \frac{1}{4}y -\frac{1}{4}(x_a \oplus y) - \frac{1}{4}(x_b \oplus y) +
       \frac{1}{4}(x_a \oplus x_b \oplus y)\\
       &\qquad -\frac{1}{4}(x_a \oplus y) - \frac{1}{4}(x_b \oplus y) +
       \frac{1}{4}(x_a \oplus x_b \oplus y)\\
-      & + \frac{1}{4}\bar{y} \qquad -\frac{1}{4}(x_a \oplus \bar{y})
+      & + \frac{1}{4}\bar{y} -\frac{1}{4}(x_a \oplus \bar{y})
       - \frac{1}{4}(x_b \oplus \bar{y}) +
       \frac{1}{4}(x_a \oplus x_b \oplus \bar{y})\\
       &\qquad -\frac{1}{4}(x_a \oplus \bar{y}) - \frac{1}{4}(x_b \oplus \bar{y}) +

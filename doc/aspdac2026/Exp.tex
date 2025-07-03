@@ -4,7 +4,13 @@
 \label{Exp:Set}
 We compare the ability of T-par to optimize circuits produced using our methodology against those of
 Qiskit's \texttt{PhaseOracle} method. This method takes in an ESOP expression and applies the synthesis in
-Sec.~\ref{Mot:Lib}. We randomly generate ESOP expressions to feed into both of our methods, and average all
+Sec.~\ref{Mot:Lib}. Since \texttt{PhaseOracle} only generates Control-Z gates,
+we further decompose these using the methods described in Sec.~\ref{Pro}, and for cubes of $n \geq 4$,
+the decomposition from Sec.~\ref{Pro:n4} is used. \texttt{PhaseOracle} synthesizes expressions in the same
+manner as Ex.~\ref{ex-series} and so cannot take advantage of the sum of paths simplification that
+the proposed method uses.
+
+We randomly generate ESOP expressions to feed into both of our methods, and average all
 of the differences in T-count and T-depth between the two. The main code is run in python, while running
 T-par as a system call to a C++ binary and EXORCISM-4 through a Python-C++ API.
 
@@ -35,14 +41,17 @@ based on the number of cubes $k$ in them.
 
 \begin{table}[t]
   \begin{center}
-    \scalebox{1.2} {
-      \begin{tabular}{c|c|c}\hline
-        & $k=2^{n-1}$ & $k=n$ \\\hline
-        N3       &             &       \\\hline
-        Scramble &             &       \\\hline
+    \scalebox{1.0} {
+      \begin{tabular}{c|c|c|c|c}\hline
+                             & \multicolumn{2}{c|}{N3} & \multicolumn{2}{c}{Scramble}\\\hline
+                             & $k=2^{n-1}$ & $k=n$    & $k=2^{n-1}$  & $k=n$        \\\hline
+        Proposed             &             &          &             &               \\\hline
+        \texttt{PhaseOracle} &             &          &             &               \\\hline
       \end{tabular}
     }
   \end{center}
+  \caption{Experimental Results}
+  \label{table-results}
 \end{table}
 
 \subsection{Analysis}

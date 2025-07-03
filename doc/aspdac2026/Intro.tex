@@ -1,7 +1,7 @@
 \section{Introduction}
 One of quantum computing's most significant results is the development of Grover's
 algorithm~\cite{bib-grover1996fast}. This algorithm performs an unstructured search
-in optimally~\cite{bib-zaika-grov-opt}. Various applications have
+optimally~\cite{bib-zaika-grov-opt}. Various applications have
 been proposed for such an algorithm, including the acceleration of solving NP-hard
 problems~\cite{bib-williams-grover-np}.
 
@@ -30,7 +30,8 @@ cubes of at most 3 variables can be implemented as a CNOT+T circuit. We utilize
 this observation in our proposal.
 
 In this work, we propose a solution that utilizes CNOT+T circuits to reduce the
-T-count and T-depth for general Boolean functions of arbitrary literal count.
+T-count and T-depth for phase oracles of a given Boolean function of arbitrary
+literal count.
 
 Our contributions include:
 
@@ -43,13 +44,16 @@ Our contributions include:
 
 We find that our solution... [DCTODO: complete with results]
 
-The rest of this paper is structured as follows: First we introduce
-some preliminary knowledge. In addition to the basics of qubits and
-quantum circuits, this includes the basics of the mathematics of
-phase polynomials and their mapping to phase oracles and CNOT+T
-circuits. Then we detail our proposal, including how to generate
-a library of up to 3-qubit phase oracles, and how to use it to generate
-phase oracles of 4 or more qubits. Finally, we test our results against
-Qiskit PhaseOracle. Finally, we conclude with our findings and propose
-some future research.
+The rest of this paper is structured as follows: First Sec~\ref{Pre}
+introducs some preliminary knowledge. In addition to the basics of
+qubits and quantum circuits, this includes the basics of the
+mathematics of phase polynomials and their mapping to phase oracles
+and CNOT+T circuits. Then Sec.~\ref{Mot} goes through some
+motivational examples that inform the general idea of our proposal.
+Sec.~\ref{Pro} details the proposal itself, including how to
+generate a library of up to 3-qubit phase oracles, and how to use
+it to generate phase oracles of 4 or more qubits. In Sec.~\ref{Exp},
+we test our results against Qiskit PhaseOracle and analyze our
+findings. Finally, Sec.~\ref{Conc} concludes with our findings and
+proposes some future research.
 
