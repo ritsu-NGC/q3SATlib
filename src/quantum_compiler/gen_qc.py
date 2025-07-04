@@ -1,7 +1,10 @@
 from qiskit import QuantumCircuit,QuantumRegister
-from dd import cudd
+# from dd import cudd
 from textwrap import dedent
 from qiskit import transpile
+from n_qubit_esop_builder import build_esop_circuit
+
+
 
 #DCDEBUG
 import tracemalloc
@@ -21,6 +24,14 @@ import gc
 import random
 import re
 #import pyexorcism
+
+try:
+    # Import the standalone function (easiest approach)
+    from n_qubit_esop_builder import build_esop_circuit
+    print("✅ Successfully imported ESOP builder")
+except ImportError as e:
+    print(f"❌ Error importing ESOP builder: {e}")
+    print("Make sure n_qubit_esop_builder.py is in the same directory")
 
 def partition_esop(esop_str):
     # Find all cubes (parenthesized terms)
@@ -62,10 +73,14 @@ def gen_qc(esop3, esop4, test_type):
     
     return qc3 + qc4
     
-def gen_n3(s):
-    #CHITRANSHU TODO
-    qc = QuantumCircuit()
-    return qc
+def gen_n3(esop_str):
+    """
+    Generate a quantum circuit from a 3-variable-or-less ESOP string using the n_qubit_esop_builder.
+    """
+    # Call the builder function and return the circuit
+    circuit = build_esop_circuit(esop_str)
+    return circuit
+
 
 def gen_n4(s):
     #DCTODO
@@ -117,6 +132,8 @@ def build_qc(qc_args):
     qc_out.ccz(qr_out[0],qr_out[1],qr_out[2])
     return qc_out
                      
+qc = gen_n3("X1*X2 ^ X3*X2")
+print(qc.draw())
 
 
 

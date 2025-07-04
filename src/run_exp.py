@@ -132,5 +132,10 @@ def run_exp(test_type):
     elif test_type == "4vars":
         esop3,esop4 = generate_esop_expression(vars, terms=5, prob_2=1.0, prob_3=1.0, prob_more=1.0)
 
-    pro_qc = gen_qc(esop3, esop4, test_type)
-    qk_qc  = PhaseOracle(qk_str)
+# <<<<<<< Updated upstream
+#     pro_qc = gen_qc(esop3, esop4, test_type)
+#     qk_qc  = PhaseOracle(qk_str)
+
+    pro_qc =q3SATlib.src.quantum_compiler.gen_qc(esop3, esop4, test_type)
+    qk_qc = PhaseOracle(qk_str)
+

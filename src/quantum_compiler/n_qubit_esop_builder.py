@@ -20,7 +20,27 @@ except ImportError as e:
 
 class NQubitESOPBuilder:
     """Build n-qubit quantum circuits from ESOP expressions using existing 3-qubit compiler"""
-    
+    def build_circuit_programmatically(self, esop_expr):
+        """Programmatic interface - builds circuit and returns Qiskit QuantumCircuit No interactive input required"""
+        print(f"🔧 Building circuit programmatically for: {esop_expr}")
+
+        try:
+            # Build the complete circuit
+            circuit = self.build_complete_circuit(esop_expr)
+
+            if circuit is not None:
+                print(f"✅ Successfully built {circuit.num_qubits}-qubit circuit with {len(circuit.data)} gates")
+                return circuit
+            else:
+                print("❌ Failed to build circuit")
+                return None
+
+        except Exception as e:
+            print(f"❌ Error building circuit programmatically: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+        
     def __init__(self):
         self.total_qubits = 0
         self.variables = []
@@ -446,18 +466,10 @@ def example_usage():
         print("❌ Failed to build example circuit")
         return None
 
-if __name__ == "__main__":
-    print("🚀 N-Qubit ESOP Quantum Circuit Builder")
-    print("🔥 Extended Variable Mapping Support")
-    print("📄 Automatic QC Format Generation")
-    print("1. Interactive mode")
-    print("2. Example usage")
-    
-    choice = input("Choose mode (1-2): ").strip()
-    
-    if choice == "1":
-        interactive_mode()
-    elif choice == "2":
-        example_usage()
-    else:
-        print("❌ Invalid choice!")
+
+def build_esop_circuit(esop_expr):
+    """
+    Standalone function to build ESOP circuit - easy to import and use
+    """
+    builder = NQubitESOPBuilder()
+    return builder.build_complete_circuit(esop_expr)
