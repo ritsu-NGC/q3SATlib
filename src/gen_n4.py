@@ -213,7 +213,7 @@ class lut_node:
             elif synth_func0 != self.bdd.add_expr('False'):
                 f0 = self.do_synth(synth_func0,var_order[1:],qc,do_unbalanced ^ unbalanced,do_unbalanced)
                 qc = xdotg(var_order,f0[0])
-                print("DCDEBUG f0" + str(f0[1]))
+                # print("DCDEBUG f0" + str(f0[1]))
                 f0_gen = True
             else:
                 f0 = [qc,0]
@@ -227,7 +227,7 @@ class lut_node:
                 f1 = self.do_synth(synth_func1,var_order[1:],qc,do_unbalanced ^ unbalanced, do_unbalanced)
                 qc = xdotg(var_order,f1[0])
                 f1_gen = True
-                print("DCDEBUG f1" + str(f1[1]))
+                # print("DCDEBUG f1" + str(f1[1]))
             else:
                 f1 = [qc,0]
 
