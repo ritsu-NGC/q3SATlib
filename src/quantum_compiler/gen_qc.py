@@ -54,6 +54,23 @@ def partition_esop(esop_str):
     esop_more = ' ^ '.join(cubes_more)
     return esop_3_or_less, esop_more
 
+def parse_cube(cube_str):
+    """
+    Given a cube string like '(a & ~b & c)', return a list of variable names: ['a', 'b', 'c']
+    Ignores negation (~).
+    """
+    # Remove parentheses
+    inner = cube_str.strip()[1:-1]
+    # Split on '&', strip whitespace, remove any '~'
+    variables = []
+    for literal in inner.split('&'):
+        literal = literal.strip()
+        # Remove leading '~' if present
+        var = literal.lstrip('~').strip()
+        if var:  # skip empty
+            variables.append(var)
+    return variables
+
 def run_tpar(qc,filename):
     circ_name = filename + ".qc"
     write_qc_format(qc,circ_name)
@@ -84,10 +101,11 @@ def gen_n3(esop_str):
 
 def gen_n4(s):
     #DCTODO
-    qc = QuantumCircuit()
+    lits = parse_cube(s)
+    qc = QuantumCircuit(len(lits))
 
     #Gen RTOF LUT
-    
+    c = lut_node
     #run T-PAR
 
 
@@ -96,19 +114,24 @@ def gen_n4(s):
 def write_qc_format(circuit: QuantumCircuit, filename: str):
     """Write a Qiskit QuantumCircuit to a .qc format file"""
     gate_map = {
-        'cx': 'CNOT',
-        'ccx': 'TOF',
+        'cx': 'tof',
+        'ccx': 'tof',
         'x': 'X',
         'h': 'H',
         't': 'T',
-        'tdg': 'TDG',
+        'tdg': 'T*',
         'z': 'Z',
         'y': 'Y',
         's': 'S',
-        'sdg': 'SDG',
+        'sdg': 'S*',
         # Add more as needed
     }
     with open(filename, 'w') as f:
+        qubit_indices = [str(i) for i in range(circuit.num_qubits)]
+        f.write(f".v {' '.join(qubit_indices)}\n")
+        f.write(f".i {' '.join(qubit_indices)}\n")
+        f.write(f".o {' '.join(qubit_indices)}\n")                
+        f.write("\nBEGIN\n")
         for inst, qargs, cargs in circuit.data:
             name = inst.name.lower()
             if name in gate_map:
@@ -117,6 +140,7 @@ def write_qc_format(circuit: QuantumCircuit, filename: str):
                 f.write(f"{gate_label} {' '.join(map(str, qubits))}\n")
             else:
                 print(f"Warning: Gate {name} not supported in .qc format")
+        f.write(f"\nEND")
 
 # # Example usage:
 # qc = QuantumCircuit(3)
