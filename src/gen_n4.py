@@ -305,33 +305,34 @@ def xdotg(controls, subcirc):
     target = 0
     control = 1
     new_circ = QuantumCircuit(len(controls) + 1)
+    new_circ.barrier()
     new_circ.h(target)
-    print("DCDEBUG xdotg subcirc")
-    print(subcirc) #DCDEBUG
+
+    # CNOT from last control to target
+    new_circ.cx(target, control)
+
     # T on target
     new_circ.t(target)
 
+    # Tdg on target
+    new_circ.tdg(control)
+
     # CNOT from last control to target
     new_circ.cx(control, target)
-    # Tdg on target
-    new_circ.tdg(target)
-    print("DCDEBUG xdotg" + str([target] + controls))
+
     # Recursively apply F on n-1 controls
     new_circ = new_circ.compose(subcirc, list(range(1,1+len(controls))))
-    new_circ.t(target)
-
-    # CNOT from last control to target
     new_circ.cx(control, target)
+    
+    new_circ.t(control)
     # T on target
     new_circ.tdg(target)
-
+    new_circ.cx(target, control)
     # Recursively apply F on n-1 controls
     new_circ = new_circ.compose(subcirc, [0].append(range(2,2+len(controls))))
-    new_circ.tdg(target)
     # H on target
     new_circ.h(target)
-    print("DCDEBUG xdotg new_circ")
-    print(new_circ)
+    new_circ.barrier()
     return new_circ
 
 def make_recursive_F_circuit(n):
