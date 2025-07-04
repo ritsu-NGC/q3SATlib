@@ -1,0 +1,6 @@
+PWD C:/Users/david/quantum/q3SATlib/doc/aspdac2026
+INPUT c:/texlive/2024/texmf.cnf
+INPUT c:/texlive/2024/texmf-dist/web2c/texmf.cnf
+INPUT c:/texlive/2024/texmf-var/web2c/pdftex/latex.fmt
+INPUT Pre.tex
+OUTPUT Pre.log

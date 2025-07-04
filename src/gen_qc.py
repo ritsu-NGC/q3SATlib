@@ -43,6 +43,12 @@ def partition_esop(esop_str):
     esop_more = ' ^ '.join(cubes_more)
     return esop_3_or_less, esop_more
 
+def run_tpar(qc,filename):
+    circ_name = filename + ".qc"
+    write_qc_format(qc,circ_name)
+
+    result = subprocess.run(["./t-par",circ_name], stdout=filename + ".log",capture_output=False, text=True)
+
 def gen_qc(esop3, esop4, test_type):
     #DCTODO
     qc = QuantumCircuit()
@@ -52,7 +58,8 @@ def gen_qc(esop3, esop4, test_type):
     #run T-PAR
     qc3 = gen_n3(esop3)
     qc4 = gen_n4(esop4)
-
+    qc  = qc3 + qc4
+    
     return qc3 + qc4
     
 def gen_n3(s):

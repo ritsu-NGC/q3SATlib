@@ -1,0 +1,58 @@
+\section{Experimental Results}
+\label{Exp}
+\subsection{Experiment Setup}
+\label{Exp:Set}
+We compare the ability of T-par to optimize circuits produced using our methodology against those of
+Qiskit's \texttt{PhaseOracle} method. This method takes in an ESOP expression and applies the synthesis in
+Sec.~\ref{Mot:Lib}. Since \texttt{PhaseOracle} only generates Control-Z gates,
+we further decompose these using the methods described in Sec.~\ref{Pro}, and for cubes of $n \geq 4$,
+the decomposition from Sec.~\ref{Pro:n4} is used. \texttt{PhaseOracle} synthesizes expressions in the same
+manner as Ex.~\ref{ex-series} and so cannot take advantage of the sum of paths simplification that
+the proposed method uses.
+
+We randomly generate ESOP expressions to feed into both of our methods, and average all
+of the differences in T-count and T-depth between the two. The main code is run in python, while running
+T-par as a system call to a C++ binary and EXORCISM-4 through a Python-C++ API.
+
+Here we propose two sets of measurements:
+
+\begin{itemize}
+\item (N3) : ESOP expressions are constrained to those of $n \leq 3$. This tests the ability of the
+  precomputed 3bit library to enable simplification of pure CNOT+T circuits
+\item (Scramble) : ESOP expressions are again constrained to $n \leq 3$, but these are then ``scrambled''
+  by using a Davio expansion of the ESOP expression according to different variable orders until an ESOP expression
+  that contains cubes of $n \geq 4$ is found. This tests the ability of the proposed method to find such a
+  solution in its EXORCISM-4 step, by guaranteeing that there is such an optimal solution.
+\end{itemize}
+
+We test these for $n=4-12$ literals. The ESOP expressions are randomly generated according to two groups
+based on the number of cubes $k$ in them.
+
+\begin{itemize}
+\item ($k=2^{n-1}$) This increases the chances that inserted subcircuits will have common literals that allow them
+  to be simplified and have reduced T-count, while making it harder for T-par to partition any cubes $n \geq 4$
+  for T-depth scheduling.
+\item ($k=n$) This makes the arrangements sparser, allowing for better parallelization by T-par, but making
+  it harder to have common literals that can combine to reduce T-count.
+\end{itemize}
+
+\subsection{Results}
+\label{Exp:Res}
+
+\begin{table}[t]
+  \begin{center}
+    \scalebox{1.0} {
+      \begin{tabular}{c|c|c|c|c}\hline
+                             & \multicolumn{2}{c|}{N3} & \multicolumn{2}{c}{Scramble}\\\hline
+                             & $k=2^{n-1}$ & $k=n$    & $k=2^{n-1}$  & $k=n$        \\\hline
+        Proposed             &             &          &             &               \\\hline
+        \texttt{PhaseOracle} &             &          &             &               \\\hline
+      \end{tabular}
+    }
+  \end{center}
+  \caption{Experimental Results}
+  \label{table-results}
+\end{table}
+
+\subsection{Analysis}
+\label{Exp:An}
