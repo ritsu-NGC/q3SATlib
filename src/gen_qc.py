@@ -1,4 +1,5 @@
 from qiskit import QuantumCircuit,QuantumRegister
+
 from dd import cudd
 from textwrap import dedent
 from qiskit import transpile
@@ -45,75 +46,6 @@ def partition_esop(esop_str):
     esop_more = ' ^ '.join(cubes_more)
     return esop_3_or_less, esop_more
 
-def normalize_cube(cube):
-    """
-    Returns a normalized, hashable string for a cube, e.g. (a & ~b & c) => ('a','~b','c')
-    Ignores literal order.
-    """
-    literals = [lit.strip() for lit in cube[1:-1].split('&')]
-    # Sort literals to make order unimportant
-    return tuple(sorted(literals))
-
-def generate_esop_expression(variables, terms=4, 
-                             prob_2=1.0, prob_3=1.0, prob_more=1.0):
-    """
-    Generate an ESOP (Exclusive Sum of Products) expression as a string.
-    - variables: list of variable names (e.g., ['a', 'b', 'c', 'd'])
-    - terms: number of product terms in the ESOP
-    - prob_2: relative probability of picking a 2-literal product (default 1.0)
-    - prob_3: relative probability of picking a 3-literal product (default 1.0)
-    - prob_more: relative probability of picking a >3-literal product (default 1.0)
-    
-    Returns:
-        A tuple of two strings:
-        - ESOP of cubes with 3 or fewer literals
-        - ESOP of the rest (cubes with more than 3 literals)
-    """
-    n_vars = len(variables)
-    weightings = []
-    sizes = []
-    if n_vars >= 2:
-        sizes.append(2)
-        weightings.append(prob_2)
-    if n_vars >= 3:
-        sizes.append(3)
-        weightings.append(prob_3)
-    if n_vars > 3:
-        sizes.append(random.randint(4, n_vars))
-        weightings.append(prob_more)
-    total = sum(weightings)
-    if total == 0:
-        weightings = [1] * len(weightings)
-        total = sum(weightings)
-    norm_weights = [w / total for w in weightings]
-
-    # Uniquify cubes using a set
-    seen_cubes = set()
-    unique_terms = []
-    tries = 0
-    max_tries = terms * 10  # avoid infinite loop in pathological cases
-
-    while len(unique_terms) < terms and tries < max_tries:
-        k = random.choices(sizes, weights=norm_weights)[0]
-        k = min(k, n_vars)
-        vars_chosen = random.sample(variables, k)
-        literals = []
-        for v in vars_chosen:
-            if random.choice([True, False]):
-                literals.append(v)
-            else:
-                literals.append(f'~{v}')
-        cube = f"({' & '.join(literals)})"
-        norm = normalize_cube(cube)
-        if norm not in seen_cubes:
-            seen_cubes.add(norm)
-            unique_terms.append(cube)
-        tries += 1
-
-    esop_expr = ' ^ '.join(unique_terms)
-    esop_3_or_less, esop_more = partition_esop(esop_expr)
-    return esop_3_or_less, esop_more
-
 def parse_cube(cube_str):
     """
     Given a cube string like '(a & ~b & c)', return a list of variable names: ['a', 'b', 'c']
@@ -156,9 +88,9 @@ def gen_qc(esop3, esop4, vars_list, test_type):
     #run T-PAR
     qc3 = gen_n3(esop3)
     qc4 = gen_n4(esop4,var_dict)
-    qc  = qc3 + qc4
+    qc  = qc4.compose(qc3)
     
-    return qc3 + qc4
+    return qc4.compose(qc3)
     
 def gen_n3(esop_str):
     """
@@ -170,8 +102,9 @@ def gen_n3(esop_str):
 
 def gen_n4(s,var_dict):
     qc = QuantumCircuit(len(var_dict.keys()) + 1)
-    cubes = s.split("^")
+    cubes = [cube.strip() for cube in re.split(r'\s*(?:\^|⊕)\s*', s) if cube.strip()]
     for cube in cubes:
+        print("DCDEBUG gen_n4 cube " + cube)
         cube = re.sub(r'\(([^)]+)\)', r'\1', cube)
         cz,lits = gen_n4_cube(cube)
         #look up indices of 
@@ -188,6 +121,7 @@ def gen_n4_cube(s):
 
     #Gen RTOF LUT
     c = lut_node("node0",lits,"y")
+    print("DCDEBUG gen_n4_cube " + s)
     c.add_sop_expr(s)
     result = c.synth()
     qc = qc.compose(result[0])
@@ -208,8 +142,8 @@ def write_qc_format(circuit: QuantumCircuit, filename: str):
         'tdg': 'T*',
         'z': 'Z',
         'y': 'Y',
-        's': 'S',
-        'sdg': 'S*',
+        's': 'P',
+        'sdg': 'P*',
         # Add more as needed
     }
     with open(filename, 'w') as f:
@@ -217,7 +151,7 @@ def write_qc_format(circuit: QuantumCircuit, filename: str):
         f.write(f".v {' '.join(qubit_indices)}\n")
         f.write(f".i {' '.join(qubit_indices)}\n")
         f.write(f".o {' '.join(qubit_indices)}\n")                
-        f.write("\nBEGIN\n")
+        f.write("\nBEGIN\n\n")
         for inst, qargs, cargs in circuit.data:
             name = inst.name.lower()
             if name in gate_map:
