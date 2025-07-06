@@ -208,6 +208,8 @@ def run_exp(test_type,runs):
         if test_type == "n3_2n":
             cubes       = 2**(n-1)
             esop3,esop4 = generate_esop_expression(vars_list, terms=cubes, prob_2=2.0, prob_3=1.0, prob_more=0)
+            qk_str      = esop3 + esop4
+            pro_str     = esop3 + esop4
         elif test_type == "n3_n":
             cubes       = n
             esop3,esop4 = generate_esop_expression(vars_list, terms=cubes, prob_2=2.0, prob_3=1.0, prob_more=0)
