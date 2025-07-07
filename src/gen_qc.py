@@ -108,7 +108,7 @@ def gen_n4(s,var_dict):
         cube = re.sub(r'\(([^)]+)\)', r'\1', cube)
         cz,lits = gen_n4_cube(cube)
         #look up indices of 
-        ctrl_connections = [var_dict[var_name] for var_name in lits]
+        ctrl_connections = [var_dict[var_name] + 1 for var_name in lits]
         connections = [0] + ctrl_connections
         print("DCDEBUG gen_n4 " + str(connections))
         qc = qc.compose(cz,connections)
