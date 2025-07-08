@@ -46,7 +46,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "eabc/exor.h"
-#include "exorcism.h"
+//DCDEBUG #include "exorcism.h"
 #include <functional>
 
 #include <string> //DCDEBUG

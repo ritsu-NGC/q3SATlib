@@ -21,7 +21,7 @@
 
 namespace abc {
   namespace exorcism {
-    int Abc_ExorcismMain(
+    extern int Abc_ExorcismMain(
 		Vec_Wec_t * vEsop,
 		int nIns,
 		int nOuts,
