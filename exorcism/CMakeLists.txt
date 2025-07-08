@@ -48,7 +48,7 @@ if (BUILD_PYTHON)
     set(PYBIND11_WRAPPER exorcism_pybind.cpp)
 
     # Build the Python extension module
-    pybind11_add_module(exorcism ${PYBIND11_WRAPPER} exor.cpp)
+    pybind11_add_module(exorcism ${PYBIND11_WRAPPER})
 
     # Link the exorcism library to the Python module
     target_link_libraries(exorcism PRIVATE libabcesop)

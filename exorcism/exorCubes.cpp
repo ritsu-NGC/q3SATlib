@@ -96,6 +96,7 @@ int AllocateCover( int nCubes, int nWordsIn, int nWordsOut )
     Cube ** pp;
     int TotalSize;
     int i, k;
+    printf("DCDEBUG g_CoverInfo exorCubes.cpp address: %p\n", (void*)&g_CoverInfo);
     printf("DCDEBUG AllocateCover start g_CoverInfo.nCubesInUse %d g_CoverInfo.nCubesFree %d  g_CoverInfo.nCubesAlloc %d nCubesBefore %d, ADDITIONAL_CUBES %d nVarsIn%d\n", g_CoverInfo.nCubesInUse,g_CoverInfo.nCubesFree, g_CoverInfo.nCubesAlloc, g_CoverInfo.nCubesBefore,ADDITIONAL_CUBES, g_CoverInfo.nVarsIn);
     fflush(stdout);//DCDEBUG
 

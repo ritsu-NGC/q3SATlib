@@ -46,7 +46,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "eabc/exor.h"
-//DCDEBUG #include "exorcism.h"
+//#include "exorcism.h"
 #include <functional>
 
 #include <string> //DCDEBUG
@@ -839,6 +839,7 @@ int Exorcism( Vec_Wec_t * vEsop, int nIns, int nOuts, std::function<void(uint32_
     MemTotal = 0;
     printf("DCDEBUG Exorcism 2 g_CoverInfo.nCubesInUse %d g_CoverInfo.nCubesFree %d  g_CoverInfo.nCubesAlloc %d nCubesBefore %d, ADDITIONAL_CUBES %d\n", g_CoverInfo.nCubesInUse,g_CoverInfo.nCubesFree, g_CoverInfo.nCubesAlloc, g_CoverInfo.nCubesBefore,ADDITIONAL_CUBES);
     fflush(stdout);//DCDEBUG    
+    printf("DCDEBUG exor.cpp g_CoverInfo address: %p\n", (void*)&g_CoverInfo);
     MemTemp = AllocateCover( g_CoverInfo.nCubesAlloc, g_CoverInfo.nWordsIn, g_CoverInfo.nWordsOut );
     printf("DCDEBUG g_CoverInfo.nCubesInUse %d g_CoverInfo.nCubesFree %d  g_CoverInfo.nCubesAlloc %d nCubesBefore %d, ADDITIONAL_CUBES %d\n", g_CoverInfo.nCubesInUse,g_CoverInfo.nCubesFree, g_CoverInfo.nCubesAlloc, g_CoverInfo.nCubesBefore,ADDITIONAL_CUBES);
     fflush(stdout);//DCDEBUG
