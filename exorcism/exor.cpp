@@ -761,7 +761,6 @@ void AddCubesToStartingCover( Vec_Wec_t * vEsop )
 
 	
         // add this cube to storage
-	printf("DCDEBUG exor.cpp Cube %d nCubesInUse=%d nCubesFree=%d\n", c, g_CoverInfo.nCubesInUse, g_CoverInfo.nCubesFree);
         CheckForCloseCubes( pNew, 1 );
 
 
@@ -833,16 +832,9 @@ int Exorcism( Vec_Wec_t * vEsop, int nIns, int nOuts, std::function<void(uint32_
     // STEP 2: prepare internal data structures
     ///////////////////////////////////////////////////////////////////////
     g_CoverInfo.nCubesAlloc = g_CoverInfo.nCubesBefore + ADDITIONAL_CUBES; 
-    printf("DCDEBUG Exorcism g_CoverInfo.nCubesInUse %d g_CoverInfo.nCubesFree %d  g_CoverInfo.nCubesAlloc %d nCubesBefore %d, ADDITIONAL_CUBES %d\n", g_CoverInfo.nCubesInUse,g_CoverInfo.nCubesFree, g_CoverInfo.nCubesAlloc, g_CoverInfo.nCubesBefore,ADDITIONAL_CUBES);
-    fflush(stdout);//DCDEBUG
     // allocate cube cover
     MemTotal = 0;
-    printf("DCDEBUG Exorcism 2 g_CoverInfo.nCubesInUse %d g_CoverInfo.nCubesFree %d  g_CoverInfo.nCubesAlloc %d nCubesBefore %d, ADDITIONAL_CUBES %d\n", g_CoverInfo.nCubesInUse,g_CoverInfo.nCubesFree, g_CoverInfo.nCubesAlloc, g_CoverInfo.nCubesBefore,ADDITIONAL_CUBES);
-    fflush(stdout);//DCDEBUG    
-    printf("DCDEBUG exor.cpp g_CoverInfo address: %p\n", (void*)&g_CoverInfo);
     MemTemp = AllocateCover( g_CoverInfo.nCubesAlloc, g_CoverInfo.nWordsIn, g_CoverInfo.nWordsOut );
-    printf("DCDEBUG g_CoverInfo.nCubesInUse %d g_CoverInfo.nCubesFree %d  g_CoverInfo.nCubesAlloc %d nCubesBefore %d, ADDITIONAL_CUBES %d\n", g_CoverInfo.nCubesInUse,g_CoverInfo.nCubesFree, g_CoverInfo.nCubesAlloc, g_CoverInfo.nCubesBefore,ADDITIONAL_CUBES);
-    fflush(stdout);//DCDEBUG
 
     if ( MemTemp == 0 )
     {

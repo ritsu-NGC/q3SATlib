@@ -1,1 +1,3 @@
 cmake -DBUILD_PYTHON=ON -DPYTHON_INCLUDE_DIR=/usr/include/python3.12 ..
+
+export PYTHONPATH=$PWD/build:$PYTHONPATH
