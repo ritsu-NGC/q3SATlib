@@ -29,6 +29,8 @@ import re
 #import pyexorcism
 import gen_qc
 from gen_qc import partition_esop,gen_qc,write_qc_format,gen_n4_cube
+from exorcism import exorcism
+
 
 def run_tpar(qc,filename):
     circ_name = filename + ".qc"
@@ -276,7 +278,50 @@ def find_esop_with_large_cube(esop_str, var_order, min_literals=4, max_attempts=
 
 
 #########          SCRAMBLE            ########################
+#########          OPTIMIZE            ########################
+def optimize_esop(esop_str,var_names,):
+    ret_str = ""
+    results = []
+    def on_cube(bits, mask):
+        """
+        Convert bits and mask to C-style Boolean string (optionally with variable names).
+        - bits, mask: integers (bitmasks)
+        - n_vars: number of variables
+        - var_names: optional list of variable names
+        Returns: String, e.g. '01-1' or '!a & b & c'
+        """
+        nonlocal ret_str
+        cube_str = []
+        for i in range(len(var_names)):
+            m = (mask >> i) & 1
+            b = (bits >> i) & 1
+            if not m:
+                s = '-'
+            else:
+                s = '1' if b else '0'
+            cube_str.append(s)
+        cube_str = cube_str[::-1]  # Reverse to match variable order if LSB = last variable
+        # If variable names are given, produce an expression
+        if var_names:
+            literals = []
+            for val, name in zip(cube_str, var_names):
+                if val == '1':
+                    literals.append(name)
+                elif val == '0':
+                    literals.append('!' + name)
+                # Skip '-' (don't care)
+            ret_str = ret_str + ' & '.join(literals) if literals else '1'
+        else:
+            ret_str = ret_str + ''.join(cube_str)
+        return 0
 
+    # This call won't do meaningful minimization (no ESOP input), but demonstrates calling
+    #result = exorcism.exorcism(nIns=3, nOuts=1, onCube=on_cube)
+    result = exorcism(esop_str=esop_str, nIns=len(var_names), nOuts=1, onCube=on_cube, Quality=0,Verbosity=1,nCubesMax=1000,fUseQCost=1)
+
+    return ret_str
+
+#########          OPTIMIZE            ########################
 def run_exp(test_type,runs):
     for i in range(1,runs+1):
         n         = 8
@@ -304,7 +349,7 @@ def run_exp(test_type,runs):
             # qk_str      = large_cube_esop
             # pro_str     = large_cube_esop
             qk_str = esop
-            pro_str = esop
+            pro_str = optimize_esop(esop,vars_list)
         elif test_type == "scramble_n":
             cubes       = n
             esop        = generate_esop_expression(vars_list, terms=cubes, prob_2=1.0, prob_3=1.0, prob_more=0.5)
@@ -317,7 +362,7 @@ def run_exp(test_type,runs):
             # qk_str      = large_cube_esop
             # pro_str     = large_cube_esop
             qk_str = esop
-            pro_str = esop
+            pro_str = optimize_esop(esop,vars_list)
         else:
             raise ValueError("Unknown test_type:" + test_type)
         

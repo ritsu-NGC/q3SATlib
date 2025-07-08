@@ -48,7 +48,7 @@
 #include "eabc/exor.h"
 //#include "exorcism.h"
 #include <functional>
-
+#include <cmath>
 #include <string> //DCDEBUG
 #include <iostream> //DCDEBUG
 #include <cstdint>
@@ -105,24 +105,50 @@ int GetQCost( int nVars, int nNegs )
         return 1;
     if ( nVars == 1 )  
     {
-        if ( nNegs == 0 )  return 1;
-        if ( nNegs == 1 )  return 2;
+        if ( nNegs == 0 )  return 0;
+        if ( nNegs == 1 )  return 0;
     }
     if ( nVars == 2 )
     {
-        if ( nNegs <= 1 )  return 5;
-        if ( nNegs == 2 )  return 6;
+        if ( nNegs <= 1 )  return 0;
+        if ( nNegs == 2 )  return 0;
     }
     if ( nVars == 3 )
     {
-        if ( nNegs <= 1 )  return 14;
-        if ( nNegs == 2 )  return 16;
-        if ( nNegs == 3 )  return 18;
+        if ( nNegs <= 1 )  return 7;
+        if ( nNegs == 2 )  return 7;
+        if ( nNegs == 3 )  return 7;
     }
-    Extra = nNegs - nVars/2;
-    return 20 + 12 * (nVars - 4) + (Extra > 0 ? 2 * Extra : 0);
+    Extra = std::pow(2,nVars -1);
+    return Extra;
 
 }
+//DCDEBUG int GetQCost( int nVars, int nNegs )
+// {
+//     int Extra;
+//     assert( nVars >= nNegs );
+//     if ( nVars == 0 )  
+//         return 1;
+//     if ( nVars == 1 )  
+//     {
+//         if ( nNegs == 0 )  return 1;
+//         if ( nNegs == 1 )  return 2;
+//     }
+//     if ( nVars == 2 )
+//     {
+//         if ( nNegs <= 1 )  return 5;
+//         if ( nNegs == 2 )  return 6;
+//     }
+//     if ( nVars == 3 )
+//     {
+//         if ( nNegs <= 1 )  return 14;
+//         if ( nNegs == 2 )  return 16;
+//         if ( nNegs == 3 )  return 18;
+//     }
+//     Extra = nNegs - nVars/2;
+//     return 20 + 12 * (nVars - 4) + (Extra > 0 ? 2 * Extra : 0);
+
+// }
 void GetQCostTest()
 {
     int i, k, Limit = 10;

@@ -22,7 +22,7 @@ from qiskit import qasm2
 # result = gen_n4("x1 & x2 & x3 & x4")
 # print(result)
 #qc = qasm2.load("qk_qc.qasm")
-run_exp("scramble_n",10)
+run_exp("scramble_2n",1)
 
 # esop3 = "(~d & e) ^ (a & c & ~b) ^ (a & ~d & ~b) ^ (c & a & ~e) ^ (~a & b) ^ (c & e & a) ^ (~b & ~c) ^ (b & ~e)"
 # esop4 = "(e & ~b & ~c & ~d) ^ (~d & a & ~c & ~b) ^ (a & e & ~c & ~d) ^ (~a & c & ~b & ~e) ^ (c & ~a & b & ~e) ^ (~a & ~c & ~b & d)"

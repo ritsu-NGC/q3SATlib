@@ -27,7 +27,7 @@ static inline std::string trim(const std::string& s) {
 static inline int parse_literal(const std::string& lit) {
     bool neg = false;
     size_t idx = 0;
-    if (lit[idx] == '!') {
+    if ((lit[idx] == '!') || (lit[idx] == '~')) {
         neg = true;
         ++idx;
     }
