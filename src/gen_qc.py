@@ -149,8 +149,6 @@ def write_qc_format(circuit: QuantumCircuit, filename: str):
         'sdg': 'P*',
         # Add more as needed
     }
-    print("DCDEBUG write_qc_format filename" + filename)
-    print("DCDEBUG write_qc_format filename" + filename)
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, 'w') as f:
         qubit_indices = [str(i) for i in range(circuit.num_qubits)]
@@ -160,7 +158,6 @@ def write_qc_format(circuit: QuantumCircuit, filename: str):
         f.write("\nBEGIN\n\n")
         for inst, qargs, cargs in circuit.data:
             name = inst.name.lower()
-            print("DCDEBUG write_qc_format " + name)
             if name in gate_map:
                 gate_label = gate_map[name]
                 qubits = [circuit.find_bit(q).index for q in qargs]

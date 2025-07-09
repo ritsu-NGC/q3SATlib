@@ -347,16 +347,17 @@ def run_exp(test_type,runs,directory="."):
             max_cubes   = 2**(n-1)            
             min_cubes   = 2 * n
             esop        = generate_esop_expression(vars_list, min_terms=min_cubes, max_terms=max_cubes, prob_2=2.0, prob_3=1.0, prob_more=0)
-            esop3,esop4 = partition_esop(esop)
             qk_str      = esop
-            pro_str     = esop
+            pro_str = optimize_esop(esop,vars_list,1)
+            esop3,esop4 = partition_esop(pro_str)
         elif test_type == "n3_n":
             max_cubes   = 2 * n
             min_cubes   = 1
             esop        = generate_esop_expression(vars_list, min_terms=min_cubes, max_terms=max_cubes, prob_2=2.0, prob_3=1.0, prob_more=0)
             esop3,esop4 = partition_esop(esop)
             qk_str      = esop
-            pro_str     = esop
+            pro_str = optimize_esop(esop,vars_list,1)
+            esop3,esop4 = partition_esop(pro_str)
         elif test_type == "scramble_2n": #DCTODO
             max_cubes   = 2**(n-1)            
             min_cubes   = 2 * n
@@ -368,7 +369,8 @@ def run_exp(test_type,runs,directory="."):
             # )
             # qk_str      = large_cube_esop
             # pro_str     = large_cube_esop
-            qk_str = optimize_esop(esop,vars_list,0)
+            #qk_str = optimize_esop(esop,vars_list,0)
+            qk_str = esop
             pro_str = optimize_esop(esop,vars_list,1)
             esop3,esop4 = partition_esop(pro_str)
         elif test_type == "scramble_n":
@@ -383,8 +385,9 @@ def run_exp(test_type,runs,directory="."):
             
             # qk_str      = large_cube_esop
             # pro_str     = large_cube_esop
-            qk_str = optimize_esop(esop,vars_list,0)
-            pro_str = optimize_esop(esop,vars_list)
+            qk_str = esop
+            #qk_str = optimize_esop(esop,vars_list,0)
+            pro_str = optimize_esop(esop,vars_list,1)
             esop3,esop4 = partition_esop(pro_str)            
         else:
             raise ValueError("Unknown test_type:" + test_type)
