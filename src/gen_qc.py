@@ -107,10 +107,13 @@ def gen_n4(s,var_dict):
         print("DCDEBUG gen_n4 cube " + cube)
         cube = re.sub(r'\(([^)]+)\)', r'\1', cube)
         cz,lits = gen_n4_cube(cube)
-        #look up indices of 
+        #look up indices of
+        print("DCDEBUG var_dict " + str(var_dict))
         ctrl_connections = [var_dict[var_name] + 1 for var_name in lits]
         connections = [0] + ctrl_connections
         print("DCDEBUG gen_n4 " + str(connections))
+        print("DCDEBUG gen_n4 cz " + str(cz.num_qubits))
+        print("DCDEBUG gen_n4 qc " + str(qc.num_qubits))        
         qc = qc.compose(cz,connections)
     return qc
         
@@ -146,6 +149,7 @@ def write_qc_format(circuit: QuantumCircuit, filename: str):
         'sdg': 'P*',
         # Add more as needed
     }
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, 'w') as f:
         qubit_indices = [str(i) for i in range(circuit.num_qubits)]
         f.write(f".v {' '.join(qubit_indices)}\n")
@@ -158,8 +162,8 @@ def write_qc_format(circuit: QuantumCircuit, filename: str):
                 gate_label = gate_map[name]
                 qubits = [circuit.find_bit(q).index for q in qargs]
                 f.write(f"{gate_label} {' '.join(map(str, qubits))}\n")
-            else:
-                print(f"Warning: Gate {name} not supported in .qc format")
+            # else:
+            #     print(f"Warning: Gate {name} not supported in .qc format")
         f.write(f"\nEND")
 
 # # Example usage:

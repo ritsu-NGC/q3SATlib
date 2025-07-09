@@ -48,7 +48,7 @@ def normalize_cube(cube):
     # Sort literals to make order unimportant
     return tuple(sorted(literals))
 
-def generate_esop_expression(variables, terms=4, 
+def generate_esop_expression(variables, min_terms=0, max_terms=4, 
                              prob_2=1.0, prob_3=1.0, prob_more=1.0):
     """
     Generate an ESOP (Exclusive Sum of Products) expression as a string.
@@ -85,6 +85,7 @@ def generate_esop_expression(variables, terms=4,
     seen_cubes = set()
     unique_terms = []
     tries = 0
+    terms = random.randint(min_terms, max_terms) 
     max_tries = terms * 10  # avoid infinite loop in pathological cases
 
     while len(unique_terms) < terms and tries < max_tries:
@@ -144,7 +145,7 @@ def ccz_replacement(control1, control2, target):
     qc.cx(control1,control2)
     return qc
 
-def preprocess_qk(original_circuit):
+def preprocess_qk(original_circuit,vars_list):
     """Returns a new circuit where CZ and CCZ gates are replaced by defined circuits."""
 
     qr_old = original_circuit.qregs[0]
@@ -152,7 +153,8 @@ def preprocess_qk(original_circuit):
     # Create new register with one extra qubit
     qr_new = QuantumRegister(n + 1, 'q')
     new_qc = QuantumCircuit(qr_new)
-
+    var_dict = {var_name: index for index, var_name in enumerate(vars_list)}
+    
     for inst, qargs, cargs in original_circuit.data:
         name = inst.name.lower()
         if name == 'cz':
@@ -171,10 +173,21 @@ def preprocess_qk(original_circuit):
             nvars = [f'x{i+1}' for i in range(len(qargs))]
             n_and = ' & '.join(nvars)
             rep,lits = gen_n4_cube(n_and)
-            new_qc = new_qc.compose(rep)
+
+            target_indices = [original_circuit.qubits.index(q) + 1 for q in qargs]
+            connections = [0] + target_indices
+
+            print("DCDEBUG preprocess_qk connections " + str(connections))
+            new_qc = new_qc.compose(rep, connections)            
+
+            # ctrl_connections = [qargs.index(q) for q in qargs]
+            # #DCDEBUG ctrl_connections = [var_dict[var_name] + 1 for var_name in lits]
+            # connections = [0] + ctrl_connections
+            # print("DCDEBUG preprocess_qk connections " + str(connections))
+            # new_qc = new_qc.compose(rep,connections)
         else:
             # preserve other instructions
-            new_qargs = [qr_old.index(q) for q in qargs]
+            new_qargs = [qr_old.index(q) + 1 for q in qargs]
             new_qc.append(inst, new_qargs)
 
     return new_qc
@@ -193,7 +206,7 @@ def parse_c_format_esop(esop_str, var_order):
         literals = {}
         for var_match in re.finditer(r'!?[a-zA-Z_][a-zA-Z0-9_]*', cube_str):
             var = var_match.group()
-            if var.startswith('!'):
+            if var.startswith('!') or var.startswith('~'):
                 varname = var[1:]
                 literals[varname] = '0'
             else:
@@ -279,8 +292,8 @@ def find_esop_with_large_cube(esop_str, var_order, min_literals=4, max_attempts=
 
 #########          SCRAMBLE            ########################
 #########          OPTIMIZE            ########################
-def optimize_esop(esop_str,var_names,):
-    ret_str = ""
+def optimize_esop(esop_str,var_names,fUseQCost=1):
+    ret_str = []
     results = []
     def on_cube(bits, mask):
         """
@@ -308,53 +321,64 @@ def optimize_esop(esop_str,var_names,):
                 if val == '1':
                     literals.append(name)
                 elif val == '0':
-                    literals.append('!' + name)
+                    literals.append('~' + name)
                 # Skip '-' (don't care)
-            ret_str = ret_str + ' & '.join(literals) if literals else '1'
+            cube_var_str = '('
+            cube_var_str += ' & '.join(literals) if literals else '1'
+            cube_var_str += ')'
+            ret_str.append(cube_var_str)
+            
         else:
-            ret_str = ret_str + ''.join(cube_str)
+            ret_str.append(''.join(cube_str))
         return 0
 
     # This call won't do meaningful minimization (no ESOP input), but demonstrates calling
     #result = exorcism.exorcism(nIns=3, nOuts=1, onCube=on_cube)
-    result = exorcism(esop_str=esop_str, nIns=len(var_names), nOuts=1, onCube=on_cube, Quality=0,Verbosity=1,nCubesMax=1000,fUseQCost=1)
+    result = exorcism(esop_str=esop_str, nIns=len(var_names), nOuts=1, onCube=on_cube, Quality=0,Verbosity=1,nCubesMax=1000,fUseQCost=fUseQCost)
 
-    return ret_str
+    return ' ^ '.join(ret_str)
 
 #########          OPTIMIZE            ########################
-def run_exp(test_type,runs):
+def run_exp(test_type,runs,directory="."):
     for i in range(1,runs+1):
         n         = 8
         vars_list = [f'x{j}' for j in range(1, n + 1)]
         if test_type == "n3_2n":
-            cubes       = 2**(n-1)
-            esop        = generate_esop_expression(vars_list, terms=cubes, prob_2=2.0, prob_3=1.0, prob_more=0)
-            esop3,esop4 = partition_esop(esop)
+            max_cubes   = 2**(n-1)            
+            min_cubes   = 2 * n
+            esop        = generate_esop_expression(vars_list, min_terms=min_cubes, max_terms=max_cubes, prob_2=2.0, prob_3=1.0, prob_more=0)
             qk_str      = esop
-            pro_str     = esop
+            pro_str = optimize_esop(esop,vars_list,1)
+            esop3,esop4 = partition_esop(pro_str)
         elif test_type == "n3_n":
-            cubes       = n
-            esop        = generate_esop_expression(vars_list, terms=cubes, prob_2=2.0, prob_3=1.0, prob_more=0)
+            max_cubes   = 2 * n
+            min_cubes   = 1
+            esop        = generate_esop_expression(vars_list, min_terms=min_cubes, max_terms=max_cubes, prob_2=2.0, prob_3=1.0, prob_more=0)
             esop3,esop4 = partition_esop(esop)
             qk_str      = esop
-            pro_str     = esop
+            pro_str = optimize_esop(esop,vars_list,1)
+            esop3,esop4 = partition_esop(pro_str)
         elif test_type == "scramble_2n": #DCTODO
-            cubes       = 2**(n-1)
-            esop        = generate_esop_expression(vars_list, terms=cubes, prob_2=1.0, prob_3=1.0, prob_more=0.5)
-            esop3,esop4 = partition_esop(esop)
+            max_cubes   = 2**(n-1)            
+            min_cubes   = 2 * n
+            esop        = generate_esop_expression(vars_list, min_terms=min_cubes, max_terms=max_cubes, prob_2=1.0, prob_3=1.0, prob_more=0.5)
+
             print("DCDEBUG run_exp og esop " + esop)
             # random_order, large_cube_esop = find_esop_with_large_cube(
             #     esop, vars_list, min_literals=n/2, max_attempts=1000
             # )
             # qk_str      = large_cube_esop
             # pro_str     = large_cube_esop
+            #qk_str = optimize_esop(esop,vars_list,0)
             qk_str = esop
-            pro_str = optimize_esop(esop,vars_list)
+            pro_str = optimize_esop(esop,vars_list,1)
+            esop3,esop4 = partition_esop(pro_str)
         elif test_type == "scramble_n":
-            cubes       = n
-            esop        = generate_esop_expression(vars_list, terms=cubes, prob_2=1.0, prob_3=1.0, prob_more=0.5)
+            max_cubes   = 2 * n
+            min_cubes   = 1
+            esop        = generate_esop_expression(vars_list, min_terms=min_cubes, max_terms=max_cubes,prob_2=1.0, prob_3=1.0, prob_more=0.5)
             print("DCDEBUG run_exp og esop " + esop)
-            esop3,esop4 = partition_esop(esop)
+
             # random_order, large_cube_esop = find_esop_with_large_cube(
             #     esop, vars_list, min_literals=n/2, max_attempts=1000
             # )
@@ -362,26 +386,39 @@ def run_exp(test_type,runs):
             # qk_str      = large_cube_esop
             # pro_str     = large_cube_esop
             qk_str = esop
-            pro_str = optimize_esop(esop,vars_list)
+            #qk_str = optimize_esop(esop,vars_list,0)
+            pro_str = optimize_esop(esop,vars_list,1)
+            esop3,esop4 = partition_esop(pro_str)            
         else:
             raise ValueError("Unknown test_type:" + test_type)
-        
+        print("DCDEBUG run_exp esop3 " + esop3 + " esop4 " + esop4)
         pro_qc = gen_qc(esop3, esop4, vars_list, test_type)    
         print("DCDEBUG run_exp qk_str " + qk_str)
-        qk_str = parse_c_format_esop(qk_str,vars_list)
-        qk_qc = synth_phase_oracle_from_esop(qk_str, len(vars_list))
+        print("DCDEBUG run_exp pro_str " + pro_str)        
         print("DCDEBUG run_exp tpar pro")
-        run_tpar(pro_qc,"pro_qc"+str(i))
-        qk_qc = preprocess_qk(qk_qc)
+        run_tpar(pro_qc,directory + "/pro_qc"+str(i))
+        with open(directory + "/pro_qc"+str(i)+".qc", 'a') as f:
+            f.write(f"\n# {pro_str}\n")
+
+        qk_qc_str = parse_c_format_esop(qk_str,vars_list)
+        print("DCDEBUG run_exp qk_qc_str " + str(qk_qc_str))
+
+        num_vars = len(vars_list) #DCDEBUG
+        for cube in qk_qc_str:#DCDEBUG
+            assert len(cube) == num_vars, f"Cube {cube} does not match num_vars {num_vars}"#DCDEBUG
+        qk_qc = synth_phase_oracle_from_esop(qk_qc_str, len(vars_list))
+        qk_qc = preprocess_qk(qk_qc,vars_list)
 
         # with open("qk_qc" + str(i) + ".qasm","w") as f:#DCDEBUG
         #     dump(qk_qc,f)#DCDEBUG
         # with open("qk_qc" + str(i) + ".txt","w") as f:#DCDEBUG
         #     f.write(str(qk_qc.decompose().draw(output="text")))#DCDEBUG
         print("DCDEBUG run_exp tpar qk_qc")        
-        run_tpar(qk_qc,"qk_qc"+str(i))
+        run_tpar(qk_qc,directory + "/qk_qc"+str(i))
 
     
+        with open(directory + "/qk_qc"+str(i)+".qc", 'a') as f:
+            f.write(f"\n# {qk_str}\n")
 
     
 
