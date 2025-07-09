@@ -40,17 +40,17 @@ class WalshHadamardLookup:
             try:
                 with open(self.cache_file, 'rb') as f:
                     self.coefficient_cache = pickle.load(f)
-                print(f"✅ Loaded {len(self.coefficient_cache)} cached coefficient sets")
+                print(f" Loaded {len(self.coefficient_cache)} cached coefficient sets")
             except Exception as e:
-                print(f"❌ Error loading cache: {e}")
+                print(f" Error loading cache: {e}")
                 self.generate_complete_cache()
         else:
-            print("🔄 Generating complete Walsh-Hadamard lookup table...")
+            print(" Generating complete Walsh-Hadamard lookup table...")
             self.generate_complete_cache()
     
     def generate_complete_cache(self):
         """Precompute coefficients for all 2^8 = 256 possible Boolean functions"""
-        print("⏳ Computing coefficients for all 3-variable Boolean functions...")
+        print(" Computing coefficients for all 3-variable Boolean functions...")
         
         for i, truth_table in enumerate(product([0, 1], repeat=8)):
             coeffs = self.compute_coefficients_from_truth_table(truth_table)
@@ -63,9 +63,9 @@ class WalshHadamardLookup:
         try:
             with open(self.cache_file, 'wb') as f:
                 pickle.dump(self.coefficient_cache, f)
-            print(f"✅ Generated and cached {len(self.coefficient_cache)} coefficient sets")
+            print(f" Generated and cached {len(self.coefficient_cache)} coefficient sets")
         except Exception as e:
-            print(f"❌ Error saving cache: {e}")
+            print(f" Error saving cache: {e}")
     
     def compute_coefficients_from_truth_table(self, truth_table):
         """Compute Walsh-Hadamard coefficients from truth table"""
@@ -93,7 +93,7 @@ class WalshHadamardLookup:
             function_key = self.generate_function_key(func_expr)
             return self.coefficient_cache.get(function_key, {})
         except Exception as e:
-            print(f"❌ Error getting coefficients: {e}")
+            print(f" Error getting coefficients: {e}")
             return {}
     
     def cache_stats(self):
