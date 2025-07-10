@@ -1,8 +1,4 @@
 \section{Conclusion}
-We introduced a method that synthesizes a quantum circuit from an ESOP expression, in such a way that
-it can be optimized by CNOT+T optimization methods such as Tpar. We find that the T-count
-and T-depth produced by such an optimization method is less than the action of the same optimization
-method on Qiskit's built in operations, by an average of 36.5\%. However, we find corner cases where
-the method produces circuits which underperform after T-par relative to the the default ones Qiskit
-produces. Further investigation into this will be a topic of future research.
 \label{Conc}
+
+We introduced a method that synthesizes a quantum circuit from an ESOP expression in such a way that it can be optimized by CNOT+T optimization methods such as T-par. We find that the T-count and T-depth produced by such an optimization method are less than those of the same optimization method on Qiskit's built-in operations, by an average of 36.5\%. However, we find corner cases where the method produces circuits that underperform after T-par relative to the default ones Qiskit produces. Further investigation into this will be a topic of future research.

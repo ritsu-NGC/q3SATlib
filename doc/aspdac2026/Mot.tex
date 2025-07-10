@@ -36,15 +36,12 @@ can be computed as follows:
   input states, which will be a linear function of the same form as the
   $\chi_{\mathbf{k}}$ from the previous section.
 \item Multiply the phase driven by the phase gate by this function.
-\item Add the phases from all such similar functions 
+\item Add the phases from all such similar functions.
 \item Resynthesize the circuit from the resulting phase polynomial using
   the methods from Sec.~\ref{Pre}.
 \end{itemize}
 
-The summation invovled in this method is sometimes called a circuit's {\it sum of paths}~\cite{bib-amy-cnot}.
-The result is that any phase gates driven by the same function will merge
-together in the phase polynomial. This means that T-gates
-can combine into an S-gate or Z-gate, reducing the total T-count.
+The summation involved in this method is sometimes called a circuit's \emph{sum of paths}~\cite{bib-amy-cnot}. The result is that any phase gates driven by the same function will merge together in the phase polynomial. This means that T-gates can combine into an S-gate or Z-gate, reducing the total T-count.
 
 This is important because the matroid partitioning algorithm from~\cite{bib-amy-matroid}
 that was used to sequence Fig.~\ref{fig-toff-mark-matroid} uses this sum of paths
@@ -57,7 +54,7 @@ calculation as a preprocessing step.
   the method detailed in Sec~\ref{Pre:OracleEsop}. It inserts
   Fig.~\ref{fig-toff-mark-matroid} to implement $x_a x_b y$. The second term has a negated
   input, so it inserts X on the $y$ qubit after the first circuit to negate $y$, again
-  insert Fig.~\ref{fig-toff-mark-matroid} to implement the phase, and finally place another
+  inserts Fig.~\ref{fig-toff-mark-matroid} to implement the phase, and finally places another
   X on $y$ to return its value to the original.
 
   Since the first half of the circuit just implements $x_a x_b y$, we already know
