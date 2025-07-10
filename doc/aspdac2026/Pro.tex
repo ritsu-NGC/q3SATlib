@@ -19,7 +19,7 @@ represent precomputation, while tan boxes represent runtime.
   in Sec.~\ref{Pro:Minimize}.
 \item \textbf{(Map the $n \leq 3$ cubes to the 3 bit library)} : Takes all cubes of $n \leq 3$ and maps them to 
   appropriate functions from the 3 bit library, inserting the corresponding subcircuit into the phase oracle.
-\item \textbf{(Synthesize $n \geq 4$ cubes)} : Synthesizes all cubes of $n \geq 4$ using the method labeled in
+\item \textbf{(Synthesize $n \geq 4$ cubes)} : Synthesizes all cubes of $n \geq 4$ using the method described in
   Sec.~\ref{Pro:n4}.
 \item \textbf{(Combine $n \geq 4$ and $n \leq 3$)} : The results of the above two steps are combined into one
   phase oracle.
@@ -77,9 +77,9 @@ any given Boolean function.
 
 To optimize for T-count and T-depth, we utilize the T-par algorithm from~\cite{bib-amy-matroid}. This is a
 variant of the matroid partitioning algorithm that deals with optimization of Clifford+T circuits by heuristically
-partitioning along the H-gates present in it. This deals with the circuits synthesized in Sec.~\ref{Pro:n4} as well
-as the CNOT+T circuits the $n \leq 3$ processing step produces. We defer more detailed discussion to the cited
-paper.
+separating the circuit into CNOT+T partitions along the H-gates in the circuit. This deals with the circuits
+synthesized in Sec.~\ref{Pro:n4} as well as the CNOT+T circuits the $n \leq 3$ processing step produces. We defer
+more detailed discussion to the cited paper.
 
 
 
