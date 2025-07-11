@@ -58,9 +58,10 @@
 \subsection{Quantum Bits and Quantum Gates}
 \label{Chap:Pre-qubits}
 Quantum computers internally represent data as \emph{qubits}, which are quantum systems that can
-take on the quantum states $\ket{0}$ and $\ket{1}$.
+take on the quantum states $\ket{0}$ and $\ket{1}$, each known as \emph{basis states}.
 
-Additionally, qubits can exist in quantum states that are a linear combination of $\ket{0}$ and $\ket{1}$, which is called \emph{superposition}:
+Additionally, qubits can exist in quantum states that are a linear combination of $\ket{0}$ and $\ket{1}$,
+which is called \emph{superposition}:
 \begin{equation}
 \ket{\psi} = \alpha_0 \ket{0} + \alpha_1 \ket{1}, \quad \alpha_0, \alpha_1 \in \mathbb{C}
 \end{equation}
@@ -73,7 +74,7 @@ Qubits can be taken together as tensor products to create multiqubit states.
 \ket{\psi} = \ket{\psi}_0 \otimes \ket{\psi}_1 =(\alpha_{00} \ket{0}_0 + \alpha_{01} \ket{1}_0) \otimes
 (\alpha_{10} \ket{0}_1 + \alpha_{11} \ket{1}_1)
 \end{equation}
-Note in Equation~\ref{eq-multi-qb} that, in particular, the tensor product of several basis states is known as a \emph{computational basis state},
+The tensor product of several basis states is known as a \emph{computational basis state},
 and is written as a bit string consisting of the values in the component tensor multiplicands.
 \begin{equation}
 \ket{x_0}\otimes\ket{x_1}\otimes\cdots\otimes\ket{x_{n-1}}=\ket{x_0 x_1 \cdots x_{n-1}}=\ket{\mathbf{x}},
@@ -170,7 +171,7 @@ method~\cite{amy-meet-in-middle}.
   functions.
 \item CNOT and X networks are synthesized to drive each phase gate's corresponding
   $\chi_k(\mathbf{x})$ function
-\item additional CNOT and X logic is added to return the state to the input state.
+\item Additional CNOT and X logic is added to return the state to the input state.
 \end{itemize}
 
 Scheduling these T-gates can be done using the matroid partitioning algorithm described in
