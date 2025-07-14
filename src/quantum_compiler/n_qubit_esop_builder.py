@@ -3,6 +3,8 @@ import sys
 import os
 from qiskit import QuantumCircuit
 from qiskit.circuit import Instruction
+from qiskit.qasm2 import dumps
+
 
 # Import your existing 3-qubit program
 try:
@@ -50,7 +52,7 @@ class NQubitESOPBuilder:
         self.final_circuit = None
         self.term_circuits = []
         self.qc_content = None
-        
+        self.qasm_content = None
     def parse_esop_expression(self, esop_expr):
         """Parse ESOP expression and extract terms and variables"""
         print(f"Parsing ESOP expression: {esop_expr}")
@@ -219,7 +221,26 @@ class NQubitESOPBuilder:
         except Exception as e:
             print(f" Error generating QC format: {e}")
             return None
-    
+    def generate_openqasm(self):
+        """
+        Generate OpenQASM 2.0 code from the final circuit.
+        Returns the OpenQASM string or None if circuit is missing.
+        """
+        if self.final_circuit is None:
+            print("No circuit to convert to OpenQASM!")
+            return None
+
+        try:
+            from qiskit.qasm2 import dumps
+            openqasm_code = dumps(self.final_circuit)
+            self.qasm_content = openqasm_code
+            return self.qasm_content
+        except Exception as e:
+            print(f"Error generating OpenQASM: {e}")
+            return None
+
+
+
     def show_qc_format(self):
         """Display the QC format of the circuit"""
         if self.qc_content is None:
@@ -232,7 +253,20 @@ class NQubitESOPBuilder:
             print(self.qc_content)
         else:
             print(" No QC format available!")
-    
+    def show_openqasm(self):
+        """Display the OpenQASM 2.0 format of the circuit"""
+        if self.qasm_content is None:
+            self.generate_openqasm()  # Generate and store OpenQASM code
+
+        if self.qasm_content:
+            print(f"\n{'='*60}")
+            print(f" OPENQASM 2.0 FORMAT")
+            print(f"{'='*60}")
+            print(self.qasm_content)
+        else:
+            print(" No OpenQASM format available!")
+
+
     def build_complete_circuit(self, esop_expr):
         """Build complete n-qubit circuit from ESOP expression"""
         print(f"\n{'='*60}")
@@ -365,6 +399,28 @@ class NQubitESOPBuilder:
         except Exception as e:
             print(f" Error saving circuit: {e}")
             return None
+    def save_openqasm(self, filename=None):
+        """Save the circuit to OpenQASM 2.0 format (.qasm file)"""
+        if self.final_circuit is None:
+            print(" No circuit to save!")
+            return
+
+        if filename is None:
+            filename = f"esop_{self.total_qubits}qubit_circuit.qasm"
+
+        try:
+            if self.qasm_content is None:
+                self.generate_openqasm()
+
+            with open(filename, 'w') as f:
+                f.write(self.qasm_content)
+
+            print(f" OpenQASM 2.0 circuit saved to: {filename}")
+            return self.qasm_content
+
+        except Exception as e:
+            print(f" Error saving OpenQASM circuit: {e}")
+            return None
 
 def interactive_mode():
     """Interactive mode for building ESOP circuits"""
@@ -382,11 +438,13 @@ def interactive_mode():
         print("2. Show circuit diagram")
         print("3. Show detailed circuit analysis")
         print("4. Show QC format")
-        print("5. Save circuit to .qc file")
-        print("6. Start new circuit")
-        print("7. Exit")
+        print("5. Show OpenQASM2.0 format")
+        print("6. Save circuit to .qc file")
+        print("7. Save circuit to OpenQASM2.0 file")
+        print("8. Start new circuit")
+        print("9. Exit")
         
-        choice = input("\nChoose option (1-7): ").strip()
+        choice = input("\nChoose option (1-9): ").strip()
         
         if choice == "1":
             esop_expr = input("Enter ESOP expression (e.g., 'X1*X2 ^ X2*X3 ^ X3*X4 ^ X4*X5 ^ X5*X1'): ")
@@ -414,20 +472,27 @@ def interactive_mode():
         
         elif choice == "4":
             builder.show_qc_format()
-        
         elif choice == "5":
+            builder.show_openqasm()
+        elif choice == "6":
             filename = input("Enter filename (press Enter for default): ").strip()
             if not filename:
                 filename = None
             result = builder.save_circuit(filename)
             if result:
                 print(" Circuit saved successfully!")
-        
-        elif choice == "6":
+        elif choice == "7":
+            filename = input("Enter filename (press Enter for default): ").strip()
+            if not filename:
+                filename = None
+            result = builder.save_openqasm(filename)
+            if result:
+                print(" Circuit saved successfully!")
+        elif choice == "8":
             builder = NQubitESOPBuilder()
             print(" Started new circuit builder")
         
-        elif choice == "7":
+        elif choice == "9":
             print(" Goodbye!")
             break
         
@@ -473,3 +538,6 @@ def build_esop_circuit(esop_expr):
     """
     builder = NQubitESOPBuilder()
     return builder.build_complete_circuit(esop_expr)
+
+interactive_mode()
+# build_esop_circuit("X1*X2 ^ X2*X3 ^ X3*X4 ^ X4*X5 ^ X5*X1")
