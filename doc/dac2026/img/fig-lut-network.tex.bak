@@ -1,0 +1,11 @@
+\Qcircuit @C=0.5em @R=0.2em @!R { \\
+  \lstick{\ket{{x}_{1}}} & \qw  & \qw               & \qw               & \qw                & \qw              & \qw              & \multigate{6}{3} & \qw               & $x_1$  \\
+  \lstick{\ket{{x}_{2}}} & \qw  & \multigate{2}{1}  & \qw               & \qw                & \qw              & \qw              & \ghost{3}\qw     & \multigate{2}{1}  & $x_2$  \\
+  \lstick{\ket{{x}_{3}}} & \qw  & \qw               & \qw               & \qw                & \qw              & \qw              & \ghost{3}\qw     & \qw               & $x_3$  \\
+  \lstick{\ket{{x}_{4}}} & \qw  & \qw               & \multigate{2}{2}  & \qw                & \qw              & \qw              & \ghost{3}\qw     & \qw               & $x_4$  \\
+  \lstick{\ket{{x}_{5}}} & \qw  & \qw               & \ghost{2}         & \qw                & \qw              & \qw              & \ghost{3}\qw     & \qw               & $x_5$  \\
+  \lstick{\ket{0}     }  & \qw  & \targ\qwx[-3]\qw  & \qw               & \multigate{2}{4}   & \qw              & \multigate{2}{4} & \ghost{3}\qw     & \targ\qwx[-3]\qw & 0      \\
+  \lstick{\ket{0}     }  & \qw  & \qw               & \targ\qwx[-2]\qw  & \ghost{4}          & \multigate{2}    & \ghost{4}        & \targ\qwx[-1]\qw & \qw              & $y_1$  \\
+  \lstick{\ket{0}     }  & \qw  & \qw               & \qw               & \targ\qwx[-1]\qw   & \qw              & \targ\qwx[-1]\qw & \qw              & \qw              & 0      \\
+  \lstick{\ket{0}     }  & \qw  & \qw               & \qw               & \qw                & \targ\qwx[-2]\qw & \qw              & \qw              & \qw              & $y_2$  \\
+}

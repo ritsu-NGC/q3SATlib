@@ -1,0 +1,152 @@
+\begin{figure*}[t]
+  \centering
+  \begin{minipage}{\textwidth}
+    \centering
+    \scalebox{0.9} {
+      \input{img/fig-series}
+    }
+    \subcaption{Using negated input $x_a x_b \bar{y}$}
+    \sublabel{fig-series}
+    \scalebox{0.9} {
+      \input{img/fig-series2}
+    }
+    \subcaption{Using Boolean Fourier transform calculated $x_a x_b \bar{y}$}
+    \sublabel{fig-series2}
+  \end{minipage}
+  \caption{Phase oracle for $x_a x_b y \oplus x_a x_b \bar{y}$}
+  \label{fig-series-all}
+  \vspace{-0.5cm}  
+\end{figure*}
+
+\section{Motivation}
+\label{Mot}
+\subsection{CNOT+T Circuit Optimization}
+\label{Mot:CnotOpt}
+CNOT+T circuits are notable because the T-gates in them can be freely rearranged to optimize T-depth.
+Techniques such as matroid partitioning guarantee an optimal T-depth
+for them~\cite{bib-amy-matroid}. Given enough ancilla, they can be rearranged to
+arbitrarily small T-depth, down to a T-depth of 1 in some cases.
+
+Additionally, there is a straightforward way to reduce the T-count for such circuits.
+Note that because the phase is a scalar, the actions of phase gates on different
+qubits all multiply together into the same scalar (essentially adding the powers
+of $e^{i \pi}$). Therefore, the result of all phase gates in a circuit
+can be computed as follows:
+
+\begin{itemize}
+\item For every phase gate, calculate the state driving it as a function of the
+  input states, which will be a linear function of the same form as the
+  $\chi_{\mathbf{k}}$ from the previous section.
+\item Multiply the phase driven by the phase gate by this function.
+\item Add the phases from all such similar functions.
+\item Resynthesize the circuit from the resulting phase polynomial using
+  the methods from Sec.~\ref{Pre}.
+\end{itemize}
+
+The first step in this method is sometimes called a circuit's \emph{sum of paths}~\cite{bib-amy-cnot}.
+The result is that any phase gates driven by the same function will merge together in the phase
+polynomial. This means that T-gates can combine into an S-gate or Z-gate, reducing the total T-count.
+
+This is important because the matroid partitioning algorithm from~\cite{bib-amy-matroid}
+that was used to sequence Fig.~\ref{fig-toff-mark-matroid} uses this sum of paths
+calculation as a preprocessing step. 
+
+\begin{example}
+  \label{ex-series}
+  We attempt to calculate the phase polynomial for Fig.~\ref{fig-series}. This circuit
+  is the phase oracle for $x_a x_b y \oplus x_a x_b \bar{y}$ implemented using
+  the method detailed in Sec~\ref{Pre:OracleEsop}. It inserts
+  Fig.~\ref{fig-toff-mark-matroid} to implement $x_a x_b y$. The second term has a negated
+  input, so it inserts X on the $y$ qubit after the first circuit to negate $y$, again
+  inserts Fig.~\ref{fig-toff-mark-matroid} to implement the phase, and finally places another
+  X on $y$ to return its value to the original.
+
+  Since the first half of the circuit just implements $x_a x_b y$, we already know
+  the phase polynomial for this from Eq.~\ref{eq-toff-bool}. The second term, we
+  substitute $\bar{y}$ for $y$ in Eq.~\ref{eq-toff-bool}. We add the two phase
+  polynomials together and get
+
+  \begin{equation}
+    \label{eq-series}
+    \begin{aligned}
+      &x_a \cdot x_b \cdot y \oplus x_a \cdot x_b \cdot \bar{y} = \frac{1}{2}x_a +
+      \frac{1}{2}x_b +\frac{1}{2}(x_a \oplus x_b) \\
+      & + \frac{1}{4}y -\frac{1}{4}(x_a \oplus y) - \frac{1}{4}(x_b \oplus y) +
+      \frac{1}{4}(x_a \oplus x_b \oplus y)\\
+      &\qquad -\frac{1}{4}(x_a \oplus y) - \frac{1}{4}(x_b \oplus y) +
+      \frac{1}{4}(x_a \oplus x_b \oplus y)\\
+      & + \frac{1}{4}\bar{y} -\frac{1}{4}(x_a \oplus \bar{y})
+      - \frac{1}{4}(x_b \oplus \bar{y}) +
+      \frac{1}{4}(x_a \oplus x_b \oplus \bar{y})\\
+      &\qquad -\frac{1}{4}(x_a \oplus \bar{y}) - \frac{1}{4}(x_b \oplus \bar{y}) +
+      \frac{1}{4}(x_a \oplus x_b \oplus \bar{y})
+    \end{aligned}
+  \end{equation}
+  This results in a savings of 3 T-gates. 
+\end{example}
+
+Observe from Ex~\ref{ex-series} that the terms containing $\bar{y}$ didn't combine with
+those containing $y$ that were otherwise identical. If $x_a x_b \bar{y}$ can be expressed
+as a phase polynomial containing $y$ instead, these terms would combine. By taking the
+Boolean Fourier transform of $x_a x_b \bar{y}$, we find that it can, in fact, be expressed
+using the phase polynomial in Eq.~\ref{eq-toff-bool2}. We use this in the next example.
+
+\begin{equation}
+  \label{eq-toff-bool2}
+  \begin{aligned}
+    &x_a \cdot x_b \cdot \bar{y} = \frac{1}{4}x_a + \frac{1}{4}x_b - \frac{1}{4}y
+    - \frac{1}{4}(x_a \oplus x_b) \\
+    &\qquad +\frac{1}{4}(x_a \oplus y) + \frac{1}{4}(x_b \oplus y)
+    - \frac{1}{4}(x_a \oplus x_b \oplus y)
+  \end{aligned}
+\end{equation}
+
+\begin{example}
+  From the new circuit in Fig.~\ref{fig-series2}, which integrates the Boolean Fourier
+  transform calculated $x_a x_b \bar{y}$, the phase polynomial for it
+  is now calculated by the addition of Eq.~\ref{eq-toff-bool} and Eq.~\ref{eq-toff-bool2}.
+  Observe that all of the $y$ related terms now cancel, and we are left with
+  $\frac{1}{2}x_a + \frac{1}{2}x_b +\frac{1}{2}(x_a \oplus x_b)$, which is the
+  phase polynomial for a two bit Controlled-Z gate. This means that Fig.~\ref{fig-series}
+  did not require any T-gates to implement at all.
+\end{example}
+
+A library of such Boolean function decompositions could enable easier sum of paths
+optimization for a particular quantum circuit.
+
+The reader may have already noticed that in this simplistic example, a simple Boolean
+simplification may have dispensed with the need to even calculate the phase polynomial
+in the first place. We utilize a similar observation in our next section.
+
+
+\subsection{Optimizing the Cubes in an ESOP Expression}
+\label{Mot:Lib}
+
+Observe that in Ex.~\ref{ex-esop-synth}, the cubes of two or fewer variables didn't incur
+any T-count, while the one with four literals cost 15. It is thus beneficial to find
+an equivalent ESOP expression for a circuit that has as few cubes of over 4 literals as
+possible. This allows us to reduce the number of T-gates, as well as implement as much of
+the circuit as possible using only CNOT+T, which allows the usage of tools such as
+sum of paths simplification in Sec.~\ref{Mot:CnotOpt} and matroid partitioning from
+~\cite{bib-amy-matroid} to optimize for T-count and T-depth.
+
+\begin{example}
+  \label{ex-esop-synth2}
+  Let's revisit Fig.~\ref{fig-esop-synth}. Observe that
+  $x_2x_3 \oplus x_3x_4 \oplus x_4x_5 \oplus x_2x_4 x_5x_1$ can be rewritten as
+  $x_2x_3 \oplus x_3x_4 \oplus x_4x_5 \oplus x_5x_1 \oplus x_1x_2$. This means that
+  Fig.~\ref{fig-esop-synth} can actually be implemented using Fig.~\ref{fig-esop-synth2}.
+  This new circuit has a T-count of 0. In the next section, we will go over how to
+  get as close as possible to something like this for a given Boolean function.
+
+  \begin{figure}[t]
+    \centering
+    \scalebox{1.0}{
+      \input{img/fig-esop-synth2.tex}
+    }
+    \caption{Simplified Fig.~\ref{fig-esop-synth}}
+    \label{fig-esop-synth2}
+    \vspace{-0.5cm}    
+  \end{figure}
+\end{example}
+
