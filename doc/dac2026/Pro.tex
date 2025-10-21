@@ -1,0 +1,84 @@
+
+\section{Proposal}
+\label{Pro}
+\subsection{Overview}
+
+In this section, we present the overall flow of our proposal, depicted in Fig.~\ref{fig-flow}. The blue boxes represent precomputation, while tan boxes represent runtime.
+
+\begin{itemize}
+\item \textbf{(Generate 3bit phase polynomials)} : Precompute library of phase polynomials of Boolean functions of
+  3 bits or fewer using the Boolean Fourier transform.
+\item \textbf{(Synthesize 3bit phase subcircuits)} : The phase polynomials are then sequenced using matroid
+  partitioning from~\cite{bib-amy-matroid} and synthesized as subcircuits. The results are stored in hard disk,
+  to be loaded into memory at runtime.
+\item \textbf{(Decompose $f$ into ESOP expression)} : At runtime, a Boolean function is read in and converted to
+  an ESOP expression.
+\item \textbf{(Minimize the number of $n \geq 4$ cubes in ESOP)} : The ESOP is optimized by adapting
+  EXORCISM-4~\cite{bib-exorcism} to reduce the number of cubes of more than 4 literals. This method is explained
+  in Sec.~\ref{Pro:Minimize}.
+\item \textbf{(Map the $n \leq 3$ cubes to the 3 bit library)} : Takes all cubes of $n \leq 3$ and maps them to 
+  appropriate functions from the 3 bit library, inserting the corresponding subcircuit into the phase oracle.
+\item \textbf{(Synthesize $n \geq 4$ cubes)} : Synthesizes all cubes of $n \geq 4$ using the method described in
+  Sec.~\ref{Pro:n4}.
+\item \textbf{(Combine $n \geq 4$ and $n \leq 3$)} : The results of the above two steps are combined into one
+  phase oracle.
+\item \textbf{(Optimize for T-count and T-depth)} : The combined circuit is optimized for T-count and T-depth using
+  the T-par algorithm~\cite{bib-amy-matroid}. Further detail of this step is in Sec.~\ref{Pro:Tpar}.
+\end{itemize}
+\begin{figure}[t]
+  \centering
+  \scalebox{1.0} {
+    \input{img/flowchart.tex}
+  }
+  \caption{The overall flow of the proposed method}
+  \label{fig-flow}
+\end{figure}
+
+\subsection{Minimize the number of $n \geq 4$ cubes in ESOP}
+\label{Pro:Minimize}
+
+To minimize the number of $n \geq 4$ cubes in the ESOP, the proposal adapts EXORCISM-4~\cite{bib-exorcism}.
+EXORCISM-4 is a heuristic method of minimizing the number of cubes in a given ESOP expression. Extended
+discussion of its details is defered to the cited paper. 
+
+We modify it for our purposes by changing
+the cost function \texttt{CountCubesInExactPseudoKro} that EXORCISM-4 uses for its heuristic, which uses a plain sum
+of cubes to assess the cost of the arrangement that its heuristic encounters. We introduce a cost function
+that instead uses a weighted sum of the cubes, where each cube is weighted by its T-count (i.e. a 2 literal cube
+has weight 0) for $n \leq 3$ and $2^n$ for $n \geq 4$ (its T-count when synthesized according to the method in
+Sec.~\ref{Pro:n4}). This penalizes terms of $n \geq 4$, while terms of $n < 3$ are free.
+
+
+\subsection{Synthesize $n \geq 4$ cubes}
+\label{Pro:n4}
+
+To synthesize cubes of $n \geq 4$ variables, we utilize the construction in Fig.~\ref{fig-phase-n4}. Here,
+$U_F$ and $U_F^{\dagger}$ are $F$-controlled-NOT gates, meaning that they apply X to the target bit when
+the Boolean function $F$ is true. We add an ancilla bit and use the relative-phase Boolean decomposition
+method from~\cite{bib-clarino-lut} to enable the implementation of such $F$-controlled-NOT gates with a
+reduced number of T-gates. We defer detailed discussion of that method to the cited paper. This resulting
+phase oracle has T-count $2^{n}$, and T-depth $2^{n+1}$. Note that this means that larger cubes can
+dominate the T-depth of a given circuit, so it is imperative that the minimum of them be found for
+any given Boolean function.
+
+\begin{figure}[t]
+  \centering
+  \scalebox{1.0} {
+    \input{img/fig-phase-n4}
+  }
+  \caption{Synthesize a phase oracle for a cube of $n \geq 4$}
+  \label{fig-phase-n4}
+  \vspace{-0.5cm}
+\end{figure}
+
+\subsection{Optimize for T-count and T-depth}
+\label{Pro:Tpar}
+
+To optimize for T-count and T-depth, we utilize the T-par algorithm from~\cite{bib-amy-matroid}. This is a
+variant of the matroid partitioning algorithm that deals with optimization of Clifford+T circuits by heuristically
+separating the circuit into CNOT+T partitions along the H-gates in the circuit. This deals with the circuits
+synthesized in Sec.~\ref{Pro:n4} as well as the CNOT+T circuits the $n \leq 3$ processing step produces. We defer
+more detailed discussion to the cited paper.
+
+
+

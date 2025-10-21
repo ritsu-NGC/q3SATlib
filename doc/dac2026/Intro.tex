@@ -1,0 +1,73 @@
+\section{Introduction}
+One of quantum computing's most significant results is the development of Grover's
+algorithm~\cite{bib-grover1996fast}. This algorithm performs an unstructured search
+optimally~\cite{bib-zaika-grov-opt}. Various applications have
+been proposed for such an algorithm, including the acceleration of solving NP-hard
+problems~\cite{bib-williams-grover-np}.
+
+Grover's algorithm uses a phase oracle, a quantum circuit that applies a phase of
+$-1$ when the Boolean function it implements is true, to mark search hits in the
+database.
+
+Oracles are typically implemented to drive a function on a qubit's state (DCTODO refs).
+It is straightforward to implement a phase oracle from one of these circuits by having
+them drive a Z gate on the qubit where the function is implemented. However, as we
+will see later, these types of constructions provide an obstacle to optimizing their
+T-depth, owing to their use of Hadamard gates.
+
+It has been known that a restricted class of phase oracles can be implemented
+using only phase gates such as the T, T$^\dagger$, as well as CNOT gates (hereafter
+referred to as CNOT+T). In fact, phase oracles of 3 or fewer variables can all be
+implemented exactly using this set of gates~\cite{bib-amy-cnot}, and these circuits
+can be calculated exactly using the Boolean Fourier transform. These classes of
+circuits are interesting because the T-gates and CNOT gates in them can be freely rearranged
+to create equivalent circuits with lower T-depth. Selinger~\cite{bib-selinger-tdepthone}
+demonstrated that with sufficient ancilla, many of them can be implemented in a
+T-depth of one. Amy et al.~\cite{amy-meet-in-middle} further demonstrate that CNOT+T
+circuits can be provably optimized for T-depth for a particular ancilla
+count~\cite{bib-amy-matroid}.
+
+However, the vast majority of Boolean functions of 4 or more variables cannot be
+implemented using only this gate set~\cite{bib-amy-rm}. There will inevitably be a need to use
+a Hadamard (H) gate. The addition of this gate adds rotations that CNOT+T optimization
+methods cannot account for. This means that methods to optimize for T-count and T-depth when
+including the H gate are only heuristic ~\cite{amy-meet-in-middle,bib-amy-matroid,bib-amy-rm}.
+This renders any solution they have as either non-unique, or does not guarantee arrival
+at a global minimum.
+
+Phase oracles are straightforward to synthesize from an Exclusive Sum
+of Products (ESOP) expression~\cite{bib-phaseoracle}. Since each cube maps to
+a Boolean function, it is easy to see that any such function expressible with
+cubes of at most 3 variables can be implemented as a CNOT+T circuit. We utilize
+this observation in our proposal.
+
+In this work, we propose a solution that utilizes CNOT+T circuits to reduce the
+T-count and T-depth for phase oracles of a given Boolean function of arbitrary
+literal count.
+
+Our contributions include:
+
+\begin{itemize}
+\item A precomputed library of circuits that implement all Boolean functions of
+  3 variables or fewer.
+\item A synthesis method that uses ESOP minimization to limit the number of
+  product terms involving 4 or more variables.
+\end{itemize}
+
+We find that our solution can reduce T-count and T-depth by an average of 36.5\%
+and over 65\% in some cases. We examine those cases and which ones the method
+is best suited for.
+
+The rest of this paper is structured as follows: First Sec~\ref{Pre}
+introduces some preliminary knowledge. In addition to the basics of
+qubits and quantum circuits, this includes the basics of the
+mathematics of phase polynomials and their mapping to phase oracles
+and CNOT+T circuits. Then Sec.~\ref{Mot} goes through some
+motivational examples that inform the general idea of our proposal.
+Sec.~\ref{Pro} details the proposal itself, including how to
+generate a library of up to 3-qubit phase oracles, and how to use
+it to generate phase oracles of 4 or more qubits. In Sec.~\ref{Exp},
+we test our results against Qiskit PhaseOracle and analyze our
+findings. Finally, Sec.~\ref{Conc} concludes with our findings and
+proposes some future research.
+
