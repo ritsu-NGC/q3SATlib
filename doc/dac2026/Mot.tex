@@ -43,13 +43,9 @@ can be computed as follows:
   the methods from Sec.~\ref{Pre}.
 \end{itemize}
 
-The first step in this method is sometimes called a circuit's \emph{sum of paths}~\cite{bib-amy-cnot}.
+The resulting expression from this method is sometimes called a circuit's \emph{sum of paths}~\cite{bib-amy-cnot}.
 The result is that any phase gates driven by the same function will merge together in the phase
 polynomial. This means that T-gates can combine into an S-gate or Z-gate, reducing the total T-count.
-
-This is important because the matroid partitioning algorithm from~\cite{bib-amy-matroid}
-that was used to sequence Fig.~\ref{fig-toff-mark-matroid} uses this sum of paths
-calculation as a preprocessing step. 
 
 \begin{example}
   \label{ex-series}
@@ -118,7 +114,15 @@ The reader may have already noticed that in this simplistic example, a simple Bo
 simplification may have dispensed with the need to even calculate the phase polynomial
 in the first place. We utilize a similar observation in our next section.
 
+\subsection{Optimizing T-depth in the Presence of Hadamard Gates}
+\label{Mot:tdepth}
 
+
+\subsection{Synthesizing a Phase Oracle from Standard Methods}
+\label{Mot:std}
+
+As a phase oracle implements a single Boolean function by multiplying -1 on certain inputs,
+a phase oracle can be constructed as in~\figref{fig-single-target}. 
 \subsection{Optimizing the Cubes in an ESOP Expression}
 \label{Mot:Lib}
 
