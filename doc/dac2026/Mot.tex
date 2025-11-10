@@ -112,27 +112,102 @@ optimization for a particular quantum circuit.
 
 The reader may have already noticed that in this simplistic example, a simple Boolean
 simplification may have dispensed with the need to even calculate the phase polynomial
-in the first place. We utilize a similar observation in our next section.
+in the first place. We utilize a similar observation in \secref{Pro}.
 
-\subsection{Optimizing T-depth in the Presence of Hadamard Gates}
+\subsection{Partitioning Around Hadamard Gates for CNOT+T Optimization}
 \label{Mot:tdepth}
 
+Hadamard gates present an obstacle to CNOT+T optimization, and so it is often useful
+to partition circuits around where Hadamard gates appear. This creates partitions that
+consist entirely of CNOT gates and phase gates, with Hadamard gates as their boundaries.
+Amy et. al~\cite{bib-amy-matroid} utilize a greedy approach to partitioning around Hadamard
+gates, enumerated below:
+
+\begin{itemize}
+  \item Create a partition
+  \item For each qubit, sort any single non-Hadamard gates into the partition in the
+    previous step. For CNOT-gates, check if the target qubit has terminated partitioning;
+    if not, partition into the created partition.
+  \item Terminate partitioning for a qubit when a Hadamard gate is encountered.
+  \item Once all qubits have encountered a Hadamard gate, or they have reached the end of
+    the circuit, save the partition.
+  \item Redo the first step, starting the partition from after the Hadamard gate
+    encountered for each qubit. Remove any qubits that have had all their gates partitioned.
+  \item Terminate partitioning when all Hadamard gates have been processed.
+\end{itemize}
+
+It can be observed from this method that a circuit that contains sequences where T-gates
+are separated by Hadamard gates will have a higher minimum T-depth than one where more of
+the T-gates are sorted into the same partition. The next section will elaborate on what
+cases this applies.
 
 \subsection{Synthesizing a Phase Oracle from Standard Methods}
 \label{Mot:std}
 
-As a phase oracle implements a single Boolean function by multiplying -1 on certain inputs,
-a phase oracle can be constructed as in~\figref{fig-single-target}. 
+A standard phase oracle drives the output of the Boolean function it implements on the
+target qubit as demonstrated in~\figref{fig-single-target}. As a phase oracle implements a
+single Boolean function by multiplying -1 on certain inputs, a phase oracle can be
+constructed from a standard oracle as in~\figref{fig-single-target-phase}.
+
+Observe that in general, barring the case that the Boolean function can be implemented
+entirely using CNOT and X gates, this method creates at least three partitions. This
+means that for most Boolean functions, the necessary T-depth may need to be doubled. 
+
+\subsection{Synthesizing Phase Oracles from ESOP}
+\label{Pre:OracleEsop}
+A transformation $\ket{x}\ket{y} \rightarrow (-1)^{x \oplus y}\ket{x}\ket{y}$ can be
+realized using the below circuit
+\begin{figure}[h]
+  \centering
+  \scalebox{1.0} {
+    \Qcircuit @C=0.5em @R=0.2em @!R {
+      \lstick{\ket{x}} & \qw & \gate{Z} & \qw  \\
+      \lstick{\ket{y}} & \qw & \gate{Z} & \qw
+    }
+  }
+\end{figure}
+
+Thus, given an Exclusive Sum of Products expression of a Boolean function
+$f(\mathbf{x}) = x_a x_b \cdots x_g \oplus x_i x_j \cdots x_m \oplus \cdots$, we
+can implement its phase oracle by inserting controlled phase gates that are controlled
+by the cubes as Boolean functions
+
+This method is used by Qiskit's Phase Oracle \cite{bib-phaseoracle}. Our proposal revolves around
+the effective use of such an Exclusive Sum of Products to implement such a phase oracle.
+
+\begin{example}
+  \label{ex-esop-synth}
+  We attempt to synthesize the Boolean function
+  $x_2 x_3 \oplus x_3 x_4 \oplus x_4 x_5 \oplus x_2 x_4 x_5 x_1$ into a quantum circuit.
+  The first term $x_2x_3$ is merely a two input Controlled-Z gate so we insert such a gate
+  between the qubits containing $x_2$ and $x_3$. We do the same for $x_3x_4$ and $x_4x_5$.
+  $x_2 x_4 x_5 x_1$ is a 4 input quantum Controlled-Z, which is not implementable
+  using only CNOT+T. Such a gate has a T-count of at least 15. This means that the
+  resulting circuit has T-count of 15. The resulting circuit is depicted in
+  Fig.~\ref{fig-esop-synth}.
+\end{example}
+
+\begin{figure}[h]
+ \centering
+  \scalebox{1.0} {
+    \input{img/fig-esop-synth}
+  }
+  \caption{A phase oracle for $x_2x_3 \oplus x_3x_4 \oplus x_4x_5 \oplus x_2x_4 x_5x_1$}
+  \label{fig-esop-synth}
+  \vspace{-0.5cm}
+\end{figure}
+
+
 \subsection{Optimizing the Cubes in an ESOP Expression}
 \label{Mot:Lib}
 
 Observe that in Ex.~\ref{ex-esop-synth}, the cubes of two or fewer variables didn't incur
-any T-count, while the one with four literals cost 15. It is thus beneficial to find
-an equivalent ESOP expression for a circuit that has as few cubes of over 4 literals as
+any T-count, while the one with four variables cost 15. It is thus beneficial to find
+an equivalent ESOP expression for a circuit that has as few cubes of over 4 variables as
 possible. This allows us to reduce the number of T-gates, as well as implement as much of
 the circuit as possible using only CNOT+T, which allows the usage of tools such as
-sum of paths simplification in Sec.~\ref{Mot:CnotOpt} and matroid partitioning from
-~\cite{bib-amy-matroid} to optimize for T-count and T-depth.
+sum of paths simplification in Sec.~\ref{Mot:CnotOpt} and matroid partitioning
+from~\cite{bib-amy-matroid} to optimize for T-count and T-depth.
 
 \begin{example}
   \label{ex-esop-synth2}

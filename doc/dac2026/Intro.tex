@@ -9,43 +9,39 @@ Grover's algorithm uses a phase oracle, a quantum circuit that applies a phase o
 $-1$ when the Boolean function it implements is true, to mark search hits in the
 database.
 
-It has been known that a restricted class of phase oracles can be implemented
-using only phase gates such as the T, T$^\dagger$, as well as CNOT gates (hereafter
-referred to as CNOT+T). In fact, phase oracles of 3 or fewer variables can all be
-implemented exactly using this set of gates~\cite{bib-amy-cnot}, and these circuits
-can be calculated exactly using the Boolean Fourier transform. These classes of
-circuits are interesting because the T-gates and CNOT gates in them can be freely rearranged
-to create equivalent circuits with lower T-depth. Selinger~\cite{bib-selinger-tdepthone}
-demonstrated that with sufficient ancilla, many of them can be implemented in a
-T-depth of one. Amy et al.~\cite{amy-meet-in-middle} further demonstrate that CNOT+T
-circuits can be provably optimized for T-depth for a particular ancilla
-count, in polynomial time~\cite{bib-amy-matroid}.
+In fault-tolerant quantum computing, there is a need to optimize these circuits for
+the number of T-gates and T$^{\dagger}$-gates, known as the {\it T-count}, as well
+as the longest such chain of gates, known as the {\it T-depth} DCTODOrefs(amy).
+A restricted class of circuits using only phase gates such as the T, T$^\dagger$,
+as well as CNOT gates (hereafter referred to as {\it CNOT+T}), is well known to be
+efficiently optimizable for T-count and
+T-depth~\cite{amy-meet-in-middle,bib-amy-matroid,bib-selinger-tdepthon}. In fact,
+phase oracles of 3 or fewer variables can all be implemented exactly using this set
+of gates~\cite{bib-amy-cnot}, and these circuits can be calculated exactly using the
+Boolean Fourier transform.
 
 However, the vast majority of Boolean functions of 4 or more variables cannot be
 implemented using only this gate set~\cite{bib-amy-rm}. There will inevitably be a need to use
 a Hadamard (H) gate. The addition of this gate adds rotations that CNOT+T optimization
-methods cannot account for. This means that methods to optimize for T-count and T-depth when
-including the H gate are only heuristic~\cite{amy-meet-in-middle,bib-amy-matroid,bib-amy-rm}.
-This renders any solution they have as either non-unique, or does not guarantee arrival
-at a global minimum.
+methods cannot account for. Many existing methods to optimize for T-count and T-depth try to
+account for the H-gate in the general case by introducing heuristic methods to partition around
+it~\cite{amy-meet-in-middle,bib-amy-matroid,bib-amy-rm} or gadgetization to eliminate it
+entirelyDCTODOheyfron. The T-depth of methods which partition according to H-gates, such
+as~\cite{bib-amy-matroid} thus relates directly to how well it can partition these H-gates.
 
-Existing oracle generation methods focus on driving a Boolean function on a single qubit's
-state~\cite{bib-meuli-mult}. It is straightforward to implement a phase oracle from one of
-these circuits by having them drive a Z gate on the qubit where the function is implemented,
-and then implementing it again to return the state. However, as we will see later, these
-types of constructions provide an obstacle to optimizing their T-depth, owing to their use
-of Hadamard gates.
+While phase oracle generation methods in general have not been explored extensively, there
+exist oracle generation methods that focus on driving a Boolean function on a single qubit's
+state while minimizing the T-count~\cite{bib-meuli-mult}. It is straightforward to implement
+a phase oracle from one of these circuits by generating an oracle and using it to drive a
+Z-gate on an ancilla qubit, and then applying the oracle again to return the state. However,
+as we will see later, these types of constructions provide an obstacle to optimizing their
+T-depth, owing to their use of Hadamard gates.
 
-Instead, some phase oracle generation methods take advantage of the fact that
-phase oracles are straightforward to synthesize from an Exclusive Sum
-of Products (ESOP) expression~\cite{bib-phaseoracle}. Since each product term maps to
-a Boolean function, it is easy to see that any such function expressible with
-cubes of at most 3 variables can be implemented as a CNOT+T circuit. We utilize
-this observation in our proposal.
-
-In this work, we propose a solution that utilizes CNOT+T circuits to reduce the
-T-count and T-depth for phase oracles of a given Boolean function of arbitrary
-literal count.
+In this work, we demonstrate that Exclusive Sum of Products (ESOP) generation of phase oracles,
+most prominently implemented in Qiskit~\cite{bib-phaseoracle}, produce circuits that are more
+amenable to such optimization techniques. We additionally propose several extensions to it
+that make optimization easier, by expressing as much of the circuit as CNOT+T circuits as
+possible.
 
 Our contributions include:
 

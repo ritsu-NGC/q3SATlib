@@ -174,7 +174,7 @@ method~\cite{amy-meet-in-middle}.
 \item Additional CNOT and X logic is added to return the state to the input state.
 \end{itemize}
 
-Scheduling these T-gates can be done using the matroid partitioning algorithm described in
+Scheduling these T-gates can be done efficiently using the matroid partitioning algorithm described in
 \cite{bib-amy-matroid}. This guarantees a minimal T-depth for CNOT+T circuits.
 The terms in Eq.~\ref{eq-toff-bool} are synthesized and scheduled using that algorithm as
 demonstrated in Fig.~\ref{fig-toff-mark-matroid}.
@@ -259,51 +259,6 @@ using S and Z gates, plus one T-gate. Since each $\hat{f}(\mathbf{k})$
 is unique to each $f(\mathbf{x})$ when $|\mathbf{x}| \leq 3$,
 $\hat{f}(\mathbf{k})$ has the optimal T-count needed to implement
 $f(\mathbf{x})$ as a phase oracle when $|\mathbf{x}| \leq 3$.
-
-\subsection{Synthesizing Phase Oracles from ESOP}
-\label{Pre:OracleEsop}
-A transformation $\ket{x}\ket{y} \rightarrow (-1)^{x \oplus y}\ket{x}\ket{y}$ can be
-realized using the below circuit
-\begin{figure}[h]
-  \centering
-  \scalebox{1.0} {
-    \Qcircuit @C=0.5em @R=0.2em @!R {
-      \lstick{\ket{x}} & \qw & \gate{Z} & \qw  \\
-      \lstick{\ket{y}} & \qw & \gate{Z} & \qw
-    }
-  }
-\end{figure}
-
-Thus, given an Exclusive Sum of Products expression of a Boolean function
-$f(\mathbf{x}) = x_a x_b \cdots x_g \oplus x_i x_j \cdots x_m \oplus \cdots$, we
-can implement its phase oracle by inserting controlled phase gates that are controlled
-by the cubes as Boolean functions
-
-This method is used by Qiskit's Phase Oracle \cite{bib-phaseoracle}. Our proposal revolves around
-the effective use of such an Exclusive Sum of Products to implement such a phase oracle.
-
-\begin{example}
-  \label{ex-esop-synth}
-  We attempt to synthesize the Boolean function
-  $x_2 x_3 \oplus x_3 x_4 \oplus x_4 x_5 \oplus x_2 x_4 x_5 x_1$ into a quantum circuit.
-  The first term $x_2x_3$ is merely a two input Controlled-Z gate so we insert such a gate
-  between the qubits containing $x_2$ and $x_3$. We do the same for $x_3x_4$ and $x_4x_5$.
-  $x_2 x_4 x_5 x_1$ is a 4 input quantum Controlled-Z, which is not implementable
-  using only CNOT+T. Such a gate has a T-count of at least 15. This means that the
-  resulting circuit has T-count of 15. The resulting circuit is depicted in
-  Fig.~\ref{fig-esop-synth}.
-\end{example}
-
-\begin{figure}[h]
- \centering
-  \scalebox{1.0} {
-    \input{img/fig-esop-synth}
-  }
-  \caption{A phase oracle for $x_2x_3 \oplus x_3x_4 \oplus x_4x_5 \oplus x_2x_4 x_5x_1$}
-  \label{fig-esop-synth}
-  \vspace{-0.5cm}
-\end{figure}
-
 
 %% DCTODO The first term is merely a 3-input AND, which is already seen in
 %%   Fig.~\ref{fig-toff-mark-matroid}. Thus we merely insert this circuit to implement
