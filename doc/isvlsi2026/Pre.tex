@@ -1,0 +1,435 @@
+\begin{figure}[t]
+  \hspace{-0.5cm}
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \vspace{-0.5cm}
+    \scalebox{1.0} {
+      \input{img/Xgate}
+    }
+    \subcaption{X-gate}
+    \sublabel{fig-xgate}
+    \scalebox{1.0} {
+      \input{img/Zgate}
+    }
+    \subcaption{Z-gate}
+    \sublabel{fig-zgate}
+    \scalebox{1.0} {
+      \vbox{
+        \hbox{\input{img/Sgate}}
+        \hbox{\input{img/Sdgate}}
+      }
+    }
+    \subcaption{S-gate/S$^{\dagger}$-gate}
+    \sublabel{fig-sgate}
+    \scalebox{1.0}{
+      \input{img/cnot}
+    }
+    \subcaption{CNOT-gate}
+    \sublabel{fig-cnot}
+  \end{minipage}
+  \begin{minipage}{0.45\linewidth}
+    \centering
+
+    \scalebox{1.0} {
+      \input{img/Hgate}
+    }
+    \subcaption{H-gate}
+    \sublabel{fig-hgate}
+    \scalebox{1.0} {
+      \vbox{
+        \hbox{\input{img/Tgate}}
+        \hbox{\input{img/Tdgate}}
+      }
+    }
+    \subcaption{T/T$^{\dagger}$-gate}
+    \sublabel{fig-tgate}
+    \scalebox{1.0}{
+      \input{img/cz}
+    }
+    \subcaption{Controlled-Z-gate}
+    \sublabel{fig-cz}
+  \end{minipage}
+  \hspace{-0.5cm}
+  \caption{Quantum gates}
+  \label{fig-gates}
+\end{figure}
+
+
+\section{Preliminaries}
+\label{Pre}
+\subsection{Quantum Bits and Quantum Gates}
+\label{Chap:Pre-qubits}
+Quantum computers internally represent data as \emph{qubits}, which are quantum systems that can
+take on the quantum states $\ket{0}$ and $\ket{1}$, each known as \emph{basis states}.
+
+%% Additionally, qubits can exist in quantum states that are a linear combination of $\ket{0}$ and $\ket{1}$,
+%% which is called \emph{superposition}:
+%% \begin{equation}
+%% \ket{\psi} = \alpha_0 \ket{0} + \alpha_1 \ket{1}, \quad \alpha_0, \alpha_1 \in \mathbb{C}
+%% \end{equation}
+
+%% Because these coefficients $\alpha_0$ and $\alpha_1$ are complex numbers, they can also be expressed as a complex exponential $a\cdot e^{i \theta}$, where $\theta$ is often referred to as a \emph{phase}.
+
+Qubits can be taken together as tensor products to create multiqubit states.
+\begin{equation}
+\label{eq-multi-qb}
+\ket{\psi} = \ket{\psi}_0 \otimes \ket{\psi}_1 =(\alpha_{00} \ket{0}_0 + \alpha_{01} \ket{1}_0) \otimes
+(\alpha_{10} \ket{0}_1 + \alpha_{11} \ket{1}_1)
+\end{equation}
+The tensor product of several basis states is known as a \emph{computational basis state},
+and is written as a bit string consisting of the values in the component tensor multiplicands.
+\begin{equation}
+\ket{x_0}\otimes\ket{x_1}\otimes\cdots\otimes\ket{x_{n-1}}=\ket{x_0 x_1 \cdots x_{n-1}}=\ket{\mathbf{x}},
+\mathbf{x} \in \{0,1\}^n
+\end{equation}
+
+%% These computational basis states can also be in linear superposition.
+%% \begin{equation}
+%% \ket{\psi} = \sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}}\ket{\mathbf{k}},
+%% \sum_{\mathbf{k} \in \{0,1\}^n} \alpha_{\mathbf{k}}^2 = 1
+%% \end{equation}
+
+{\it Quantum gates} describe transformations in qubits. The main ones concerning this work
+are demonstrated in Fig.~\ref{fig-gates}. The $T/T^{\dagger}$, $S/S^{\dagger}$, and $Z$
+gates will be referred to as {\it phase gates}.
+
+All of these gates except $T/T^{\dagger}$ are known as {\it Clifford gates}. For
+fault-tolerant quantum computers, Clifford gates are relatively inexpensive to implement.
+However, without $T/T^{\dagger}$ gates, computations that display quantum advantage
+cannot be implemented, which have a much bigger implementation cost. Thus,
+{\it T-count}, the number of $T/T^{\dagger}$ gates, and {\it T-depth}, the longest such
+serial chain of them in a circuit, are often used as a cost metric~\cite{amy-meet-in-middle}.
+The set of gates in Fig.~\ref{fig-gates} is known as the {\it Clifford+T} gates, which are
+universal for fault-tolerant quantum computing.
+
+In addition, controlled versions of each of these gates exist, which means the phase is
+applied when all the control bits are 1, just like the CNOT gate. One such example is
+the two-bit Control-Z gate, which is 1 when its control bit and target bit are 1,
+implementing $\ket{x}\ket{y} \rightarrow (-1)^{x \cdot y}\ket{x}\ket{y}$. We will see
+how this is constructed from the gates in Fig.~\ref{fig-gates} later.
+
+All of the gates in Fig.~\ref{fig-gates} can be composed into {\it quantum circuits}.
+A subclass of quantum circuits, which applies an X-gate on one output qubit
+if a Boolean function of the input states is true or false, respectively, is known as a
+{\it quantum oracle}. We cover a variation of this type of circuit in the next section.
+
+\subsection{Phase Oracles}
+\label{Pre:oracle}
+A {\it phase oracle} is one such quantum circuit that implements a Boolean function as a
+quantum circuit, implementing a mapping of a computational basis state
+$\ket{\mathbf{x}} \mapsto e^{i \pi f(\mathbf{x})}\ket{\mathbf{x}}$, where $f(\mathbf{x})$
+is a Boolean function $\{0,1\}^n \rightarrow \{0,1\}$. Phase oracles are key elements in
+algorithms such as Grover's Algorithm.
+
+A phase oracle can be constructed from a quantum oracle as in~\figref{fig-phase-n4}. The
+$F$ controlled not gate is a quantum circuit that inverts the target qubit, denoted by the
+circle on the qubit initialized to $\ket{1}$ in~\figref{fig-phase-n4}, when $F(x_1,x_2,\cdots,x_n)$
+is true. $F$ is a Boolean function. Placing H-gates on either side of the target bit
+utilizes the identity $HXH = Z$, where $H$, $X$, and $Z$ are the transformations effected by
+the $H$, $X$, and $Z$ gates respectively. This means this circuit applies a phase of $-1$
+when $F$ is true.
+
+
+\begin{figure}[t]
+  \centering
+  \scalebox{1.0} {
+    \input{img/fig-phase-mct}
+  }
+  \caption{Synthesize a phase oracle using quantum oracles}
+  \label{fig-phase-n4}
+  \vspace{-0.5cm}
+\end{figure}
+
+\subsection{Synthesizing Phase Oracles from ESOP}
+\label{Pre:OracleEsop}
+A transformation $\ket{x}\ket{y} \rightarrow (-1)^{x \oplus y}\ket{x}\ket{y}$ can be
+realized using the below circuit
+\begin{figure}[h]
+  \centering
+  \scalebox{1.0} {
+    \Qcircuit @C=0.5em @R=0.2em @!R {
+      \lstick{\ket{x}} & \qw & \gate{Z} & \qw  \\
+      \lstick{\ket{y}} & \qw & \gate{Z} & \qw
+    }
+  }
+\end{figure}
+
+Thus, given an Exclusive Sum of Products expression of a Boolean function
+$f(\mathbf{x}) = x_a x_b \cdots x_g \oplus x_i x_j \cdots x_m \oplus \cdots$, we
+can implement its phase oracle by inserting controlled phase gates that are activated
+by the {\it cubes}, or the product terms of the ESOP, as Boolean functions. Each of these
+cubes is composed of {\it literals} consisted of positive or negative values of an input variable.
+
+This method is used by Qiskit's Phase Oracle \cite{bib-phaseoracle}. Our proposal revolves around
+the effective use of such an Exclusive Sum of Products to implement such a phase oracle.
+
+\begin{example}
+  \label{ex-esop-synth}
+  We synthesize the Boolean function
+  $\bar{x_a}\bar{x_c} \oplus \bar{x_a} x_b \bar{x_c}\bar{x_d} \oplus x_a x_b \oplus x_a \bar{x_c} x_d$
+  into a quantum circuit. The first term $x_a x_b$ is merely a two input Controlled-Z gate so we insert
+  such a gate between the qubits containing $x_a$ and $x_b$. $\bar{x_a}\bar{x_c}$, $x_a \bar{x_c} x_d$, and
+  $\bar{x_a}\bar{x_b}\bar{x_c}\bar{x_d}$ have similar controlled-Z gates, so we generate those.
+  ~\figref{fig-esop-synth} shows the result of the synthesis, where the open control bits signify negated
+  inputs
+\end{example}
+
+\begin{figure}[h]
+ \centering
+  \scalebox{1.0} {
+    \input{img/fig-esop-synth}
+  }
+  \caption{A phase oracle for $\bar{x_a}\bar{x_c} \oplus \bar{x_a}\bar{x_b}\bar{x_c}\bar{x_d} \oplus x_a x_b \oplus x_a \bar{x_c} x_d$}
+  \label{fig-esop-synth}
+\end{figure}
+
+
+Previous research has demonstrated that some phase oracles can be implemented using only
+CNOT and phase gates.
+(CNOT+T)~\cite{bib-amy-cnot}. When done in such a manner, $f(\mathbf{x})$ can be expressed
+as a {\it phase polynomial},
+defined in Eq.~\ref{eq-boolean-fourier}.
+
+\begin{equation}
+  \begin{aligned}
+    \label{eq-boolean-fourier}
+    f(\mathbf{x}) = \sum_{\mathbf{k} \neq 0} \hat{f}(\mathbf{k}) \cdot \chi_k(\mathbf{x}),
+    \hat{f}(\mathbf{k}) \in \mathbb{R}
+  \end{aligned}
+\end{equation}
+
+Where $\chi_k(\mathbf{x}) = ( k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1})$
+for $\mathbf{k} \in \{0,1\}^{n}$. Section~\ref{Pre:Four} shows how $\hat{f}(\mathbf{k})$ is
+calculated.
+
+Eq.~\ref{eq-toff-bool} demonstrates one such phase polynomial. 
+
+\begin{equation}
+  \label{eq-toff-bool}
+  \begin{aligned}
+    &x_a \cdot x_b \cdot x_c = \frac{1}{4}x_a + \frac{1}{4}x_b + \frac{1}{4}x_c - \frac{1}{4}(x_a \oplus x_b) \\
+    &\qquad -\frac{1}{4}(x_a \oplus x_c) - \frac{1}{4}(x_b \oplus x_c) + \frac{1}{4}(x_a \oplus x_b \oplus x_c)
+  \end{aligned}
+\end{equation}
+
+%% \def\arraystretch{1.3}
+%% \begin{table*}[h]
+%%   \begin{minipage}{\textwidth}
+%%     \begin{center}
+%%       \scalebox{1.0} {
+%%         \input{img/table-pseudo-toff}
+%%       }
+%%       \caption{Truth table-like values of the phase polynomial of $x_a \cdot x_b \cdot y$}
+%%       \label{table-pseudo-toff}
+%%     \end{center}
+%%   \end{minipage}
+%%   \vspace{-0.5cm}
+%% \end{table*}
+%%\def\arraystretch{1.0}
+
+Coefficients of the phase polynomial describe the phase that needs to be driven as multiples of $i\pi$
+by using phase gates such as $S$ and $T$ (i.e. $3/4$ will be driven as an $S$-gate followed by $T$-gate).
+Corresponding $\chi_k(\mathbf{x})$ functions can be implemented as a network of CNOT and X gates. The
+next example elaborates on how Fig.~\ref{fig-toff-mark-matroid} implements Eq.~\ref{eq-toff-bool}.
+
+\begin{example}
+  The first term in Eq.~\ref{eq-toff-bool} is the function $x_a$ with the coefficient $\frac{1}{4}$. To
+  drive this phase, a T-gate is placed on the input $x_a$. Next, we try to drive the term for $x_b \oplus x_c$,
+  which has a coefficient of $-\frac{1}{4}$. To do this, we place a CNOT gate with $x_c$ as the control and
+  $x_b$ as the target. We then place a $T^{\dagger}$ gate after the target. The rest of the circuit can be
+  similarly constructed. Many ways of sequencing the terms in Eq.~\ref{eq-toff-bool} exist, such as the
+  matroid partitioning algorithm in ~\cite{bib-amy-matroid}, but the details will not be important to our proposal.
+\end{example}
+
+\begin{figure}[t]
+  \centering
+  \scalebox{0.7} {
+    \input{img/fig-toff-mark-matroid}
+  }
+  \caption{Implementing $x_a \cdot x_b \cdot x_c$ using CNOT and T gates}
+  \label{fig-toff-mark-matroid}
+  \vspace{-0.5cm}
+\end{figure}
+
+The next section shows how $\hat{f}(\mathbf{k})$ may be obtained for the three or fewer qubit case using the
+Boolean Fourier transform.
+
+\subsection{Boolean Fourier Transform}
+\label{Pre:Four}
+Observe that the $\chi_k(\mathbf{x})$ from Eq.~\ref{eq-boolean-fourier} form an orthonormal basis with respect
+to the below inner product.
+
+\begin{equation}
+  \label{eq-inner-prod}
+  \langle f(\mathbf{x}) , g(\mathbf{x}) \rangle = \frac{1}{2^n} \sum_{\mathbf{x}} (-1)^{f(\mathbf{x})} (-1)^{g(\mathbf{x})}, \quad \mathbf{x} \in \{0,1\}^n
+\end{equation}
+
+for $n = |\mathbf{x}| \leq 3$.
+
+That means, we can calculate $\hat{f}(\mathbf{k})$ using the below inner product
+
+\begin{equation}
+  \label{eq-fhat-prod}
+  \hat{f}(\mathbf{k}) = \langle f(\mathbf{x}), \chi(\mathbf{x})_{\mathbf{k}} \rangle \forall \mathbf{k} 
+\end{equation}
+
+$\hat{f}(\mathbf{k})$ is also known as the Boolean Fourier transform of $f(\mathbf{x})$~\cite{bib-odonnell}
+\footnote{All equations that are taken from~\cite{bib-odonnell} are written here
+with coefficients in $\{0,1\}$ and $\chi_{\mathbf{k}}(\mathbf{x})$ functions from ~\cite{bib-amy-matroid}}.
+
+\begin{example}
+As an example, let's derive the coefficients for Eq.~\ref{eq-toff-bool} with $\mathbf{k} = (k_{x_a}, k_{x_b}, k_{x_c})$.
+For $\mathbf{k} = 100$, $\chi_{100} = x_a$.
+
+%Table~\ref{table-ex-100} enumerates the values and the term $(-1)^{f(\mathbf{x})} (-1)^{\chi_{100}(\mathbf{x})}$ for the inner product.
+%% \begin{table}[h]
+%%   \begin{center}
+%%     \begin{tabular}{c|c|c|c|c|c}
+%%       \hline
+%%       $x_a$ & $x_b$ & $y$ & $f(\mathbf{x})$ & $\chi_{100}$ & $(-1)^{\chi_{100}(\mathbf{x})} (-1)^{f(\mathbf{x})}$ \\\hline
+%%       0 & 0 & 0 & 0 & 0 & 1\\\hline
+%%       0 & 0 & 1 & 0 & 0 & 1\\\hline
+%%       0 & 1 & 0 & 0 & 0 & 1\\\hline
+%%       0 & 1 & 1 & 0 & 0 & 1\\\hline
+%%       1 & 0 & 0 & 0 & 1 & -1\\\hline
+%%       1 & 0 & 1 & 0 & 1 & -1\\\hline
+%%       1 & 1 & 0 & 0 & 1 & -1\\\hline      
+%%       1 & 1 & 1 & 1 & 1 & 1\\\hline
+%%     \end{tabular}
+%%     \caption{The value of $\chi_{100}$ and the inner product $\langle f(\mathbf{x}), \chi_{100} \rangle$}
+%%     \label{table-ex-100}
+%%   \end{center}
+%% \end{table}
+
+Substituting in $f(\mathbf{x})=x_a \cdot x_b \cdot x_c$ and $g(\mathbf{x})=\chi_{100}$, and evaluating Eq.~\ref{eq-inner-prod} for different values of $x_a,x_b,x_c$ we get:
+\begin{align}
+  &\hat{f}(100) &= \langle f(\mathbf{x}), \chi_{100} \rangle &= \frac{1}{8} ( 1 + 1 + 1 + 1 - 1 - 1 - 1 + 1 ) \\
+  &&= \frac{1}{4}\nonumber
+\end{align}
+Thus,
+\begin{equation}
+  f(\mathbf{x}) = \frac{1}{4}x_a + \sum_{\mathbf{k} \neq 000,100} \hat{f}(\mathbf{k}) \cdot \chi_{\mathbf{k}}
+\end{equation}
+The rest of the calculation is omitted for brevity, but readers can verify that it results in Eq.~\ref{eq-toff-bool}.
+\end{example}
+
+Synthesizing the phase polynomial of a Boolean function using the Boolean Fourier
+transform for 3 variables or fewer has an interesting consequence. First, the
+number of odd multiples of $i\frac{\pi}{4}$ of $\hat{f}(\mathbf{k})$ corresponds to
+the T-count needed to implement $f(\mathbf{x})$~\cite{bib-amy-rm}. This is easy to
+check, since any even multiple of $i\frac{\pi}{4}$ can be implemented using only
+S and Z gates, which do not take any T-cost, and any odd multiple can be realized
+using S and Z gates, plus one T-gate. Since each $\hat{f}(\mathbf{k})$
+is unique to each $f(\mathbf{x})$ when $|\mathbf{x}| \leq 3$,
+$\hat{f}(\mathbf{k})$ has the optimal T-count needed to implement
+$f(\mathbf{x})$ as a phase oracle when $|\mathbf{x}| \leq 3$.
+
+\begin{figure*}[t]
+  \centering
+  \begin{minipage}{\textwidth}
+    \centering
+    \scalebox{0.9} {
+      \input{img/fig-series-4inp}
+    }
+  \end{minipage}
+  \caption{Phase oracle for $x_a \bar{x_b} x_c \oplus x_b \bar{x_c} x_d$}
+  \label{fig-series-all}
+  \vspace{-0.5cm}  
+\end{figure*}
+
+
+%% DCTODO The first term is merely a 3-input AND, which is already seen in
+%%   Fig.~\ref{fig-toff-mark-matroid}. Thus we merely insert this circuit to implement
+%%   the first term. The second term has a negated input, so we insert X on the $x_c$ qubit
+%%   after the first circuit to negate $x_c$, again insert Fig.~\ref{fig-toff-mark-matroid}
+%%   to implement the phase, and finally place another X on $x_c$ to return its value to
+%%   the original.
+\subsection{CNOT+T Circuit Optimization}
+\label{Mot:CnotOpt}
+CNOT+T circuits are notable because the T-gates in them can be freely rearranged to optimize T-depth.
+Techniques such as matroid partitioning guarantee an optimal T-depth
+for them~\cite{bib-amy-matroid}. Given enough ancilla, they can be rearranged to
+arbitrarily small T-depth, down to a T-depth of 1 in some cases~\cite{bib-selinger-tdepth}.
+
+Additionally, there is a straightforward way to reduce the T-count for such circuits.
+Note that because the phase is a scalar, the actions of phase gates on different
+qubits all multiply together into the same scalar (essentially adding the powers
+of $e^{i \pi}$). Therefore, the result of all phase gates in a circuit
+can be computed as follows, which can be viewed as the inverse of the synthesis
+method in Sec.~\ref{Pre:oracle}:
+
+\begin{itemize}
+\item For every phase gate, calculate the state driving it as a function of the
+  input states, which will be a linear function of the same form as the
+  $\chi_{\mathbf{k}}$ from the previous section.
+\item Multiply the phase driven by the phase gate by this function.
+\item Add the phases from all such similar functions.
+\item Resynthesize the circuit from the resulting phase polynomial using
+  the methods from Sec.~\ref{Pre:oracle}.
+\end{itemize}
+
+The resulting expression from this method is sometimes called a circuit's \emph{sum of paths}~\cite{bib-amy-cnot}.
+The result is that any phase gates driven by the same function will merge together in the phase
+polynomial. This means that T-gates can combine into an S-gate or Z-gate, reducing the total T-count.
+
+\begin{example}
+  \label{ex-series}
+  We calculate the phase polynomial for Fig.~\ref{fig-series-all}. It is straightforward
+  to check that this circuit is the phase oracle for $x_a \bar{x_b} x_c \oplus x_b \bar{x_c} x_d$ by
+  substituting values for $x_a,x_b,x_c,x_d$ and checking the resulting phase. Following the method described in
+  ~\ref{Mot:CnotOpt}, the resulting phase polynomial is:
+
+  \begin{equation}
+    \label{eq-series}
+    \begin{aligned}
+      &x_a \bar{x_b} x_c \oplus x_b \bar{x_c} x_d = \frac{1}{4}x_a + \frac{1}{4}x_d
+      - \frac{1}{4}(x_a \oplus x_b) \\
+      & + \frac{1}{4}(x_a \oplus x_c) + \frac{1}{2}(x_b \oplus x_c)
+      + \frac{1}{4}(x_b \oplus x_d) -\frac{1}{4}(x_c \oplus x_d)     \\
+      &+ \frac{1}{4}(x_a \oplus x_b \oplus x_c) - \frac{1}{4}(x_b \oplus x_c \oplus x_d) 
+    \end{aligned}
+  \end{equation}
+  
+  This has 11 odd multiples of $\frac{1}{4}$ coefficients, resulting in a savings of 3 T-gates. 
+\end{example}
+
+%% The reader may have already noticed that in this simplistic example, a simple Boolean
+%% simplification may have dispensed with the need to even calculate the phase polynomial
+%% in the first place. We utilize a similar observation in \secref{Pro}.
+
+\subsection{Partitioning Around Hadamard Gates for CNOT+T Optimization}
+\label{Mot:tdepth}
+
+Hadamard gates present an obstacle to CNOT+T optimization, and so it is often useful
+to partition circuits by the appearance of Hadamard gates. This creates partitions that
+consist entirely of CNOT gates and phase gates, with Hadamard gates as their boundaries.
+Amy et. al~\cite{bib-amy-matroid} utilize a greedy approach to partitioning around Hadamard
+gates, enumerated below:
+
+\begin{itemize}
+  \item Create a partition with an associated phase polynomial.
+  \item Iterate through the single qubit gates and add their contribution to the phase polynomial
+    for the partition.
+    \begin{itemize}
+    \item When a Hadamard gate is encountered, terminate iterating through further gates on the qubit
+      where the Hadamard gate is found. Likewise, terminate further iteration on a qubit if there are
+      no more gates left on that qubit.
+    \end{itemize}
+  \item Once iteration has terminated on all qubits, synthesize the phase polynomial as a CNOT+T quantum circuit
+    and append it to a new circuit, adding any Hadamard gates found in the previous step.
+  \item Redo from the first step, creating a partition, and iterating through gates that come after the
+    points where the last partition ended. Any qubits which have had all their gates processed will not be
+    included in this iteration.
+  \item Repeat until all gates have been processed.
+\end{itemize}
+
+It can be observed from this method that a circuit that contains sequences where T-gates
+are separated by Hadamard gates will have a higher minimum T-depth than one where more of
+the T-gates are sorted into the same partition. The next section will elaborate on what
+cases this applies.
+
+Observe that in general, barring the case that the Boolean function can be implemented
+entirely using CNOT and X gates,  creates at least three partitions. This
+means that for most Boolean functions, the necessary T-depth and T-count may need to be doubled. 
+
+

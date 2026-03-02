@@ -1,0 +1,37 @@
+\section{Motivation}
+\label{Mot}
+\subsection{CNOT+T Circuits and Boolean Fourier Transform}
+\label{Mot:CNOTBool}
+
+As already noted in \secref{Pre:Four}, the phase polynomial with the optimal T-count can already
+be calculated. In many cases, this T-count is actually 0. Observe that \figref{fig-series-all} can
+be implemented by putting an oracle for $x_a \cdot x_b \cdot \bar{x_c}$ and $\bar{x_b} \cdot x_c \cdot x_d$
+in series with each other, and then expanding each of them out to their CNOT+T implementation.
+Doing so will enable the sum of paths method to combine T-gates, such that the phases needed to implement
+that term can combine into a value that does not need any T-gates to implement. Utilizing a library of
+such functions where the number of variables $n \leq 3$, we can enable lower T-counts through cancellations
+and by guaranteeing the lowest T-counts for each of the individual components.
+
+\subsection{Optimizing ESOP Expressions for T-count and T-depth Reduction}
+\label{Mot:Lib}
+
+We can deduce from~\secref{Pre:Four} that any cube of 3 literals of fewer can be synthesized purely as
+a quantum circuit. Moreover, any cube of 2 literals or fewer can be realized without using any T-gates
+Knowing that, it is thus useful to rewrite any Boolean functions with as little cubes of over four literals
+as possible. This allows us to reduce the number of T-gates, as well as implement as much of
+the circuit as possible using only CNOT+T, which allows the usage of tools such as
+sum of paths simplification in Sec.~\ref{Mot:CnotOpt} and matroid partitioning
+from~\cite{bib-amy-matroid} to optimize for T-count and T-depth.
+
+\begin{example}
+  \label{ex-esop-synth2}
+  Let's revisit Fig.~\ref{fig-esop-synth}. Observe that
+  $\bar{x_a}\bar{x_c} \oplus \bar{x_a} x_b \bar{x_c}\bar{x_d} \oplus x_a x_b \oplus x_a \bar{x_c} x_d$
+  can be rewritten as
+  $\bar{x_a} \bar{x_b} \bar{x_c} \bar{x_d} \oplus \bar{x_c} x_d \oplus x_a x_b$. Since 2 literal cubes have
+  a T-count and T-depth of 0, 3 literal cubes have a T-count of 7 and T-depth of 3, and $n \geq 4$ can use
+  ~\figref{fig-phase-n4} to implement a cube by using a Multiply Controlled Toffoli (MCT) gate, which
+  when implemented with a single ancilla, has a T-count of 15 and T-depth of 7. This means that after
+  the rewrite, the function saves a further 7 T-gates, and a T-depth of 3.
+\end{example}
+

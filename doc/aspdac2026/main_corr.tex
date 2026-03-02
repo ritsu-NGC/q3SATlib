@@ -1,0 +1,74 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{float}
+\usepackage{cite}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath,amssymb,amsfonts,amstext}
+% \usepackage{algorithmic}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage[T1]{fontenc}
+\usepackage{mdframed}
+\usepackage{algorithm, algpseudocode} % texlive-science
+\usepackage[braket, qm]{qcircuit}
+\usepackage{newtxtext}
+\usepackage[normalem]{ulem}
+\usepackage{nameref}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, shapes, positioning, calc, fit}
+
+\input{img/defs}
+
+\makeatletter
+\newcommand{\sublabel}[1]{\protected@edef\@currentlabel{\thefigure(\thesubfigure)}\label{#1}}
+\makeatother
+\captionsetup{subrefformat=parens}
+\algrenewcommand\algorithmicindent{0.5em}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newcommand{\thickhline}{%
+    \noalign {\ifnum 0=`}\fi \hrule height 1pt
+    \futurelet \reserved@a \@xhline
+}
+%\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+%    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+% You may prefer to use the caption package instead of the deprecated \@captype hack below.
+\newcommand{\figcaption}[1]{\def\@captype{figure}\caption{#1}}
+\newcommand{\tblcaption}[1]{\def\@captype{table}\caption{#1}}
+
+\newcommand{\Del}[1]{\textcolor{red}{\sout{#1}}}
+\newcommand{\Add}[1]{\textcolor{blue}{\emph{#1}}}
+
+\newcount\NGCcolor
+\NGCcolor=1
+\newcount\NGCcolortwo
+\NGCcolortwo=1
+%\NGCcolor=0
+\ifnum\NGCcolortwo<1
+  \newcommand{\blueoutt}[1]{\textcolor{blue}{#1}}  
+\else
+  \newcommand{\blueoutt}[1]{#1}
+\fi
+
+\ifnum\NGCcolor<1
+  \newcommand{\redout}[1]{\textcolor{red}{#1}}
+  \newcommand{\blueout}[1]{\textcolor{blue}{#1}}
+  \newcommand{\greenout}[1]{\textcolor{green}{#1}}
+  \newcommand{\cyannout}[1]{\textcolor{cyan}{#1}}
+  \newcommand{\magentaout}[1]{\textcolor{magenta}{#1}}
+  \newcommand{\yellowout}[1]{\textcolor{yellow}{\bf #1}}
+  \newcommand{\algblueout}[1]{\leavevmode\color{blue}{#1}}
+\else
+  \newcommand{\redout}[1]{#1}
+  \newcommand{\blueout}[1]{#1}
+  \newcommand{\greenout}[1]{#1}
+  \newcommand{\cyannout}[1]{#1}
+  \newcommand{\magentaout}[1]{#1}
+  \newcommand{\yellowout}[1]{#1}
+  \newcommand{\algblueout}[1]{#1}
+\fi
+
+% End preamble

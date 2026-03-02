@@ -1,0 +1,70 @@
+\section{Introduction}
+One of quantum computing's most significant results is the development of Grover's
+algorithm~\cite{bib-grover1996fast}. This algorithm performs an unstructured search
+optimally~\cite{bib-zaika-grov-opt}. Various applications have
+been proposed for such an algorithm, including the acceleration of solving NP-hard
+problems~\cite{bib-williams-grover-np}.
+
+Grover's algorithm uses a phase oracle, a quantum circuit that applies a phase of
+$-1$ when the Boolean function it implements is true, to mark search hits in the
+database.
+
+In fault-tolerant quantum computing, there is a need to optimize these circuits for
+the number of T-gates and T$^{\dagger}$-gates, known as the {\it T-count}, as well
+as the longest such chain of gates, known as the {\it T-depth}.
+A restricted class of circuits using only phase gates such as the T, T$^\dagger$,
+as well as CNOT gates (hereafter referred to as {\it CNOT+T}), is well known to be
+efficiently optimizable for T-count and
+T-depth~\cite{amy-meet-in-middle,bib-amy-matroid,bib-selinger-tdepth}. In fact,
+phase oracles of 3 or fewer variables can all be implemented exactly using this set
+of gates~\cite{bib-amy-cnot}, and these circuits can be synthesized exactly using the
+Boolean Fourier transform.
+
+However, the vast majority of Boolean functions of 4 or more variables cannot be
+implemented using only this gate set~\cite{bib-amy-rm}. The only fault-tolerant gate that can be
+added to make this complete is the Hadamard (H) gate. The addition of this gate adds basis changes
+that CNOT+T optimization methods cannot account for. Many existing methods to optimize for T-count
+and T-depth try to account for the H-gate in the general case by introducing heuristic methods to
+partition around it~\cite{amy-meet-in-middle,bib-amy-matroid,bib-amy-rm} or gadgetization to eliminate it
+entirely~\cite{bib-heyfron}. The T-depth of methods which partition according to H-gates, such
+as~\cite{bib-amy-matroid} thus relates directly to how well it can partition these H-gates.
+
+While phase oracle generation methods in general have not been explored extensively, there
+exist oracle generation methods that focus on driving a Boolean function on a single qubit's
+state while minimizing the T-count~\cite{bib-meuli-mult}. It is straightforward to implement
+a phase oracle from one of these circuits by generating an oracle and using it to drive a
+Z-gate on an ancilla qubit. However, as we will see later, these types of constructions provide
+an obstacle to optimizing their T-depth, owing to their use of Hadamard gates.
+
+In this work, we demonstrate that Exclusive Sum of Products (ESOP) generation of phase oracles,
+most prominently implemented in Qiskit~\cite{bib-phaseoracle}, produce circuits that are more
+amenable to such optimization techniques. We additionally propose several extensions to it
+that make optimization easier, by expressing as much of the circuit as CNOT+T circuits as
+possible.
+
+Our contributions include:
+
+\begin{itemize}
+\item A precomputed library of circuits that implement all Boolean functions of
+  3 variables or fewer.
+\item A synthesis method that uses ESOP minimization to limit the number of
+  product terms involving 4 or more variables.
+\end{itemize}
+
+We find that our solution can reduce T-count and T-depth over known implementations
+by an average of 36.5\% and over 65\% in some cases. We examine those cases and which
+ones the method is best suited for.
+
+The rest of this paper is structured as follows: First Sec~\ref{Pre}
+introduces some preliminary knowledge. In addition to the basics of
+qubits and quantum circuits, this includes the basics of the
+mathematics of phase polynomials and their mapping to phase oracles
+and CNOT+T circuits. Then Sec.~\ref{Mot} goes through some
+motivational examples that inform the general idea of our proposal.
+Sec.~\ref{Pro} details the proposal itself, including how to
+generate a library of up to 3-qubit phase oracles, and how to use
+it to generate phase oracles of 4 or more qubits. In Sec.~\ref{Exp},
+we test our results against Qiskit PhaseOracle and analyze our
+findings. Finally, Sec.~\ref{Conc} concludes with our findings and
+proposes some future research.
+
