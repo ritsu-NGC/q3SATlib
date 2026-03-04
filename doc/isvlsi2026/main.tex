@@ -4,7 +4,7 @@
 \usepackage{float}
 \usepackage{cite}
 \usepackage{caption}
-\usepackage{subcaption}
+\usepackage[caption=false,font=footnotesize]{subfig}
 \usepackage{amsmath,amssymb,amsfonts,amstext}
 % \usepackage{algorithmic}
 \usepackage[dvipdfmx]{graphicx}
@@ -28,6 +28,7 @@
 \makeatother
 \captionsetup{subrefformat=parens}
 \algrenewcommand\algorithmicindent{0.5em}
+\renewcommand{\baselinestretch}{1.05}
 \newtheorem{definition}{Definition}
 \newtheorem{example}{Example}
 \newcommand{\thickhline}{%
@@ -140,7 +141,8 @@
 \input{Conc}
 
 % DCTODO: Add Evaluation, Results, and Conclusion Sections
-
+%\vspace{-0.5cm}
+\renewcommand{\baselinestretch}{1.03}
 \bibliographystyle{unsrt}
 \bibliography{ref}
 

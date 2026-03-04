@@ -1,59 +1,73 @@
 \begin{figure}[t]
-  \hspace{-0.5cm}
-  \begin{minipage}{0.45\linewidth}
-    \centering
-    \vspace{-0.5cm}
-    \scalebox{1.0} {
-      \input{img/Xgate}
-    }
-    \subcaption{X-gate}
-    \sublabel{fig-xgate}
-    \scalebox{1.0} {
-      \input{img/Zgate}
-    }
-    \subcaption{Z-gate}
-    \sublabel{fig-zgate}
-    \scalebox{1.0} {
-      \vbox{
-        \hbox{\input{img/Sgate}}
-        \hbox{\input{img/Sdgate}}
-      }
-    }
-    \subcaption{S-gate/S$^{\dagger}$-gate}
-    \sublabel{fig-sgate}
-    \scalebox{1.0}{
-      \input{img/cnot}
-    }
-    \subcaption{CNOT-gate}
-    \sublabel{fig-cnot}
-  \end{minipage}
-  \begin{minipage}{0.45\linewidth}
-    \centering
+\centering
+\setlength{\tabcolsep}{0pt}
+\hspace{-1cm}
+\begin{tabular}{
+    p{0.48\linewidth}
+    @{\hspace{0.10\linewidth}}
+    p{0.48\linewidth}
+}
 
-    \scalebox{1.0} {
-      \input{img/Hgate}
-    }
-    \subcaption{H-gate}
-    \sublabel{fig-hgate}
-    \scalebox{1.0} {
-      \vbox{
-        \hbox{\input{img/Tgate}}
-        \hbox{\input{img/Tdgate}}
-      }
-    }
-    \subcaption{T/T$^{\dagger}$-gate}
-    \sublabel{fig-tgate}
-    \scalebox{1.0}{
-      \input{img/cz}
-    }
-    \subcaption{Controlled-Z-gate}
-    \sublabel{fig-cz}
-  \end{minipage}
-  \hspace{-0.5cm}
-  \caption{Quantum gates}
-  \label{fig-gates}
+% Row 1
+\subfloat[X-gate]{%
+  \makebox[\linewidth][c]{\input{img/Xgate}}%
+  \label{fig-xgate}
+}
+&
+\subfloat[H-gate]{%
+  \makebox[\linewidth][c]{\input{img/Hgate}}%
+  \label{fig-hgate}
+}
+\\[-0.7em]
+
+% Row 2
+\subfloat[Z-gate]{%
+  \makebox[\linewidth][c]{\input{img/Zgate}}%
+  \label{fig-zgate}
+}
+&
+{}
+\\[-0.7em]
+
+% Row 3
+\subfloat[S/S$^{\dagger}$-gate]{%
+  \makebox[\linewidth][c]{%
+    \vbox{
+      \hbox{\input{img/Sgate}}
+      \hbox{\input{img/Sdgate}}
+    }%
+  }
+  \label{fig-sgate}
+}
+&
+\subfloat[T/T$^{\dagger}$-gate]{%
+  \makebox[\linewidth][c]{%
+    \vbox{
+      \hbox{\input{img/Tgate}}
+      \hbox{\input{img/Tdgate}}
+    }%
+  }
+  \label{fig-tgate}
+}
+\\[0.4em]
+
+% Row 4
+\subfloat[CNOT-gate]{%
+  \makebox[\linewidth][c]{\input{img/cnot}}%
+  \label{fig-cnot}
+}
+&
+\subfloat[Controlled-Z-gate]{%
+  \makebox[\linewidth][c]{\input{img/cz}}%
+  \label{fig-cz}
+}
+
+\end{tabular}
+
+\caption{Quantum gates}
+\label{fig-gates}
+\vspace{-0.7cm}
 \end{figure}
-
 
 \section{Preliminaries}
 \label{Pre}
@@ -183,7 +197,6 @@ the effective use of such an Exclusive Sum of Products to implement such a phase
   \label{fig-esop-synth}
 \end{figure}
 
-
 Previous research has demonstrated that some phase oracles can be implemented using only
 CNOT and phase gates.
 (CNOT+T)~\cite{bib-amy-cnot}. When done in such a manner, $f(\mathbf{x})$ can be expressed
@@ -303,8 +316,8 @@ For $\mathbf{k} = 100$, $\chi_{100} = x_a$.
 
 Substituting in $f(\mathbf{x})=x_a \cdot x_b \cdot x_c$ and $g(\mathbf{x})=\chi_{100}$, and evaluating Eq.~\ref{eq-inner-prod} for different values of $x_a,x_b,x_c$ we get:
 \begin{align}
-  &\hat{f}(100) &= \langle f(\mathbf{x}), \chi_{100} \rangle &= \frac{1}{8} ( 1 + 1 + 1 + 1 - 1 - 1 - 1 + 1 ) \\
-  &&= \frac{1}{4}\nonumber
+  &\hat{f}(100) =& \langle f(\mathbf{x}), \chi_{100} \rangle &= \frac{1}{8} ( 1 + 1 + 1 + 1 - 1 - 1 - 1 + 1 ) \\
+  &\hat{f}(100) =& \frac{1}{4}\nonumber &
 \end{align}
 Thus,
 \begin{equation}
