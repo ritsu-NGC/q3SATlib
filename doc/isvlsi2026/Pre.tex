@@ -116,11 +116,10 @@ serial chain of them in a circuit, are often used as a cost metric~\cite{amy-mee
 The set of gates in Fig.~\ref{fig-gates} is known as the {\it Clifford+T} gates, which are
 universal for fault-tolerant quantum computing.
 
-In addition, controlled versions of each of these gates exist, which means the phase is
-applied when all the control bits are 1, just like the CNOT gate. One such example is
-the two-bit Control-Z gate, which is 1 when its control bit and target bit are 1,
-implementing $\ket{x}\ket{y} \rightarrow (-1)^{x \cdot y}\ket{x}\ket{y}$. We will see
-how this is constructed from the gates in Fig.~\ref{fig-gates} later.
+In addition, versions of the CNOT and Controlled-Z gate exist which have multiple controls,
+which means the phase is applied when all the control bits are 1, just like the CNOT gate.
+These are not native functions to a quantum computer, and will need to be constructed from
+the other gates. The rest of this paper goes into various ways to construct them.
 
 All of the gates in Fig.~\ref{fig-gates} can be composed into {\it quantum circuits}.
 A subclass of quantum circuits, which applies an X-gate on one output qubit
@@ -142,7 +141,6 @@ is true. $F$ is a Boolean function. Placing H-gates on either side of the target
 utilizes the identity $HXH = Z$, where $H$, $X$, and $Z$ are the transformations effected by
 the $H$, $X$, and $Z$ gates respectively. This means this circuit applies a phase of $-1$
 when $F$ is true.
-
 
 \begin{figure}[t]
   \centering
@@ -185,21 +183,26 @@ the effective use of such an Exclusive Sum of Products to implement such a phase
   such a gate between the qubits containing $x_a$ and $x_b$. $\bar{x_a}\bar{x_c}$, $x_a \bar{x_c} x_d$, and
   $\bar{x_a}\bar{x_b}\bar{x_c}\bar{x_d}$ have similar controlled-Z gates, so we generate those.
   ~\figref{fig-esop-synth} shows the result of the synthesis, where the open control bits signify negated
-  inputs
+  inputs, and multiple controls mean that the gate activates as an AND of the controls.
 \end{example}
 
-\begin{figure}[h]
+\begin{figure}[t]
  \centering
   \scalebox{1.0} {
     \input{img/fig-esop-synth}
   }
   \caption{A phase oracle for $\bar{x_a}\bar{x_c} \oplus \bar{x_a}\bar{x_b}\bar{x_c}\bar{x_d} \oplus x_a x_b \oplus x_a \bar{x_c} x_d$}
   \label{fig-esop-synth}
+
 \end{figure}
+
+\subsection{CNOT+T Circuits and Phase Polynomials}
+\label{Pre:CnotPhase}
 
 Previous research has demonstrated that some phase oracles can be implemented using only
 CNOT and phase gates.
-(CNOT+T)~\cite{bib-amy-cnot}. When done in such a manner, $f(\mathbf{x})$ can be expressed
+(CNOT+T)~\cite{bib-amy-cnot}. When done in such a manner, $f(\mathbf{x})$ in the exponent
+of the phase oracle equation in \secref{Pre:OracleEsop} can be expressed as a 
 as a {\it phase polynomial},
 defined in Eq.~\ref{eq-boolean-fourier}.
 
@@ -213,9 +216,52 @@ defined in Eq.~\ref{eq-boolean-fourier}.
 
 Where $\chi_k(\mathbf{x}) = ( k_0 x_0 \oplus k_1 x_1 \oplus \cdots \oplus k_{n-1} x_{n-1})$
 for $\mathbf{k} \in \{0,1\}^{n}$. Section~\ref{Pre:Four} shows how $\hat{f}(\mathbf{k})$ is
-calculated.
+calculated. While nominally $\hat{f}(\mathbf{k}) \in \mathbb{R}$
 
-Eq.~\ref{eq-toff-bool} demonstrates one such phase polynomial. 
+For a CNOT+T circuit, its phase polynomial can be read directly from the circuit using the
+following method.
+
+\begin{itemize}
+\item Initialize an empty phase polynomial with value 0.
+\item Take each phase gate as described in ~\figref{fig-gates}, take the power
+  of $e^{i\pi}$ that it drives as a coefficient, and multiply it by the function
+  that drives it
+\item Add the phase above to the phase polynomial.
+\item Repeat until all phase gates have been processed.
+\end{itemize}
+
+The resulting expression from this method is sometimes called a circuit's \emph{sum of paths}~\cite{bib-amy-cnot}.
+\begin{figure}[t]
+  \centering
+  \scalebox{0.7} {
+    \input{img/fig-toff-mark-matroid2}
+  }
+  \caption{CNOT+T Circuit}
+  \label{fig-toff-mark-matroid2}
+\end{figure}
+
+\begin{example}
+  Let's calculate the phase polynomial for~\figref{fig-toff-mark-matroid2}. The topmost T-gate
+  is driven directly by the input, which is initialized to $x_a$. This gives us $\frac{1}{4} x_a$.
+  The phase polynomial is now $f(\mathbf{x}) = \frac{1}{4} x_a + \cdots$. The T-gate below
+  that is driven by the output of a CNOT gate with control from the qubit initialized to $x_c$
+  and target to $x_b$. This gives us $frac{1}{4} x_b \oplus x_c$. The phase polynomial so far
+  now is $(\mathbf{x}) = \frac{1}{4} x_a + frac{1}{4} x_b \oplus x_c + \cdots$. The rest of the
+  calculation can be completed to show that the phase polynomial is:
+
+\begin{equation}
+  \label{eq-pp-ex}
+  \begin{aligned}
+    &f(\mathbf{x}) = \frac{1}{4}x_a + \frac{1}{4}x_b + \frac{1}{4}x_c - \frac{1}{4}(x_a \oplus x_b) \\
+    &\qquad -\frac{1}{4}(x_a \oplus x_c) - \frac{1}{4}(x_b \oplus x_c) + \frac{1}{4}(x_a \oplus x_b \oplus x_c)\nonumber
+  \end{aligned}
+\end{equation}
+
+\end{example}
+
+
+Eq.~\ref{eq-toff-bool} demonstrates another such phase polynomial. It should be straightforward
+to check the equality by substituting values for $x_a, x_b, x_c$.
 
 \begin{equation}
   \label{eq-toff-bool}
@@ -224,21 +270,6 @@ Eq.~\ref{eq-toff-bool} demonstrates one such phase polynomial.
     &\qquad -\frac{1}{4}(x_a \oplus x_c) - \frac{1}{4}(x_b \oplus x_c) + \frac{1}{4}(x_a \oplus x_b \oplus x_c)
   \end{aligned}
 \end{equation}
-
-%% \def\arraystretch{1.3}
-%% \begin{table*}[h]
-%%   \begin{minipage}{\textwidth}
-%%     \begin{center}
-%%       \scalebox{1.0} {
-%%         \input{img/table-pseudo-toff}
-%%       }
-%%       \caption{Truth table-like values of the phase polynomial of $x_a \cdot x_b \cdot y$}
-%%       \label{table-pseudo-toff}
-%%     \end{center}
-%%   \end{minipage}
-%%   \vspace{-0.5cm}
-%% \end{table*}
-%%\def\arraystretch{1.0}
 
 Coefficients of the phase polynomial describe the phase that needs to be driven as multiples of $i\pi$
 by using phase gates such as $S$ and $T$ (i.e. $3/4$ will be driven as an $S$-gate followed by $T$-gate).
@@ -278,6 +309,18 @@ to the below inner product.
 \end{equation}
 
 for $n = |\mathbf{x}| \leq 3$.
+\begin{figure*}[t]
+  \centering
+  \begin{minipage}{\textwidth}
+    \centering
+    \scalebox{0.9} {
+      \input{img/fig-series-4inp}
+    }
+  \end{minipage}
+  \caption{Phase oracle for $x_a \bar{x_b} x_c \oplus x_b \bar{x_c} x_d$}
+  \label{fig-series-all}
+  \vspace{-0.5cm}  
+\end{figure*}
 
 That means, we can calculate $\hat{f}(\mathbf{k})$ using the below inner product
 
@@ -288,7 +331,7 @@ That means, we can calculate $\hat{f}(\mathbf{k})$ using the below inner product
 
 $\hat{f}(\mathbf{k})$ is also known as the Boolean Fourier transform of $f(\mathbf{x})$~\cite{bib-odonnell}
 \footnote{All equations that are taken from~\cite{bib-odonnell} are written here
-with coefficients in $\{0,1\}$ and $\chi_{\mathbf{k}}(\mathbf{x})$ functions from ~\cite{bib-amy-matroid}}.
+with coefficients in $\{0,1\}$ and $\chi_{\mathbf{k}}(\mathbf{x})$ functions from ~\cite{bib-amy-matroid}.}.
 
 \begin{example}
 As an example, let's derive the coefficients for Eq.~\ref{eq-toff-bool} with $\mathbf{k} = (k_{x_a}, k_{x_b}, k_{x_c})$.
@@ -337,18 +380,6 @@ is unique to each $f(\mathbf{x})$ when $|\mathbf{x}| \leq 3$,
 $\hat{f}(\mathbf{k})$ has the optimal T-count needed to implement
 $f(\mathbf{x})$ as a phase oracle when $|\mathbf{x}| \leq 3$.
 
-\begin{figure*}[t]
-  \centering
-  \begin{minipage}{\textwidth}
-    \centering
-    \scalebox{0.9} {
-      \input{img/fig-series-4inp}
-    }
-  \end{minipage}
-  \caption{Phase oracle for $x_a \bar{x_b} x_c \oplus x_b \bar{x_c} x_d$}
-  \label{fig-series-all}
-  \vspace{-0.5cm}  
-\end{figure*}
 
 
 %% DCTODO The first term is merely a 3-input AND, which is already seen in
@@ -365,32 +396,16 @@ for them~\cite{bib-amy-matroid}. Given enough ancilla, they can be rearranged to
 arbitrarily small T-depth, down to a T-depth of 1 in some cases~\cite{bib-selinger-tdepth}.
 
 Additionally, there is a straightforward way to reduce the T-count for such circuits.
-Note that because the phase is a scalar, the actions of phase gates on different
-qubits all multiply together into the same scalar (essentially adding the powers
-of $e^{i \pi}$). Therefore, the result of all phase gates in a circuit
-can be computed as follows, which can be viewed as the inverse of the synthesis
-method in Sec.~\ref{Pre:oracle}:
-
-\begin{itemize}
-\item For every phase gate, calculate the state driving it as a function of the
-  input states, which will be a linear function of the same form as the
-  $\chi_{\mathbf{k}}$ from the previous section.
-\item Multiply the phase driven by the phase gate by this function.
-\item Add the phases from all such similar functions.
-\item Resynthesize the circuit from the resulting phase polynomial using
-  the methods from Sec.~\ref{Pre:oracle}.
-\end{itemize}
-
-The resulting expression from this method is sometimes called a circuit's \emph{sum of paths}~\cite{bib-amy-cnot}.
-The result is that any phase gates driven by the same function will merge together in the phase
-polynomial. This means that T-gates can combine into an S-gate or Z-gate, reducing the total T-count.
+Because the phase is a scalar, the calculated phase polynomial may combine the contributions of
+several T-gates into a phase that can be driven by other phase gates such as Z and S, which
+have lower implementation cost.
 
 \begin{example}
   \label{ex-series}
   We calculate the phase polynomial for Fig.~\ref{fig-series-all}. It is straightforward
   to check that this circuit is the phase oracle for $x_a \bar{x_b} x_c \oplus x_b \bar{x_c} x_d$ by
   substituting values for $x_a,x_b,x_c,x_d$ and checking the resulting phase. Following the method described in
-  ~\ref{Mot:CnotOpt}, the resulting phase polynomial is:
+  \secref{Mot:CnotOpt}, the resulting phase polynomial is:
 
   \begin{equation}
     \label{eq-series}
@@ -403,7 +418,8 @@ polynomial. This means that T-gates can combine into an S-gate or Z-gate, reduci
     \end{aligned}
   \end{equation}
   
-  This has 11 odd multiples of $\frac{1}{4}$ coefficients, resulting in a savings of 3 T-gates. 
+  Because the T-gates driven by $x_c$ cancel and the T-gates for $(x_b \oplus x_c)$ combine into $\frac{1}{2}$,
+  this means we can resynthesize this circuit with 4 fewer T-gates.
 \end{example}
 
 %% The reader may have already noticed that in this simplistic example, a simple Boolean
@@ -438,11 +454,7 @@ gates, enumerated below:
 
 It can be observed from this method that a circuit that contains sequences where T-gates
 are separated by Hadamard gates will have a higher minimum T-depth than one where more of
-the T-gates are sorted into the same partition. The next section will elaborate on what
-cases this applies.
+the T-gates are sorted into the same partition. 
 
-Observe that in general, barring the case that the Boolean function can be implemented
-entirely using CNOT and X gates,  creates at least three partitions. This
-means that for most Boolean functions, the necessary T-depth and T-count may need to be doubled. 
 
 

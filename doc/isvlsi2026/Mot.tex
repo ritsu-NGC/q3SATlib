@@ -1,5 +1,6 @@
 \section{Motivation}
 \label{Mot}
+
 \subsection{CNOT+T Circuits and Boolean Fourier Transform}
 \label{Mot:CNOTBool}
 
@@ -30,8 +31,8 @@ from~\cite{bib-amy-matroid} to optimize for T-count and T-depth.
   can be rewritten as
   $\bar{x_a} \bar{x_b} \bar{x_c} \bar{x_d} \oplus \bar{x_c} x_d \oplus x_a x_b$. Since 2 literal cubes have
   a T-count and T-depth of 0, 3 literal cubes have a T-count of 7 and T-depth of 3, and $n \geq 4$ can use
-  ~\figref{fig-phase-n4} to implement a cube by using a Multiply Controlled Toffoli (MCT) gate, which
-  when implemented with a single ancilla, has a T-count of 15 and T-depth of 7. This means that after
-  the rewrite, the function saves a further 7 T-gates, and a T-depth of 3.
+  ~\figref{fig-phase-n4} to implement a cube by using a Multiple Control Toffoli (MCT) gate in place of the
+  $F$-controlled gate. When implemented with a single ancilla, this circuit T-count of 15 and T-depth of 7.
+  This means that after the rewrite, the function saves a further 7 T-gates, and a T-depth of 3.
 \end{example}
 
