@@ -369,8 +369,8 @@ def run_exp(test_type,runs,directory="."):
             # )
             # qk_str      = large_cube_esop
             # pro_str     = large_cube_esop
-            #qk_str = optimize_esop(esop,vars_list,0)
-            qk_str = esop
+            qk_str = optimize_esop(esop,vars_list,0)
+            #qk_str = esop
             pro_str = optimize_esop(esop,vars_list,1)
             esop3,esop4 = partition_esop(pro_str)
         elif test_type == "scramble_n":
@@ -385,17 +385,15 @@ def run_exp(test_type,runs,directory="."):
             
             # qk_str      = large_cube_esop
             # pro_str     = large_cube_esop
-            qk_str = esop
-            #qk_str = optimize_esop(esop,vars_list,0)
+            #qk_str = esop
+            print("DCDEBUG running qk opt",flush=True)
+            qk_str = optimize_esop(esop,vars_list,0)
+            print("DCDEBUG running pro opt",flush=True)
             pro_str = optimize_esop(esop,vars_list,1)
             esop3,esop4 = partition_esop(pro_str)            
         else:
             raise ValueError("Unknown test_type:" + test_type)
-        print("DCDEBUG run_exp esop3 " + esop3 + " esop4 " + esop4)
         pro_qc = gen_qc(esop3, esop4, vars_list, test_type)    
-        print("DCDEBUG run_exp qk_str " + qk_str)
-        print("DCDEBUG run_exp pro_str " + pro_str)        
-        print("DCDEBUG run_exp tpar pro")
         run_tpar(pro_qc,directory + "/pro_qc"+str(i))
         with open(directory + "/pro_qc"+str(i)+".qc", 'a') as f:
             f.write(f"\n# {pro_str}\n")
