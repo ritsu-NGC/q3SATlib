@@ -1,6 +1,9 @@
 import re
 from dataclasses import dataclass
 from typing import List, Tuple, Dict, Optional
+import re
+from typing import List
+_LIT_PAREN_RE = re.compile(r'(~)\s*x\s*(\d+)|\b(x)\s*(\d+)', re.IGNORECASE)
 
 # ---------- AIGER builder (ASCII .aag) ----------
 
@@ -189,15 +192,18 @@ class ConversionResult:
     final_output_literal: int
 
 def esop_to_aiger(esop_text: str) -> ConversionResult:
-    cube_strs = split_cubes(esop_text)
-    print("DCDEBUG " + str(cube_strs))
+    print("DCDEBUG esop_text " + esop_text)
+    esop_conv = convert_esop_paren_to_bang(esop_text)
+    print("DCDEBUG esop_conv " + esop_conv)
+    cube_strs = split_cubes(esop_conv)
+    print("DCDEBUG cube_strs " + str(cube_strs))
     parsed_cubes = [tokenize_cube(c) for c in cube_strs]
 
-    print("DCDEBUG " + str(parsed_cubes))
+    print("DCDEBUG parsed_cubes " + str(parsed_cubes))
 
     num_inputs = compute_num_inputs(parsed_cubes)
 
-    print("DCDEBUG " + str(num_inputs))
+    print("DCDEBUG num_inputs " + str(num_inputs))
     b = AigerBuilder(num_inputs=num_inputs)
 
     cube_outs: List[int] = []
@@ -225,11 +231,77 @@ def esop_to_aiger(esop_text: str) -> ConversionResult:
         final_output_literal=final_out,
     )
 
-# ---------- CLI/demo ----------
+
+def _convert_cube_paren_to_bang(cube: str) -> str:
+    """
+    Convert one cube like:
+      "(~x2 & x3 & ~x4 & x5)"
+    into:
+      "!x2 & x3 & !x4 & x5"
+
+    Notes:
+    - '~' becomes '!'
+    - Keeps '&' separators
+    - Normalizes whitespace
+    """
+    s = cube.strip()
+    # strip optional surrounding parentheses
+    if s.startswith("(") and s.endswith(")"):
+        s = s[1:-1].strip()
+
+    # Split by '&' and parse each literal
+    parts = [p.strip() for p in s.split("&") if p.strip()]
+    out_parts: List[str] = []
+
+    for p in parts:
+        p = p.replace(" ", "")
+        # Accept ~xN or xN
+        m = re.fullmatch(r'~x(\d+)', p, flags=re.IGNORECASE)
+        if m:
+            out_parts.append(f"!x{int(m.group(1))}")
+            continue
+        m = re.fullmatch(r'x(\d+)', p, flags=re.IGNORECASE)
+        if m:
+            out_parts.append(f"x{int(m.group(1))}")
+            continue
+        raise ValueError(f"Unrecognized literal in cube: {p!r}")
+
+    return " & ".join(out_parts)
+
+def convert_esop_paren_to_bang(esop: str) -> str:
+    """
+    Convert an ESOP expression written as XOR-of-cubes using parentheses, e.g.:
+
+      (~x2 & x3 & ~x4 & x5 & x6 & x7) ^ (x1 & ~x3)
+
+    into the '!' style, with one cube per line:
+
+      !x2 & x3 & !x4 & x5 & x6 & x7
+      x1 & !x3
+
+    Cube separators supported: '^' or '+' or newlines.
+    """
+    s = esop.strip()
+
+    # Replace common cube separators with newlines
+    s = re.sub(r'[\^+]', '\n', s)
+
+    # Extract cube-like groups; if no parentheses, treat each line as a cube
+    cubes: List[str] = []
+
+    # If we find any parenthesized cubes, prefer those
+    paren_cubes = re.findall(r'\([^()]*\)', s)
+    if paren_cubes:
+        cubes = paren_cubes
+    else:
+        cubes = [line.strip() for line in s.splitlines() if line.strip()]
+
+    converted = [_convert_cube_paren_to_bang(c) for c in cubes]
+    return " ^ ".join(converted)
 
 if __name__ == "__main__":
     esop = r"""
- !x5 ^ !x4 ^ x2!x2!x4 ^ x3 ^ !x2
+ !x5 ^ !x4 ^ !x2!x4 ^ x3 ^ !x2
 """.strip()
 
     res = esop_to_aiger(esop)

@@ -30,8 +30,9 @@ import re
 import gen_qc
 from gen_qc import partition_esop,gen_qc,write_qc_format,gen_n4_cube
 from exorcism import exorcism
-
-
+from run_random_aig_abc import aig_to_blif
+from esop_to_aiger      import esop_to_aiger
+from blif_read          import blif_read
 def run_tpar(qc,filename):
     circ_name = filename + ".qc"
     write_qc_format(qc,circ_name)
@@ -177,7 +178,6 @@ def preprocess_qk(original_circuit,vars_list):
             target_indices = [original_circuit.qubits.index(q) + 1 for q in qargs]
             connections = [0] + target_indices
 
-            print("DCDEBUG preprocess_qk connections " + str(connections))
             new_qc = new_qc.compose(rep, connections)            
 
             # ctrl_connections = [qargs.index(q) for q in qargs]
@@ -363,7 +363,6 @@ def run_exp(test_type,runs,directory="."):
             min_cubes   = 2 * n
             esop        = generate_esop_expression(vars_list, min_terms=min_cubes, max_terms=max_cubes, prob_2=1.0, prob_3=1.0, prob_more=0.5)
 
-            print("DCDEBUG run_exp og esop " + esop)
             # random_order, large_cube_esop = find_esop_with_large_cube(
             #     esop, vars_list, min_literals=n/2, max_attempts=1000
             # )
@@ -377,7 +376,6 @@ def run_exp(test_type,runs,directory="."):
             max_cubes   = 2 * n
             min_cubes   = 1
             esop        = generate_esop_expression(vars_list, min_terms=min_cubes, max_terms=max_cubes,prob_2=1.0, prob_3=1.0, prob_more=0.5)
-            print("DCDEBUG run_exp og esop " + esop)
 
             # random_order, large_cube_esop = find_esop_with_large_cube(
             #     esop, vars_list, min_literals=n/2, max_attempts=1000
@@ -386,20 +384,21 @@ def run_exp(test_type,runs,directory="."):
             # qk_str      = large_cube_esop
             # pro_str     = large_cube_esop
             #qk_str = esop
-            print("DCDEBUG running qk opt",flush=True)
             qk_str = optimize_esop(esop,vars_list,0)
-            print("DCDEBUG running pro opt",flush=True)
             pro_str = optimize_esop(esop,vars_list,1)
             esop3,esop4 = partition_esop(pro_str)            
         else:
             raise ValueError("Unknown test_type:" + test_type)
+        print("DCDEBUG esop "  + esop)
+        print("DCDEBUG esop3 " + esop3)
+        print("DCDEBUG esop4 " + esop4)        
+        
         pro_qc = gen_qc(esop3, esop4, vars_list, test_type)    
         run_tpar(pro_qc,directory + "/pro_qc"+str(i))
         with open(directory + "/pro_qc"+str(i)+".qc", 'a') as f:
             f.write(f"\n# {pro_str}\n")
 
         qk_qc_str = parse_c_format_esop(qk_str,vars_list)
-        print("DCDEBUG run_exp qk_qc_str " + str(qk_qc_str))
 
         num_vars = len(vars_list) #DCDEBUG
         for cube in qk_qc_str:#DCDEBUG
@@ -411,9 +410,7 @@ def run_exp(test_type,runs,directory="."):
         #     dump(qk_qc,f)#DCDEBUG
         # with open("qk_qc" + str(i) + ".txt","w") as f:#DCDEBUG
         #     f.write(str(qk_qc.decompose().draw(output="text")))#DCDEBUG
-        print("DCDEBUG run_exp tpar qk_qc")        
         run_tpar(qk_qc,directory + "/qk_qc"+str(i))
-
     
         with open(directory + "/qk_qc"+str(i)+".qc", 'a') as f:
             f.write(f"\n# {qk_str}\n")

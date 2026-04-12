@@ -28,7 +28,10 @@ import re
 #import pyexorcism
 from gen_n4 import lut_node
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'quantum_compiler'))
-from n_qubit_esop_builder import build_esop_circuit
+from n_qubit_esop_builder import build_esop_circuit,quick_build
+from run_random_aig_abc import aig_to_blif
+from esop_to_aiger      import esop_to_aiger
+from blif_read          import blif_read
 
 def partition_esop(esop_str):
     cubes = re.findall(r'\([^\(\)]*\)', esop_str)
@@ -97,10 +100,27 @@ def gen_n3(esop_str):
     Generate a quantum circuit from a 3-variable-or-less ESOP string using the n_qubit_esop_builder.
     """
     # Call the builder function and return the circuit
+    #circuit = quick_build(esop_str)
     circuit = build_esop_circuit(esop_str)
     return circuit
 
 def gen_n4(s,var_dict):
+    qc = QuantumCircuit(len(var_dict.keys()) + 1)
+    res = esop_to_aiger(s)
+
+    with open("out.aag", "w", encoding="utf-8") as f:
+        f.write(res.aag)
+        
+    with open("out.aig", "wb") as f:
+        f.write(res.aig)
+
+    aig_to_blif('out.aig')
+    blif_read('mapped.blif')
+    
+    
+    return qc
+
+def old_gen_n4(s,var_dict):
     qc = QuantumCircuit(len(var_dict.keys()) + 1)
     cubes = [cube.strip() for cube in re.split(r'\s*(?:\^|⊕)\s*', s) if cube.strip()]
     for cube in cubes:
