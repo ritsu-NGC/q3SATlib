@@ -52,13 +52,172 @@ def blif_read(fpath):
             break
         else:
             qc_args = proc_line(qc_args,line)
-            #print("DCDEBUG line == .end " + str(line == '.end'))
             
-    print("DCDEBUG state "  + str(qc_args["state"]))
     if(qc_args["state"] == "func_info"):
         qc_args["nodes"][-1].synth()
         qc_args["nodes"][-1].synth_cf()
 
+    # NEW: connect all node circuits into one global QuantumCircuit
+    qc_args = _connect_all_nodes(qc_args)
+
+    # Option C: Qiskit text diagram (human-readable) DCDEBUG
+    with open("circuit.txt", "w", encoding="utf-8") as f:
+        f.write(qc_args["qc"].draw(output="text").single_string())
+
+    return qc_args
+
+def _connect_all_nodes(qc_args):
+    """
+    Constructs a Qiskit QuantumCircuit from the circuits in each lut_node (node.qc),
+    connecting them by shared signal names.
+
+    Rules implemented:
+      - Allocate a qubit for every variable in:
+          * qc_args["inputs"], qc_args["outputs"]
+          * every lut_node._fanin and lut_node._fanout
+      - Any signal that is not a primary input/output is treated as an ancilla
+        initialized to |0> (which is the default in Qiskit).
+      - LUT nodes that output an intermediate variable new_* are scheduled before any
+        nodes that use the same new_* as input.
+      - After all nodes that consume a new_* have executed, the inverse of the producing
+        node's circuit is applied to uncompute that intermediate.
+    """
+    nodes = qc_args.get("nodes", [])
+    if not nodes:
+        qc_args["qc"] = QuantumCircuit()
+        qc_args["var_to_qubit"] = {}
+        return
+
+    # Ensure each node has a synthesized circuit
+    for n in nodes:
+        if getattr(n, "qc", None) is None:
+            n.synth()
+
+    inputs = set(qc_args.get("inputs", []))
+    outputs = set(qc_args.get("outputs", []))
+
+    # Collect all signal names
+    all_signals = set()
+    no_outs     = set()
+    for n in nodes:
+        no_outs.update(n._fanin)
+        all_signals.add(n._fanout)
+    no_outs.update(inputs)
+    no_outs.update(outputs)
+    all_signals = all_signals.union(no_outs)
+    
+    # Stable ordering (inputs -> outputs -> new_* -> others)
+    def sort_key(v):
+        if v in inputs:
+            return (0, v)
+        if v in outputs:
+            return (1, v)
+        if str(v).startswith("new_"):
+            return (2, v)
+        return (3, v)
+
+    ordered_signals = sorted(all_signals, key=sort_key)
+    ordered_no_outs = sorted(no_outs, key=sort_key)    
+
+    qr = QuantumRegister(len(no_outs), name="v")
+    qc = QuantumCircuit(qr)
+    var_to_qubit = {name: qr[i] for i, name in enumerate(no_outs)}
+
+    qc_args["qc"] = qc
+    qc_args["var_to_qubit"] = var_to_qubit
+
+    # Producer/consumer maps by signal
+    produced_by = {}
+    consumers = {}
+    for idx, n in enumerate(nodes):
+        produced_by.setdefault(n._fanout, []).append(idx)
+        for fin in n._fanin:
+            consumers.setdefault(fin, []).append(idx)
+
+    # Build dependency graph edges: i -> j if j uses output of i
+    indeg = [0] * len(nodes)
+    succ = [[] for _ in range(len(nodes))]
+
+    for j, nj in enumerate(nodes):
+        deps = set()
+        for fin in nj._fanin:
+            if fin in produced_by:
+                for i in produced_by[fin]:
+                    if i != j:
+                        deps.add(i)
+        for i in deps:
+            succ[i].append(j)
+            indeg[j] += 1
+
+    # Kahn topo sort (deterministic tie-breaker)
+    ready = [i for i, d in enumerate(indeg) if d == 0]
+    ready.sort(key=lambda i: nodes[i]._name)
+
+    schedule = []
+    while ready:
+        i = ready.pop(0)
+        schedule.append(i)
+        for j in succ[i]:
+            indeg[j] -= 1
+            if indeg[j] == 0:
+                ready.append(j)
+                ready.sort(key=lambda k: nodes[k]._name)
+
+    # If we couldn't schedule all nodes (cycle), just use file order
+    if len(schedule) != len(nodes):
+        schedule = list(range(len(nodes)))
+
+    # new_* variables and last consumer execution position
+    new_vars = {nodes[i]._fanout for i in range(len(nodes)) if str(nodes[i]._fanout).startswith("new_")}
+    exec_pos = {node_idx: pos for pos, node_idx in enumerate(schedule)}
+
+    last_use_pos = {}
+    for nv in new_vars:
+        use_positions = [exec_pos[c] for c in consumers.get(nv, []) if c in exec_pos]
+        last_use_pos[nv] = max(use_positions) if use_positions else None
+
+    active_new_producer = {}
+
+    def append_node(node):
+        # node.qc layout assumption: [target(out)] + [fanin...]
+        if node.output_node == 1:
+            mapping = [var_to_qubit[v] for v in node._fanin]
+        else:
+            mapping = [var_to_qubit[node._fanout]] + [var_to_qubit[v] for v in node._fanin]
+        qc.compose(node.qc, mapping, inplace=True)
+
+    def append_node_inverse(node):
+        inv_inst = node.qc.inverse().to_instruction()
+
+        if node.output_node == 1:
+            mapping = [var_to_qubit[v] for v in node._fanin]            
+        else:
+            mapping = [var_to_qubit[node._fanout]] + [var_to_qubit[v] for v in node._fanin]
+
+        qc.append(inv_inst, mapping)
+        
+    for pos, idx in enumerate(schedule):
+        node = nodes[idx]
+
+        # Track producer for new_*
+        if str(node._fanout).startswith("new_"):
+            active_new_producer[node._fanout] = node
+
+        append_node(node)
+
+        # Uncompute new_* after last consumer at this pos
+        for nv, lp in list(last_use_pos.items()):
+            if lp is None:
+                # no consumers => uncompute immediately after producer executed
+                producer = active_new_producer.get(nv)
+                if producer is node:
+                    append_node_inverse(producer)
+                    last_use_pos[nv] = -1
+            elif lp == pos:
+                producer = active_new_producer.get(nv)
+                if producer is not None:
+                    append_node_inverse(producer)
+                last_use_pos[nv] = -1
     return qc_args
 
 def proc_line(qc_args,line):
@@ -74,20 +233,14 @@ def proc_line(qc_args,line):
         qc_args["outputs"] = line.split()[1:]
     elif line.split()[0] == '.names':
         #
-        #print("DCDEBUG " + str())
-        print("DCDEBUG " + line)
         if line.split()[1] == "$false" or line.split()[1] == "$true" or line.split()[1] == "$undef":
             return qc_args
         output_node = 0
         if line.split()[-1] in qc_args["outputs"]:
             output_node = 1
-        print("DCDEBUG line " + line)
-        print("DCDEBUG " + str(line.split()[1:-1]))
+
         if (qc_args["state"] != "node_info"):
             if(qc_args["state"] == "func_info"):
-                #print("DCDEBUG sizeof node" + str(sys.getsizeof(qc_args["nodes"][-1])))
-                #print("DCDEBUG sizeof qc_args" + str(sys.getsizeof(qc_args)))                
-                #print("DCDEBUG switch ")
                 qc_args["nodes"][-1].synth()
                 qc_args["nodes"][-1].synth_cf()
                 qc_args["nodes"][-1].func = None
@@ -104,9 +257,6 @@ def proc_line(qc_args,line):
             qc_args["nodes"][-1].add_sop_expr(line)
 
     if(qc_args["state"] == "func_info"):
-        #print("DCDEBUG sizeof node" + str(sys.getsizeof(qc_args["nodes"][-1])))
-        #print("DCDEBUG sizeof qc_args" + str(sys.getsizeof(qc_args)))                
-        #print("DCDEBUG switch ")
         qc_args["nodes"][-1].synth()
         qc_args["nodes"][-1].synth_cf()
 
@@ -174,7 +324,6 @@ def comp_methods(fpath):
         
 class lut_node:
     def __init__(self,name,fanin,fanout,output_node):
-        print("DCDEBUG fanin " + str(fanin))
         self._name       = name
         self._fanin      = [str.replace('$','') for str in fanin]
         self._fanout     = fanout
@@ -185,8 +334,6 @@ class lut_node:
             self.bdd.declare(inp)
         if len(self._fanin) == 0:
             self.bdd.declare(self._fanout)
-        #print("DCDEBUG fanin " + str(self._fanin))
-        #print("DCDEBUG fanout " + str(self._fanout))        
         #self.matrix = [[0 for x in range(2 ** (len(self._fanin) + 1))] for y in range (2 ** (len(self._fanin) + 1))]
         self.matrix = numpy.zeros((2 ** (len(self._fanin) + 1), 2 ** (len(self._fanin) + 1)),dtype=int)
         for i in range(2 ** (len(self._fanin) + 1)):
@@ -217,26 +364,20 @@ class lut_node:
                 for new_bit in temp_strings:
                     new_strings.append(new_bit)
             bit_strings = new_strings
-        #print("DCDEBUG " + str(bit_strings))
-        #print("DCDEBUG " + str(self.matrix))        
         for string in bit_strings:
             self.matrix[int(string + '0',2),int(string + '1',2)] = 1
             self.matrix[int(string + '0',2),int(string + '0',2)] = 0
             self.matrix[int(string + '1',2),int(string + '0',2)] = 1
             self.matrix[int(string + '1',2),int(string + '1',2)] = 0
 
-        #print("DCDEBUG " + str(self.matrix))        
     def str_to_bdd(self,line,bdd_vars,bdd):
         
-        #print("DCDEBUG bdd_vars " + str(bdd_vars))
         line_arr = line.split()
-        #print("DCDEBUG line_arr " + str(line_arr))
         count    = 0
         expr_str = ""
         if len(bdd_vars) == 0:
             return bdd.add_expr("True")
         for kbit in line_arr[0]:
-            #print("DCDEBUG count " + str(count))
             if count > 0 and not kbit == "-" and not expr_str == "":
                 expr_str += " & "
             if kbit == "1":
@@ -247,22 +388,25 @@ class lut_node:
         return bdd.add_expr(expr_str)
     def synth(self):
         var_order = self._fanin  # e.g. ["a", "b", "carry", ...]
-        print("DCDEBUG var_order synth " + str(var_order))
         # Register name can include the variable names (purely cosmetic, but helpful for debugging)
-        self.qr = QuantumRegister(len(var_order)+1, name="v_" + "_".join(var_order))
-        self.qc = QuantumCircuit(self.qr)
-        # Practical: map each variable name to its qubit position
-        var_to_q = {name: self.qr[i+1] for i, name in enumerate(var_order)}
-        var_to_q["target"] = self.qr[0]
-        if(self.output_node):
+        if self.output_node == 1:
+            self.qr = QuantumRegister(len(var_order), name="v_" + "_".join(var_order))
+            self.qc = QuantumCircuit(self.qr)
+            # Practical: map each variable name to its qubit position
+            var_to_q = {name: self.qr[i] for i, name in enumerate(var_order)}
+
             # synthesize phase gate
             dd_str = self.bdd.to_expr(self.func)
-            print("DCDEBUG dd_str " + dd_str)
             c_str  = dd_to_c_expr(dd_str)
-            print("DCDEBUG c_str " + c_str)            
-            qc = get_rtof(self.qc,var_to_q[var_order[0]],var_to_q[var_order[1]],0)
+            self.qc = get_phase_and(self.qc,self._name,var_to_q[var_order[0]],var_to_q[var_order[1]])
         else:
-            qc = get_rtof(self.qc,var_to_q[var_order[0]],var_to_q[var_order[1]],0)
+            self.qr = QuantumRegister(len(var_order)+1, name="v_" + "_".join(var_order))
+            self.qc = QuantumCircuit(self.qr)
+            # Practical: map each variable name to its qubit position
+            var_to_q = {name: self.qr[i+1] for i, name in enumerate(var_order)}
+            var_to_q["target"] = self.qr[0]
+            
+            self.qc = get_rtof(self.qc,self._name,var_to_q[var_order[0]],var_to_q[var_order[1]],0)
         
 
             
@@ -301,7 +445,6 @@ class lut_node:
         #if len(func) == 1 or len(var_order) == 1:
         if func == self.bdd.add_expr('True') or len(var_order) == 1:
             #return CNOT
-            print("DCDEBUG " + str(var_order) + " " + str(var_order[0]) + str(var_to_q))
             self.qc.cx(var_to_q[var_order[0]],var_to_q["target"])
             return [qc, 0]
         else:
@@ -319,7 +462,6 @@ class lut_node:
                 f0 = [qc,0]
             elif synth_func0 != self.bdd.add_expr('False'):
                 f0 = self.do_synth_new(synth_func0,var_order[1:],var_to_q,qc,do_unbalanced ^ unbalanced,do_unbalanced)
-                #print("DCDEBUG f0" + str(f0[1]))
                 f0_gen = True
             else:
                 f0 = [qc,0]
@@ -331,7 +473,6 @@ class lut_node:
             elif synth_func1 != self.bdd.add_expr('False'):
                 f1 = self.do_synth_new(synth_func1,var_order[1:],var_to_q,qc,do_unbalanced ^ unbalanced, do_unbalanced)
                 f1_gen = True
-                #print("DCDEBUG f1" + str(f1[1]))
             else:
                 f1 = [qc,0]
 
@@ -361,7 +502,6 @@ class lut_node:
             elif synth_func2 != self.bdd.add_expr('False'):
                 f2 = self.do_synth_new(synth_func2,var_order[1:],var_to_q,qc,do_unbalanced ^ unbalanced, do_unbalanced)
                 f2_gen = True
-                #print("DCDEBUG f2" + str(f2[1]))
             else:
                 f2 = [qc,0]
 
@@ -404,7 +544,6 @@ class lut_node:
     def synth_cf(self):
         qc           = QuantumCircuit(1)
         self.det     = numpy.linalg.det(self.matrix)
-        #print('DCDEBUG synth CF')
         if len(self._fanin) == 0:
             self.cf_qc   = qc
             self.cf_cost = 0
@@ -426,7 +565,6 @@ class lut_node:
             # #decomposer   = TwoQubitBasisDecomposer([CXGate(), XGate(), TGate()])
             # #synthesizer  = UnitarySynthesis(['x','cx','t'])
             #self.us_qc   = synthesizer.synthesize(self.matrix)
-            #print("DCDEBUG det " + str(self.det))
             if self.det == 1 and False:
                 self.us_qc   = QuantumCircuit(len(self._fanin) + 1)
                 terms        = numpy.append(self._fanin,self._fanout)
@@ -440,7 +578,6 @@ class lut_node:
             else:
                 self.us_cost += 0
                 #self.us_cost += cf_cost_tmp[0]
-            #DCDEBUG
         gc.collect()
 
 def display_top(snapshot, key_type='lineno', limit=10):
@@ -470,24 +607,33 @@ def xor_node(node0,node1,bdd):
     return ~node0 & node1 | node0 & ~node1
     
 
-def get_rtof(qc,x0,x1,f):
-    #ret_qc = QuantumCircuit(qc.qubits)
-    ret_qc = qc.copy()
+def get_rtof(qc,label,x0,x1,f):
+    ret_qc = QuantumCircuit(qc.qubits)
     ret_qc.clear()
-    #DCDEBUG ret_qc.s(f)
-    ret_qc.h(f)
-    ret_qc.t(f)
-    ret_qc.cx(x1,f)
-    ret_qc.tdg(f)
-    ret_qc.cx(x0,f)
-    ret_qc.t(f)
-    ret_qc.cx(x1,f)
-    ret_qc.tdg(f)
-    ret_qc.h(f)
-    #DCDEBUG ret_qc.sdg(f)
-    #print("DCDEBUG get_rtof")
-    #print(ret_qc.draw())
-    return ret_qc
+    ret_qc.h(0)
+    ret_qc.t(0)
+    ret_qc.cx(2,0)
+    ret_qc.tdg(0)
+    ret_qc.cx(1,0)
+    ret_qc.t(0)
+    ret_qc.cx(2,0)
+    ret_qc.tdg(0)
+    ret_qc.h(0)
+    rtof_gate = ret_qc.to_instruction(label=label)
+    qc.append(rtof_gate,[f,x0,x1])
+    return qc
+
+def get_phase_and(qc,label,x0,x1):
+    ret_qc = QuantumCircuit(qc.qubits)
+    ret_qc.clear()
+    ret_qc.s(0)
+    ret_qc.s(1)
+    ret_qc.cx(1,0)
+    ret_qc.s(0)
+    ret_qc.cx(1,0)
+    phase_and = ret_qc.to_instruction(label=label)
+    qc.append(phase_and,[x0,x1])
+    return qc
 
 def get_rtof_alt(qc,x0,x1,f):
     #ret_qc = QuantumCircuit(qc.qubits)
@@ -594,5 +740,3 @@ def dd_to_c_expr(s: str) -> str:
     if j != len(tokens):
         raise ValueError("Trailing tokens after parse")
     return emit_c(ast)
-
-

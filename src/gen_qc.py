@@ -1,5 +1,6 @@
 from qiskit import QuantumCircuit,QuantumRegister
-
+import math
+import numpy
 from dd import cudd
 from textwrap import dedent
 from qiskit import transpile
@@ -82,7 +83,7 @@ def extract_variables(boolean_expr):
     unique_vars = sorted(set(tokens))
     return unique_vars
 
-def gen_qc(esop3, esop4, vars_list, test_type):
+def gen_qc(esop3, esop4, vars_list, test_type, directory="."):
     #DCTODO
     qc = QuantumCircuit()
 
@@ -90,7 +91,7 @@ def gen_qc(esop3, esop4, vars_list, test_type):
     var_dict = {var_name: index for index, var_name in enumerate(vars_list)}
     #run T-PAR
     qc3 = gen_n3(esop3)
-    qc4 = gen_n4(esop4,var_dict)
+    qc4 = gen_n4(esop4,var_dict,directory)
     qc  = qc4.compose(qc3)
     
     return qc4.compose(qc3)
@@ -104,19 +105,21 @@ def gen_n3(esop_str):
     circuit = build_esop_circuit(esop_str)
     return circuit
 
-def gen_n4(s,var_dict):
+def gen_n4(s,var_dict, directory):
     qc = QuantumCircuit(len(var_dict.keys()) + 1)
-    res = esop_to_aiger(s)
+    if len(s) == 0:
+        return qc
 
-    with open("out.aag", "w", encoding="utf-8") as f:
+    res = esop_to_aiger(s)
+    with open(directory + "/out.aag", "w", encoding="utf-8") as f:
         f.write(res.aag)
         
-    with open("out.aig", "wb") as f:
+    with open(directory + "/out.aig", "wb") as f:
         f.write(res.aig)
 
-    aig_to_blif('out.aig')
-    blif_read('mapped.blif')
-    
+    aig_to_blif(directory + '/out.aig',directory)
+    qc_args = blif_read(directory + '/mapped.blif')
+    qc      = qc_args["qc"]
     
     return qc
 
@@ -124,16 +127,11 @@ def old_gen_n4(s,var_dict):
     qc = QuantumCircuit(len(var_dict.keys()) + 1)
     cubes = [cube.strip() for cube in re.split(r'\s*(?:\^|⊕)\s*', s) if cube.strip()]
     for cube in cubes:
-        print("DCDEBUG gen_n4 cube " + cube)
         cube = re.sub(r'\(([^)]+)\)', r'\1', cube)
         cz,lits = gen_n4_cube(cube)
         #look up indices of
-        print("DCDEBUG var_dict " + str(var_dict))
         ctrl_connections = [var_dict[var_name] + 1 for var_name in lits]
         connections = [0] + ctrl_connections
-        print("DCDEBUG gen_n4 " + str(connections))
-        print("DCDEBUG gen_n4 cz " + str(cz.num_qubits))
-        print("DCDEBUG gen_n4 qc " + str(qc.num_qubits))        
         qc = qc.compose(cz,connections)
     return qc
         
@@ -144,7 +142,6 @@ def gen_n4_cube(s):
 
     #Gen RTOF LUT
     c = lut_node("node0",lits,"y")
-    print("DCDEBUG gen_n4_cube " + s)
     c.add_sop_expr(s)
     result = c.synth()
     qc = qc.compose(result[0])
@@ -182,8 +179,66 @@ def write_qc_format(circuit: QuantumCircuit, filename: str):
                 gate_label = gate_map[name]
                 qubits = [circuit.find_bit(q).index for q in qargs]
                 f.write(f"{gate_label} {' '.join(map(str, qubits))}\n")
-            # else:
-            #     print(f"Warning: Gate {name} not supported in .qc format")
+            elif name == "p":
+                angle   = inst.params[0]
+                add_s   = 0
+                add_sdg = 0
+                if numpy.isclose(float(angle), math.pi / 2):
+                    gate_label = "P"
+                elif numpy.isclose(float(angle), - math.pi / 2):
+                    gate_label = "P*"
+                elif numpy.isclose(float(angle), math.pi / 4):
+                    gate_label = "T"
+                elif numpy.isclose(float(angle), - math.pi / 4):
+                    gate_label = "T*"
+                elif numpy.isclose(float(angle), math.pi):
+                    gate_label = "Z"
+                elif numpy.isclose(float(inst.params[2]), - 3 * math.pi / 4):
+                    gate_label = "T*"
+                    add_sdg    = 1
+                elif numpy.isclose(float(inst.params[2]), 3 * math.pi / 4):
+                    gate_label = "T"
+                    add_s      = 1
+                else:
+                    raise Exception(f"Warning: Angle {str(float(angle))} not known")
+                qubits = [circuit.find_bit(q).index for q in qargs]
+                f.write(f"{gate_label} {' '.join(map(str, qubits))}\n")
+                if add_s   == 1:
+                    f.write(f"S {' '.join(map(str, qubits))}\n")
+                if add_sdg == 1:
+                    f.write(f"S* {' '.join(map(str, qubits))}\n")
+            elif name == "u":
+                add_s   = 0
+                add_sdg = 0
+                if inst.params[0] != 0:
+                    gate_label = "H"
+                elif numpy.isclose(float(inst.params[2]), - math.pi / 4):
+                    gate_label = "T*"
+                elif numpy.isclose(float(inst.params[2]), math.pi / 4):
+                    gate_label = "T"
+                elif numpy.isclose(float(inst.params[2]), - math.pi / 2):
+                    gate_label = "P*"
+                elif numpy.isclose(float(inst.params[2]), math.pi / 2):
+                    gate_label = "P"
+                elif numpy.isclose(float(inst.params[2]), - 3 * math.pi / 4):
+                    gate_label = "T*"
+                    add_sdg    = 1
+                elif numpy.isclose(float(inst.params[2]), 3 * math.pi / 4):
+                    gate_label = "T"
+                    add_s      = 1
+                elif numpy.isclose(float(inst.params[2]), math.pi):
+                    gate_label = "Z"
+                else:
+                    raise Exception(f"Warning: Angles {str(inst.params)} not known")
+                qubits = [circuit.find_bit(q).index for q in qargs]
+                f.write(f"{gate_label} {' '.join(map(str, qubits))}\n")
+                if add_s   == 1:
+                    f.write(f"S {' '.join(map(str, qubits))}\n")
+                if add_sdg == 1:
+                    f.write(f"S* {' '.join(map(str, qubits))}\n")
+                    
+            elif name != "barrier":
+                raise Exception(f"Warning: Gate {name} not supported in .qc format")
         f.write(f"\nEND")
 
 # # Example usage:

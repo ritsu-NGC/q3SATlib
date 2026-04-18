@@ -539,5 +539,5 @@ def build_esop_circuit(esop_expr):
     builder = NQubitESOPBuilder()
     return builder.build_complete_circuit(esop_expr)
 
-interactive_mode()
+#interactive_mode()
 # build_esop_circuit("X1*X2 ^ X2*X3 ^ X3*X4 ^ X4*X5 ^ X5*X1")

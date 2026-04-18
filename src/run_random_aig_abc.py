@@ -278,12 +278,12 @@ def write_aig_tikz(filename, M, inputs, ands, outputs, title="AIG", xsep=3.0, ys
 # -------------------------
 # 7) Main pipeline
 # -------------------------
-def aig_to_blif(aig_bin):
-    workdir     = Path(".")
+def aig_to_blif(aig_bin, directory):
+    workdir     = Path(directory)
     blif_out    = workdir / "mapped.blif"
     verilog_out = workdir / "mapped.v"
     mapped_aig  = workdir / "mapped_out.aig"
-    tikz_orig = workdir / "aig_original.tex"
+    tikz_orig   = workdir / "aig_original.tex"
     tikz_mapped = workdir / "aig_mapped.tex"
 
     # run ABC: read binary aig, strash, print stats, if -K 6, strash, write mapped aig + other outputs

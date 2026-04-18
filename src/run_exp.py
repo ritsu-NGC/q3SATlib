@@ -1,13 +1,17 @@
-from qiskit import QuantumCircuit,QuantumRegister,transpile
+from qiskit import QuantumCircuit,QuantumRegister,transpile,qasm2
 from qiskit.circuit.library import PhaseOracle
 from qiskit.qasm2 import dump
+from qiskit.transpiler import PassManager
 from qiskit.synthesis.boolean.boolean_expression_synth import synth_phase_oracle_from_esop
-
+from qiskit.transpiler.passes.synthesis import HighLevelSynthesis
+from qiskit.transpiler.passes.synthesis.high_level_synthesis import HLSConfig
 
 from dd import cudd
 from dd.autoref import BDD
 from textwrap import dedent
 from qiskit import transpile
+from dataclasses import dataclass
+from typing import List, Tuple, Optional
 
 #DCDEBUG
 import tracemalloc
@@ -33,6 +37,22 @@ from exorcism import exorcism
 from run_random_aig_abc import aig_to_blif
 from esop_to_aiger      import esop_to_aiger
 from blif_read          import blif_read
+from caterpillar_if     import esop_cstyle_to_qiskit
+from projectq_to_qiskit import projectq_dump_to_qiskit
+
+_RE_QS = re.compile(r"qs\[(\d+)\]")
+_RE_SINGLE = re.compile(r"^\s*(H|X|Y|Z|S|Sdag|T|Tdag)\s*\|\s*qs\[(\d+)\]\s*$")
+_RE_CNOT = re.compile(r"^\s*CNOT\s*\|\s*\(qs\[(\d+)\],\s*qs\[(\d+)\]\)\s*$")
+_RE_CZ = re.compile(r"^\s*CZ\s*\|\s*\(qs\[(\d+)\],\s*qs\[(\d+)\]\)\s*$")
+_RE_ROT = re.compile(r"^\s*(Rx|Ry|Rz)\(([^)]+)\)\s*\|\s*qs\[(\d+)\]\s*$")
+
+# Example line:
+#   C(All(X), 4) | ([qs[0], qs[1], qs[2], qs[3]], [qs[7]])
+_RE_CTRLLED = re.compile(
+    r"^\s*C\(All\((X|Z)\),\s*(\d+)\)\s*\|\s*\(\s*\[(.*?)\]\s*,\s*\[(.*?)\]\s*\)\s*$"
+)
+
+
 def run_tpar(qc,filename):
     circ_name = filename + ".qc"
     write_qc_format(qc,circ_name)
@@ -334,6 +354,7 @@ def optimize_esop(esop_str,var_names,fUseQCost=1):
 
     # This call won't do meaningful minimization (no ESOP input), but demonstrates calling
     #result = exorcism.exorcism(nIns=3, nOuts=1, onCube=on_cube)
+    print("DCDEBUG var_names " + str(var_names) + " esop_str " + esop_str)
     result = exorcism(esop_str=esop_str, nIns=len(var_names), nOuts=1, onCube=on_cube, Quality=0,Verbosity=1,nCubesMax=1000,fUseQCost=fUseQCost)
 
     return ' ^ '.join(ret_str)
@@ -341,8 +362,8 @@ def optimize_esop(esop_str,var_names,fUseQCost=1):
 #########          OPTIMIZE            ########################
 def run_exp(test_type,runs,directory="."):
     for i in range(1,runs+1):
-        n         = 8
-        vars_list = [f'x{j}' for j in range(1, n + 1)]
+        n         = 6
+        vars_list = [f'x{j}' for j in range(0, n)]
         if test_type == "n3_2n":
             max_cubes   = 2**(n-1)            
             min_cubes   = 2 * n
@@ -374,7 +395,7 @@ def run_exp(test_type,runs,directory="."):
             esop3,esop4 = partition_esop(pro_str)
         elif test_type == "scramble_n":
             max_cubes   = 2 * n
-            min_cubes   = 1
+            min_cubes   = 2
             esop        = generate_esop_expression(vars_list, min_terms=min_cubes, max_terms=max_cubes,prob_2=1.0, prob_3=1.0, prob_more=0.5)
 
             # random_order, large_cube_esop = find_esop_with_large_cube(
@@ -384,36 +405,224 @@ def run_exp(test_type,runs,directory="."):
             # qk_str      = large_cube_esop
             # pro_str     = large_cube_esop
             #qk_str = esop
+            print("DCDEBUG vars_list " + str(vars_list) + " " + esop)
             qk_str = optimize_esop(esop,vars_list,0)
             pro_str = optimize_esop(esop,vars_list,1)
+
+            # qk_str = esop
+            # pro_str = esop
             esop3,esop4 = partition_esop(pro_str)            
         else:
             raise ValueError("Unknown test_type:" + test_type)
-        print("DCDEBUG esop "  + esop)
-        print("DCDEBUG esop3 " + esop3)
-        print("DCDEBUG esop4 " + esop4)        
-        
-        pro_qc = gen_qc(esop3, esop4, vars_list, test_type)    
-        run_tpar(pro_qc,directory + "/pro_qc"+str(i))
-        with open(directory + "/pro_qc"+str(i)+".qc", 'a') as f:
-            f.write(f"\n# {pro_str}\n")
+        print("DCDEBUG esop_str " + esop)
+        pro_qc = gen_qc(esop3, esop4, vars_list, test_type, directory)
 
+        # Option C: Qiskit text diagram (human-readable) DCDEBUG
+        with open("og_pro_circuit.txt", "w", encoding="utf-8") as f:
+            f.write(pro_qc.decompose(reps=2).draw(output="text").single_string())
+
+        
+        run_tpar(pro_qc.decompose(reps=2),directory + "/pro_qc"+str(i))
+        with open(directory + "/pro_qc"+str(i)+".qc", 'a') as f:
+            f.write(f"\n# OG {esop}\n")
+            f.write(f"\n# Reduced {pro_str}\n")
+
+        # PhaseOracle
         qk_qc_str = parse_c_format_esop(qk_str,vars_list)
 
         num_vars = len(vars_list) #DCDEBUG
         for cube in qk_qc_str:#DCDEBUG
             assert len(cube) == num_vars, f"Cube {cube} does not match num_vars {num_vars}"#DCDEBUG
         qk_qc = synth_phase_oracle_from_esop(qk_qc_str, len(vars_list))
+
+        with open("pre_qk_qc" + str(i) + ".txt","w") as f:#DCDEBUG
+            f.write(str(qk_qc.decompose().draw(output="text")))#DCDEBUG
+
         qk_qc = preprocess_qk(qk_qc,vars_list)
 
-        # with open("qk_qc" + str(i) + ".qasm","w") as f:#DCDEBUG
-        #     dump(qk_qc,f)#DCDEBUG
-        # with open("qk_qc" + str(i) + ".txt","w") as f:#DCDEBUG
-        #     f.write(str(qk_qc.decompose().draw(output="text")))#DCDEBUG
-        run_tpar(qk_qc,directory + "/qk_qc"+str(i))
+        with open("qk_qc" + str(i) + ".qasm","w") as f:#DCDEBUG
+            dump(qk_qc,f)#DCDEBUG
+        with open("qk_qc" + str(i) + ".txt","w") as f:#DCDEBUG
+            f.write(str(qk_qc.decompose().draw(output="text")))#DCDEBUG
+        run_tpar(qk_qc.decompose(),directory + "/qk_qc"+str(i))
     
         with open(directory + "/qk_qc"+str(i)+".qc", 'a') as f:
-            f.write(f"\n# {qk_str}\n")
+            f.write(f"\n# OG {esop}\n")
+            f.write(f"\n# Reduced {qk_str}\n")
 
-    
+        # Caterpillar
+        exe = "/home/dizzy/xagtdep/build/esop_to_qasm"
+        expr = esop.replace("~", "!").replace("x","a")
+        #qc, kitty_expr, qasm_path = esop_cstyle_to_qiskit(expr, exe, "out.qasm")
+        qc = qasm2.load("out.qasm")
+        qc = qc.decompose()
+        #qc = projectq_dump_to_qiskit("net_projectq.py")
+        basis = ["cx", "h", "t", "tdg", "s", "sdg", "x", "z"]
+        # hls_config = HLSConfig(
+        #     # The exact key depends on Qiskit, but "mcx" is the intended target.
+        #     # If your version wants "MCXGate" instead, see note below.
+        #     op_configs={
+        #         "mcx": {"method": "n_clean_m15"},
+        #     }
+        # )
+        with open("DCDEBUG_meuli" + str(i) + ".txt","w") as f:#DCDEBUG
+            f.write(str(qc))#DCDEBUG
 
+        # pm = PassManager([HighLevelSynthesis(hls_config=hls_config)])
+        # qc = pm.run(qc).decompose()
+        # qc = transpile(qc, basis_gates=basis, hls_config=hls_config, optimization_level=0)
+        run_tpar(qc,directory + "/caterpillar"+str(i))
+        
+        with open(directory + "/caterpillar"+str(i)+".qc", 'a') as f:
+            f.write(f"\n# OG {esop}\n")
+            f.write(f"\n# Modified {expr}\n")
+                 
+
+def connect_nodes(qc_args):
+    """Builds a connected Qiskit QuantumCircuit from qc_args['nodes']. Allocates ancilla qubits initialized to |0> for any internal net (fanin/fanout) not in qc_args['inputs'] or qc_args['outputs']."""
+    from qiskit import QuantumCircuit, QuantumRegister
+    # Collect producers and consumers by net name
+    net_to_producer = {net: None for net in qc_args['nets']}
+    net_to_consumers = {net: [] for net in qc_args['nets']}
+    for node in qc_args['nodes']:
+        for fanout in node._fanout:
+            net_to_producer[fanout] = node
+        for fanin in node._fanin:
+            net_to_consumers[fanin].append(node)
+
+    # Determine intermediate nets
+    intermediate_nets = [net for net in qc_args['nets'] if net.startswith('new_')]
+
+    # Stable topological ordering
+    circuit = QuantumCircuit()
+    qubit_allocation = {}
+    for net in qc_args['inputs']:
+        net_to_producer[net] = None  # Set producers of inputs to None
+
+    sorted_nets = []  # This will hold the stable order
+    while len(sorted_nets) < len(qc_args['nets']):
+        for net, producer in net_to_producer.items():
+            if producer and net not in sorted_nets:
+                if all(fanin in qubit_allocation for fanin in producer._fanin):
+                    sorted_nets.append(net)
+
+    # Execute nodes in order
+    for net in sorted_nets:
+        node = net_to_producer[net]
+        if node:
+            target = net  # Fanout net
+            # Ensure ancilla qubit allocation if not in inputs or outputs
+            if net not in qc_args['inputs'] and net not in qc_args['outputs']:
+                qubit_allocation[target] = circuit.allocate(1)  # Allocate ancilla
+            circuit.compose(node.qc, qubits=[target] + [qubit_allocation[fanin] for fanin in node._fanin], inplace=True)
+
+    # Inverse operations for intermediate nets
+    for net in reversed(intermediate_nets):
+        producer = net_to_producer[net]
+        if producer:
+            # Apply the inverse only after all consumers have executed
+            for consumer in net_to_consumers[net]:
+                if consumer in sorted_nets:
+                    circuit.compose(producer.qc.inverse(), qubits=[qubit_allocation[net]], inplace=True)
+
+    qc_args['circuit'] = circuit
+    qc_args['net_to_qubit'] = qubit_allocation
+    return qc_args
+def _parse_angle(expr: str) -> float:
+    expr = expr.strip()
+    if not re.fullmatch(r"[0-9\.\s\+\-\*\/\(\)pi]+", expr):
+        raise ValueError(f"Unsafe/unknown angle expression: {expr!r}")
+    import math
+    return float(eval(expr, {"__builtins__": {}}, {"pi": math.pi}))
+
+def _extract_qubits(text: str) -> List[int]:
+    return [int(m.group(1)) for m in _RE_QS.finditer(text)]
+
+def _infer_base_nqubits(lines: List[str]) -> int:
+    mx = -1
+    for ln in lines:
+        for m in _RE_QS.finditer(ln):
+            mx = max(mx, int(m.group(1)))
+    if mx < 0:
+        raise ValueError("No qs[i] found; cannot infer qubits.")
+    return mx + 1
+
+# def projectq_dump_to_qiskit(path: str, base_n_qubits: Optional[int] = None) -> QuantumCircuit:
+#     with open(path, "r", encoding="utf-8") as f:
+#         raw = [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
+#     # skip boilerplate
+#     lines = [ln for ln in raw if not (ln.startswith("from ") or ln.startswith("import "))]
+
+#     if base_n_qubits is None:
+#         base_n_qubits = _infer_base_nqubits(lines)
+
+#     # find maximum k in any C(All(X), k)
+#     max_k = 0
+#     for ln in lines:
+#         m = _RE_CTRLLED.match(ln)
+#         if m and m.group(1) == "X":
+#             max_k = max(max_k, int(m.group(2)))
+
+#     anc_needed = max(0, max_k - 2)
+#     qc = QuantumCircuit(base_n_qubits + anc_needed)
+
+#     # ancilla indices are appended at the end
+#     ancillas_global = list(range(base_n_qubits, base_n_qubits + anc_needed))
+
+#     for ln in lines:
+#         m = _RE_SINGLE.match(ln)
+#         if m:
+#             op, q = m.group(1), int(m.group(2))
+#             {"H": qc.h, "X": qc.x, "Y": qc.y, "Z": qc.z,
+#              "S": qc.s, "Sdag": qc.sdg, "T": qc.t, "Tdag": qc.tdg}[op](q)
+#             continue
+
+#         m = _RE_CNOT.match(ln)
+#         if m:
+#             qc.cx(int(m.group(1)), int(m.group(2)))
+#             continue
+
+#         m = _RE_CZ.match(ln)
+#         if m:
+#             qc.cz(int(m.group(1)), int(m.group(2)))
+#             continue
+
+#         m = _RE_ROT.match(ln)
+#         if m:
+#             op, theta, q = m.group(1), _parse_angle(m.group(2)), int(m.group(3))
+#             {"Rx": qc.rx, "Ry": qc.ry, "Rz": qc.rz}[op](theta, q)
+#             continue
+
+#         m = _RE_CTRLLED.match(ln)
+#         if m:
+#             kind, k_txt, ctrls_txt, tgts_txt = m.group(1), m.group(2), m.group(3), m.group(4)
+#             k = int(k_txt)
+#             ctrls = _extract_qubits(ctrls_txt)
+#             tgts = _extract_qubits(tgts_txt)
+#             if len(ctrls) != k or len(tgts) != 1:
+#                 raise ValueError(f"Bad controlled gate line: {ln}")
+#             t = tgts[0]
+
+#             if kind == "X":
+#                 if k <= 2:
+#                     qc.mcx(ctrls, t)  # will be cx/ccx internally
+#                 else:
+#                     # Use exactly (k-2) ancillas, as requested
+#                     anc = ancillas_global[: (k - 2)]
+#                     qc.mcx(ctrls, t, ancilla_qubits=anc)
+#             elif kind == "Z":
+#                 # MCZ via H-mcx-H; also supports ancillas similarly
+#                 qc.h(t)
+#                 if k <= 2:
+#                     qc.mcx(ctrls, t)
+#                 else:
+#                     anc = ancillas_global[: (k - 2)]
+#                     qc.mcx(ctrls, t, ancilla_qubits=anc)
+#                 qc.h(t)
+#             else:
+#                 raise ValueError(f"Unsupported C(All({kind}), ...) in: {ln}")
+#             continue
+
+#         raise ValueError(f"Unrecognized line: {ln}")
+
+#     return qc

@@ -192,18 +192,12 @@ class ConversionResult:
     final_output_literal: int
 
 def esop_to_aiger(esop_text: str) -> ConversionResult:
-    print("DCDEBUG esop_text " + esop_text)
     esop_conv = convert_esop_paren_to_bang(esop_text)
-    print("DCDEBUG esop_conv " + esop_conv)
     cube_strs = split_cubes(esop_conv)
-    print("DCDEBUG cube_strs " + str(cube_strs))
     parsed_cubes = [tokenize_cube(c) for c in cube_strs]
-
-    print("DCDEBUG parsed_cubes " + str(parsed_cubes))
 
     num_inputs = compute_num_inputs(parsed_cubes)
 
-    print("DCDEBUG num_inputs " + str(num_inputs))
     b = AigerBuilder(num_inputs=num_inputs)
 
     cube_outs: List[int] = []
