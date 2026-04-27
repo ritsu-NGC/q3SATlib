@@ -3,7 +3,7 @@
 \subsection{Experiment Setup}
 \label{Exp:Set}
 We compare our methodology ({\it Proposed}) against two methods: Qiskit's \texttt{PhaseOracle} method
-({\it Phase Oracle}), and the method proposed in Meuli et al~\cite{bib-meuli-esop} implemented in the
+({\it PhaseOracle}), and the method proposed in Meuli et al~\cite{bib-meuli-esop} implemented in the
 Caterpillar library~\cite{bib-meuli-ros} ({\it Caterpillar}).
 
 The {\it Proposed} method implements the method in~\secref{Pro}. It takes an ESOP expression and
@@ -43,15 +43,29 @@ The main code is run in Python, while T-par is executed as a system call to a C+
 Here we propose two kinds of ESOP expressions to test:
 
 \begin{itemize}
-\item (N3): Randomly generated ESOP expressions are constrained to those of $n \leq 3$. This tests the ability of the precomputed 3-bit library to enable simplification of pure CNOT+T circuits through easier sum-of-paths calculations.
-\item (N4): Randomly generated ESOP cubes are constrained as follows: those with up to 2 literals (i.e., no T gates) are generated with 2/5 probability, 3 literals (has T-gates but CNOT+T) with 2/5 probability, and 4 or more literals with 1/5 probability. This tests the ability of the proposed method to find a simplified solution in its EXORCISM-4 step. It creates an expression which can already be mostly expressed as a CNOT+T network due to its cubes of 3 or fewer literals, in order to create a more fair comparison between Qiskit's method and the proposed method.
+\item (N3): Randomly generated ESOP expressions are constrained to those of $n \leq 3$. This tests the
+  ability of the precomputed 3-bit library to enable simplification of pure CNOT+T circuits through
+  easier sum-of-paths calculations.
+\item (N4): Randomly generated ESOP cubes are constrained as follows: those with up to two literals
+  (i.e., no T gates) are generated with 2/5 probability, three, literals (has T-gates but CNOT+T) with
+  2/5 probability, and four or more literals with 1/5 probability. This tests the ability of the proposed
+  method to find a simplified solution in its EXORCISM-4 step. It creates an expression which can
+  already be mostly expressed as a CNOT+T network due to its cubes of three or fewer literals, in order to
+  create a more fair comparison between Qiskit's method and the proposed method. The probabilities
+  are chosen so that cubes with four or more literals have as little common literals to other cubes as possible,
+  reducing the possibility that the cubes of four or more literals will be reduced down by the ESOP step.
 \end{itemize}
 
-We test these for $n<=12$ literals. The ESOP expressions are randomly generated according to two groups based on the number of cubes $k$ in them. These are further divided into two groups:
+We test these for $n \leq 12$ literals. The ESOP expressions are randomly generated according to two groups based
+on the number of cubes $k$ in them. These are further divided into two groups:
 
 \begin{itemize}
-\item ($k=2^{n-1}$): This randomizes the number of cubes between $2n$ and $2^{n-1}$. This increases the chances that inserted subcircuits will have common literals that allow them to be simplified and have reduced T-count, while making it harder for T-par to partition any cubes $n \geq 4$ for T-depth scheduling.
-\item ($k=n$): This randomizes the number of cubes between $1$ and $2n-1$. This makes the arrangements sparser, allowing for better parallelization by T-par, but making it harder to have common literals that can combine to reduce the number of cubes.
+\item ($k=2^{n-1}$): This randomizes the number of cubes between $2n$ and $2^{n-1}$. This increases the chances that
+  inserted subcircuits will have common literals that allow them to be simplified and have reduced T-count, while
+  making it harder for T-par to partition any cubes $n \geq 4$ for T-depth scheduling.
+\item ($k=n$): This randomizes the number of cubes between $1$ and $2n-1$. This makes the arrangements sparser,
+  allowing for better parallelization by T-par, but making it harder to have common literals that can combine to
+  reduce the number of cubes.
 \end{itemize}
 
 For each combination of N3/N4 and $k=2^{n-1}$/$k=n$, we generated 100 random ESOP expressions and fed them
@@ -75,12 +89,12 @@ The results are shown in Table~\ref{table-results}.
 
 \subsection{Analysis}
 
-As can be seem from Table~\ref{table-results}, the {\it Proposed} method outperformed both of the
+As can be seen from Table~\ref{table-results}, the {\it Proposed} method outperformed both of the
 comparison methods, for all of the input ranges observed.
 
 The difference was most stark with N3. Because the entire circuit can be implemented using only
 CNOT+T, many of the T-gates can combine together and go away in the {\it Proposed} method. However,
-with {\it Caterpillar}, gates with 3 inputs will need ancilla, and so there are fewer opportunities
+with {\it Caterpillar}, gates with three inputs will need an ancilla, and so there are fewer opportunities
 to combine T-gates through resynthesis. On the other hand, {\it PhaseOracle} can similarly be implemented
 entirely as a CNOT+T circuit, which is reflected by a muted advantage in T-count by the {\it Proposed} method.
 This is also reflected in the {\it Proposed} method's advantage over the {\it Phase Oracle} method being close

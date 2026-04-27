@@ -50,7 +50,7 @@ individual components.
 We can deduce from~\secref{Pre:Four} that any cube of 3 literals or fewer can be synthesized
 purely as a quantum circuit. Moreover, any cube of 2 literals or fewer can be realized
 without using any T-gates. Knowing that, it is thus useful to rewrite any Boolean functions
-with as little cubes of over four literals as possible. This allows us to reduce the number
+with as few cubes of over four literals as possible. This allows us to reduce the number
 of T-gates, as well as implement as much of the circuit as possible using only CNOT+T, which
 allows the usage of tools such as sum of paths simplification in Sec.~\ref{Mot:CnotOpt} and
 matroid partitioning from~\cite{bib-amy-matroid} to optimize for T-count and T-depth.
@@ -181,15 +181,14 @@ In this section, we present the overall flow of our proposal, depicted in Fig.~\
 \item \textbf{(Decompose $f$ into ESOP expression)} : At runtime, a Boolean function is read in and converted to
   an ESOP expression.
 \item \textbf{(Minimize the number of $n \geq 4$ cubes in ESOP)} : The ESOP is optimized by adapting
-  EXORCISM-4~\cite{bib-exorcism} to reduce the number of cubes of more than 4 literals. This method is explained
+  EXORCISM-4~\cite{bib-exorcism} to reduce the number of $n \geq 4$ cubes. This method is explained
   in Sec.~\ref{Pro:Minimize}.
-\item \textbf{(Map the $n \leq 3$ cubes to the 3 bit library)} : Takes all cubes of $n \leq 3$ and maps them to 
+\item \textbf{(Map the $n \leq 3$ cubes to the 3bit library)} : Takes all cubes of $n \leq 3$ and maps them to 
   appropriate functions from the 3 bit library, inserting the corresponding subcircuit into the phase oracle,
   as described in Sec.~\ref{Pro:n4}.
 \item \textbf{(Synthesize logic network and QC from $n \geq 4$ cubes)} : Generates a logic network from all cubes
-  of $n \geq 4$ as a logic
-  network with the values of each of the cubes as separate outputs, and synthesizes the quantum circuit as a
-  network of Toffoli gates and Controlled-Z gates, as described in Sec.~\ref{Pro:n4}.
+  of $n \geq 4$ as a logic network with the values of each of the cubes as separate outputs, and synthesizes the
+  quantum circuit as a network of Toffoli gates and Controlled-Z gates, as described in Sec.~\ref{Pro:n4}.
 \item \textbf{(Append $n \geq 4$ and $n \leq 3$)} : The results of the above two steps are appended together
   into one phase oracle.
 \end{itemize}
@@ -233,11 +232,11 @@ graph in the following manner.
 
 This can then be fed into a logic network mapping tool such as abc~\cite{bib-mishchenko-lut} to
 simplify Boolean logic network. Because this paper focuses on Toffoli gates and Controlled-Z gates,
-we ask the logic network mapping tool to simplify our subject graph.. Here, we do not specify
+we ask the logic network mapping tool to simplify our subject graph. Here, we do not specify
 the simplification procedure: any such simplification procedure that optimizes for area such as
 \texttt{mfs}~\cite{bib-mishchenko-mfs} or \texttt{lutpack}~\cite{bib-mishchenko-lutpack} will suffice.
 We leave it to a topic of future research to expand on this degree of freedom. Meanwhile, we detail
-which one we pick in our section on the implemention in~\secref{Exp}.
+which one we pick in our section on the implementation in~\secref{Exp}.
 
 This Boolean logic network is processed just as in~\secref{Subsec:lhrs}. However, when it
 needs to process a node directly connected to an output, it instead uses a phase gate
@@ -248,7 +247,7 @@ from the library we generated in the first step of~\secref{Subsec:ProMet}.
   First we start off with the ESOP expression $\bar{x_{1}} \bar{x_{2}} x_{6} \bar{x_{5}} \bar{x_{4}} \oplus (x_{3} x_{6} \oplus x_{1} x_{5} \oplus \bar{x_{1}} \bar{x_{6}} \bar{x_{4}} \bar{x_{3}} \bar{x_{5}} \oplus \bar{x_{5}} \bar{x_{2}} \bar{x_{6}} x_{1} \bar{x_{4}} x_{3}$
   This is fed into an ESOP optimizer so we get
   $(x_{1} x_{5}) \oplus (\bar{x_{1}} \bar{x_{2}} x_{3} \bar{x_{4}}) \oplus (x_{1} \bar{x_{2}} \bar{x_{3}} x_{4} \bar{x_{5}}) \oplus x_{3}$.
-  $x_1 x_5 , and x_3$ are generated directly as a Controlled-Z and a Z gate respectively, depicted
+  $x_1 x_5$ , and $x_3$ are generated directly as a Controlled-Z and a Z gate respectively, depicted
   in~\figref{fig-ex-qc}, in the $n \leq 3$ box.
   $(\bar{x_{1}} \bar{x_{2}} x_{3} \bar{x_{4}}) \oplus (x_{1} \bar{x_{2}} \bar{x_{3}} x_{4} \bar{x_{5}})$ are
   generated first as a subject graph, where each of the cubes $(\bar{x_{1}} \bar{x_{2}} x_{3} \bar{x_{4}})$

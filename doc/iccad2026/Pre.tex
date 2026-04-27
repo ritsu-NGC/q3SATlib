@@ -145,7 +145,7 @@ A phase oracle can be constructed from a quantum oracle as in~\figref{fig-phase-
 $F$-controlled NOT gate is a quantum circuit that inverts the target qubit, when the Boolean
 function $F(x_1,x_2,\cdots,x_n)$ is true. This gate is depicted in~\figref{fig-urtof}, and is
 sometimes known as a {\it single target gate}. A Toffoli gate is an example of such a single
-target gate, where $F$ is the Boolean AND of the two inputs.Placing H-gates on either side of
+target gate, where $F$ is the Boolean AND of the two inputs. Placing H-gates on either side of
 the target bit, as depicted in~\figref{fig-phase-n4} utilizes the identity $HXH = Z$, where
 $H$, $X$, and $Z$ are the transformations effected by the $H$, $X$, and $Z$ gates respectively.
 This means this circuit applies a phase of $-1$ when $F$ is true.
@@ -187,7 +187,7 @@ Thus, given an Exclusive Sum of Products expression of a Boolean function
 $f(\mathbf{x}) = x_a x_b \cdots x_g \oplus x_i x_j \cdots x_m \oplus \cdots$, we
 can implement its phase oracle by inserting controlled phase gates that are activated
 by the {\it cubes}, or the product terms of the ESOP, as Boolean functions. Each of these
-cubes is composed of {\it literals} consisted of positive or negative values of an input variable.
+cubes is composed of {\it literals} consisting of positive or negative values of an input variable.
 
 This method is used by Qiskit's Phase Oracle \cite{bib-phaseoracle}. Our proposal involves
 the effective use of such an Exclusive Sum of Products to implement such a phase oracle.
@@ -220,7 +220,7 @@ Previous research has demonstrated that some phase oracles can be implemented us
 CNOT and phase gates (CNOT+T)~\cite{bib-amy-cnot}. When done in such a manner,
 the cumulative action of the phase gates $f(\mathbf{x})$ in the mapping
 $\ket{\mathbf{x}} \mapsto e^{i \pi f(\mathbf{x})}\ket{\mathbf{x}}$
-as defined in Eq.~\ref{eq-boolean-fourier}, known as its{\it phase polynomial}.
+as defined in Eq.~\ref{eq-boolean-fourier}, known as its {\it phase polynomial}.
 
 \begin{equation}
   \begin{aligned}
@@ -375,8 +375,10 @@ $\hat{f}(\mathbf{k})$ is also known as the Boolean Fourier transform of $f(\math
 \footnote{All equations that are taken from~\cite{bib-odonnell} are written here
 with coefficients in $\{0,1\}$ and $\chi_{\mathbf{k}}(\mathbf{x})$ functions from ~\cite{bib-amy-matroid}.}.
 \begin{example}
-As an example, let's derive the coefficients for Eq.~\ref{eq-toff-bool} with $\mathbf{k} = (k_{x_a}, k_{x_b}, k_y)$.
-For $\mathbf{k} = 100$, $\chi_{100} = x_a$. Table~\ref{table-ex-100} enumerates the values and the term $(-1)^{f(\mathbf{x})} (-1)^{\chi_{100}(\mathbf{x})}$ for the inner product.
+  As an example, let's derive the coefficients for Eq.~\ref{eq-toff-bool} with
+  $\mathbf{k} = (k_{x_a}, k_{x_b}, x_c)$.
+  For $\mathbf{k} = 100$, $\chi_{100} = x_a$. Table~\ref{table-ex-100} enumerates the values and the term
+  $(-1)^{f(\mathbf{x})} (-1)^{\chi_{100}(\mathbf{x})}$ for the inner product.
 \begin{table}[h]
   \begin{center}
     \begin{tabular}{c|c|c|c|c|c}
@@ -409,7 +411,7 @@ The rest of the calculation is omitted for brevity, but readers can verify that 
 \end{example}
 
 Synthesizing the phase polynomial of a Boolean function using the Boolean Fourier
-transform for threevariables or fewer has an interesting consequence. First, the
+transform for three variables or fewer has an interesting consequence. First, the
 number of odd multiples of $i\frac{\pi}{4}$ of $\hat{f}(\mathbf{k})$ corresponds to
 the T-count needed to implement $f(\mathbf{x})$~\cite{bib-amy-rm}. This is easy to
 check, since any even multiple of $i\frac{\pi}{4}$ can be implemented using only
@@ -445,10 +447,10 @@ implemented with fewer T-gates than the original circuit.
   We calculate the phase polynomial for a phase oracle that calculates
   $x_a \bar{x_b} x_c \oplus x_b \bar{x_c} x_d$.~\figref{fig-series-all} displays realizations of this phase
   oracle.~\figref{fig-series-4inp-mct} shows the realization of the phase oracle as Controlled-Z gates
-  from~\figref{Pre:OracleEsop}.~\figref{fig-series-4inp-inv} shows each of the Controlled-Z gates generated
+  from~\secref{Pre:OracleEsop}.~\figref{fig-series-4inp-inv} shows each of the Controlled-Z gates generated
   as X-gates and the CNOT+T implementation of the three input Controlled-Z in~\figref{fig-toff-mark-matroid}.
   ~\figref{fig-series-4inp} shows the implementation of Controlled-Z gates by using the Boolean Fourier
-  Transform method from~\secref{Pre:Four}. It is easy that all of these are phase oracles for
+  Transform method from~\secref{Pre:Four}. It is straightforward to check that all of these are phase oracles for
   $x_a \bar{x_b} x_c \oplus x_b \bar{x_c} x_d$ by substituting values for $x_a,x_b,x_c,x_d$ and checking
   the resulting phase.
 
@@ -577,7 +579,7 @@ sharing.
 Previous research~\cite{bib-meuli-xag,bib-meuli-ros,bib-meuli-mult} has demonstrated that the
 number of nodes in a Boolean network is directly relevant to its T-count and T-depth, so this paradigm
 is useful as a way to approach T-count/T-depth optimization by leveraging existing techniques to
-optimize the number of nodes in a network. In particular, the {\it multiplicative complexity} of logic network
+optimize the number of nodes in a network. In particular, the {\it multiplicative complexity} of a logic network
 is the number of AND nodes in it, and its {\it multiplicative depth} is the longest chain of such AND nodes
 from a primary input to a primary output~\cite{bib-meuli-xag}.
 
