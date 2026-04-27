@@ -1,0 +1,11 @@
+\section{Conclusion}
+\label{Conc}
+
+We introduced a method that synthesizes a quantum circuit from a logic network, by using an ESOP expression as
+a base, and then synthesizing a logic network with its the ESOP's cubes as outputs. It then uses Boolean
+Fourier Transform to precalculate a three qubit or fewer phase oracle library that can be used to drive the
+phase. We find that the T-count and T-depth produced by such a synthesis method improve on T-counts and T-depth
+compared to Qiskit's \texttt{PhaseOracle} and Boolean function based mappings such as {\it Caterpillar}. Results
+have shown that further consideration should be given to specialized methods such as these in order to adapt
+methods that have already been developed for quantum oracles in order to reduce T-count and T-depth. Some 
+future work may be in incorporating quantum knowledge into the area reduction step of the logic network.
