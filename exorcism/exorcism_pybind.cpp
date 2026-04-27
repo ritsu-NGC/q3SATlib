@@ -60,6 +60,10 @@ abc::exorcism::Vec_Wec_t* parse_esop(const std::string& esop) {
     abc::exorcism::Vec_Wec_t* vEsop = abc::exorcism::Vec_WecAlloc(8); // Start with capacity 8 cubes
     std::istringstream iss(esop);
     std::string cube;
+
+    for (int i = 0; i < vEsop->nCap; ++i)
+      abc::exorcism::Vec_IntZero(&vEsop->pArray[i]);
+    
     while (std::getline(iss, cube, '^')) {
         // Remove parentheses and whitespace
         cube.erase(std::remove(cube.begin(), cube.end(), '('), cube.end());
@@ -67,6 +71,7 @@ abc::exorcism::Vec_Wec_t* parse_esop(const std::string& esop) {
         cube = trim(cube);
         if (cube.empty()) continue;
         abc::exorcism::Vec_Int_t* vCube = abc::exorcism::Vec_WecPushLevel(vEsop);  // allocate new level
+	abc::exorcism::Vec_IntZero(vCube);
         parse_cube_to_vec(cube, vCube);
     }
     return vEsop;
@@ -100,16 +105,20 @@ int exorcism_null(
     int fUseQCost)
 {
   std::vector<std::string> cube_strings;
-
-  auto on_cube = [&](uint32_t bits, uint32_t mask) {
-    cube_strings.push_back(cube_to_string(bits, mask, nIns));
-  };
+  abc::exorcism::Vec_Wec_t* vEsop;
+  int result;
+  // auto on_cube = [&](uint32_t bits, uint32_t mask) {
+  //   cube_strings.push_back(cube_to_string(bits, mask, nIns));
+  // };
 
   //DCDEBUGstd::string esop_str = "(x0 & !x1 & x2) ^ (!x0 & x1 & !x2) ^ (x1 & x2)";
-  abc::exorcism::Vec_Wec_t* vEsop = parse_esop(esop_str);
-  print_vecwec(vEsop);
+  vEsop = parse_esop(esop_str);
+  //print_vecwec(vEsop);
   // WARNING: This only works for demonstration if Abc_ExorcismMain tolerates nullptr for vEsop!
-  return abc::exorcism::Abc_ExorcismMain(vEsop, nIns, nOuts, onCube, Quality, Verbosity, nCubesMax, fUseQCost);
+  result = abc::exorcism::Abc_ExorcismMain(vEsop, nIns, nOuts, onCube, Quality, Verbosity, nCubesMax, fUseQCost);
+  abc::exorcism::Vec_WecFree(vEsop);
+  std::cout << "DCDEBUG Vec_WecFree\n";
+  return result;
 }
 
 PYBIND11_MODULE(exorcism, m) {
