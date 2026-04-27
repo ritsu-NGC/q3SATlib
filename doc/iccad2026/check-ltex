@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+source ~/.bashrc
+echo $SHELL
+alias
+
+/mnt/c/Users/david/quantum/ltex-ls-16.0.0/bin/ltex-cli --client-configuration=settings.json main.tex
+
+echo $?
