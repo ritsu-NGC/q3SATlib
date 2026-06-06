@@ -40,12 +40,12 @@ class QuantumCircuitTemplateCache:
             try:
                 with open(self.template_file, 'rb') as f:
                     self.circuit_templates = pickle.load(f)
-                print(f" Loaded {len(self.circuit_templates)} circuit templates")
+                # print(f" Loaded {len(self.circuit_templates)} circuit templates")
             except Exception as e:
                 print(f" Error loading templates: {e}")
                 self.generate_common_templates()
         else:
-            print("Generating circuit templates...")
+            # print("Generating circuit templates...")
             self.generate_common_templates()
     
     def generate_common_templates(self):
@@ -109,7 +109,7 @@ class QuantumCircuitTemplateCache:
         try:
             with open(self.template_file, 'wb') as f:
                 pickle.dump(self.circuit_templates, f)
-            print(f" Generated and saved {len(self.circuit_templates)} circuit templates")
+            # print(f" Generated and saved {len(self.circuit_templates)} circuit templates")
         except Exception as e:
             print(f" Error saving templates: {e}")
     

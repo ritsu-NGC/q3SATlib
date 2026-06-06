@@ -17,7 +17,7 @@ class AigerBuilder:
     @staticmethod
     def lit(var: int, neg: bool = False) -> int:
         """Return AIGER literal (even=positive, odd=negated)."""
-        base = 2 * var
+        base = 2 * (var) 
         return base ^ (1 if neg else 0)
 
     @staticmethod
@@ -85,6 +85,8 @@ class AigerBuilder:
         # outputs:
         for o in self.outputs:
             lines.append(str(o))
+        # for o in range(1, len(self.outputs)):  
+        #     lines.append(str(o))
         # ands:
         for lhs, r0, r1 in self.ands:
             lines.append(f"{lhs} {r0} {r1}")
@@ -195,18 +197,16 @@ def esop_to_aiger(esop_text: str) -> ConversionResult:
     esop_conv = convert_esop_paren_to_bang(esop_text)
     cube_strs = split_cubes(esop_conv)
     parsed_cubes = [tokenize_cube(c) for c in cube_strs]
-
     num_inputs = compute_num_inputs(parsed_cubes)
-
     b = AigerBuilder(num_inputs=num_inputs)
+    #b = AigerBuilder(len(parsed_cubes))
 
     cube_outs: List[int] = []
 
     # Build each cube as AND of its literals
     for cube in parsed_cubes:
-        lits = [b.lit(var, neg) for var, neg in cube]
+        lits = [b.lit(var + 1, neg) for var, neg in cube]
         cube_outs.append(b.and_many(lits))
-
     # Final ESOP output = XOR of cube outputs
 
     # final_out = b.xor_many(cube_outs)

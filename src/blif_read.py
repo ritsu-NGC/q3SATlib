@@ -740,3 +740,9 @@ def dd_to_c_expr(s: str) -> str:
     if j != len(tokens):
         raise ValueError("Trailing tokens after parse")
     return emit_c(ast)
+
+# -----------------------------
+# Example usage
+# -----------------------------
+if __name__ == "__main__":
+    qc_args = blif_read('/home/dizzy/q3SATlib/src/2026_04_18_1205_scramble_n/mapped.blif')

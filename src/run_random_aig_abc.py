@@ -292,6 +292,7 @@ def aig_to_blif(aig_bin, directory):
     strash
     print_stats
     if -K 2
+    mfs
     strash
     print_stats
     write_blif {blif_out}
@@ -340,10 +341,11 @@ def aig_to_blif(aig_bin, directory):
         print(" -", p)
 
 if __name__ == "__main__":
-    esop = r"""
-    !x5 ^ !x4 ^ x2x3!x4 ^ x2x3x5 ^ x3 ^ !x2
-    """.strip()
-
+    # esop = r"""
+    # !x5 ^ !x4 ^ x2x3!x4 ^ x2x3x5 ^ x3 ^ !x2
+    # """.strip()
+    esop = '(~x5 & ~x4 & x2) ^ (~x0 & x4) ^ (x1 & x4 & x2) ^ (x5 & ~x4 & ~x1 & ~x0 & x3) ^ (~x1 & x4 & x0)'
+    #esop = '(x5 & ~x4 & ~x1 & ~x0 & x3)'
     res = esop_to_aiger(esop)
 
     with open("out.aag", "w", encoding="utf-8") as f:
@@ -352,4 +354,4 @@ if __name__ == "__main__":
     with open("out.aig", "wb") as f:
         f.write(res.aig)
 
-    aig_to_blif('out.aig')
+    aig_to_blif('out.aig','/home/dizzy/q3SATlib/src/')

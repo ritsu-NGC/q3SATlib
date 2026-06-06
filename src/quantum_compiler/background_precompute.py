@@ -29,24 +29,24 @@ class QuantumCompilerWithAutoPrecompute:
     
     def _initialize_complete_cache(self):
         """Background precomputation of all possible circuits"""
-        print(" Quantum Compiler Initialization")
-        print("=" * 50)
+        # print(" Quantum Compiler Initialization")
+        # print("=" * 50)
         
         # Check if complete cache exists
         if self._cache_exists_and_complete():
-            print(" Complete cache found - loading instantly!")
+            # print(" Complete cache found - loading instantly!")
             self._load_complete_cache()
             return
         
-        print("Performing one-time background precomputation...")
-        print("   This will make ALL future queries instant!")
+        # print("Performing one-time background precomputation...")
+        # print("   This will make ALL future queries instant!")
         
         if self.show_progress:
             self._precompute_with_progress()
         else:
             self._precompute_silently()
         
-        print(" Precomputation complete! All circuits ready for instant lookup.")
+        # print(" Precomputation complete! All circuits ready for instant lookup.")
     
     def _cache_exists_and_complete(self):
         """Check if complete cache exists and has all 256 functions"""
@@ -87,7 +87,7 @@ class QuantumCompilerWithAutoPrecompute:
         total_functions = 2**8  # 256 possible truth tables
         completed = 0
         
-        print(f" Precomputing {total_functions} Boolean functions...")
+        # print(f" Precomputing {total_functions} Boolean functions...")
         
         for truth_table in product([0, 1], repeat=8):
             try:
@@ -103,13 +103,13 @@ class QuantumCompilerWithAutoPrecompute:
                 completed += 1
                 if self.show_progress and completed % 32 == 0:
                     progress = (completed / total_functions) * 100
-                    print(f"   Progress: {completed}/{total_functions} ({progress:.1f}%)")
+                    # print(f"   Progress: {completed}/{total_functions} ({progress:.1f}%)")
             except Exception as e:
                 print(f" Error processing truth table {truth_table}: {e}")
                 continue
         
         self._save_complete_cache()
-        print(f" Successfully precomputed {completed} circuits")
+        # print(f" Successfully precomputed {completed} circuits")
     
     def _truth_table_to_expression(self, truth_table):
         """Convert truth table to a representative expression"""
@@ -140,7 +140,7 @@ class QuantumCompilerWithAutoPrecompute:
             os.makedirs(os.path.dirname(self.cache_file), exist_ok=True)
             with open(self.cache_file, 'wb') as f:
                 pickle.dump(self.complete_cache, f)
-            print(f" Saved {len(self.complete_cache)} circuits to cache")
+            # print(f" Saved {len(self.complete_cache)} circuits to cache")
         except Exception as e:
             print(f" Error saving cache: {e}")
     
@@ -184,9 +184,9 @@ class QuantumCompilerWithAutoPrecompute:
     def _background_precompute_worker(self):
         """Background worker for precomputation"""
         if not self._cache_exists_and_complete():
-            print(" Starting background precomputation...")
+            # print(" Starting background precomputation...")
             self._precompute_all_circuits()
-            print(" Background precomputation finished!")
+            # print(" Background precomputation finished!")
 
     def _build_with_original_algorithm(self, func_expr):
         """Build circuit using original algorithm"""
@@ -219,9 +219,9 @@ class BackgroundPrecomputer:
                 show_progress=False
             )
             self.is_ready = True
-            print(" Background precomputation finished!")
+            # print(" Background precomputation finished!")
         except Exception as e:
-            print(f" Background precomputation failed: {e}")
+            # print(f" Background precomputation failed: {e}")
             self.is_ready = False
     
     def get_compiler(self):

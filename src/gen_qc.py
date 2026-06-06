@@ -93,7 +93,7 @@ def gen_qc(esop3, esop4, vars_list, test_type, directory="."):
     qc3 = gen_n3(esop3)
     qc4 = gen_n4(esop4,var_dict,directory)
     qc  = qc4.compose(qc3)
-    
+    # qc  = gen_n4(esop3 + ' ^ ' + esop4, var_dict, directory)
     return qc4.compose(qc3)
     
 def gen_n3(esop_str):

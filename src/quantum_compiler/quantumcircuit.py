@@ -263,7 +263,7 @@ def build_quantum_circuit_with_intelligent_monitoring(coefficients, verbose=Fals
 
 def precompute_all_256_circuits():
     """Precompute all 256 possible 3-variable Boolean function circuits"""
-    print(" Precomputing all 256 circuits...")
+    # print(" Precomputing all 256 circuits...")
     cache = {}
     n = 3
     
@@ -291,7 +291,7 @@ def precompute_all_256_circuits():
             'depth': circuit.depth()
         }
     
-    print(" All 256 circuits precomputed!")
+    # print(" All 256 circuits precomputed!")
     return cache
 
 def function_to_truth_table(func_expr):
@@ -328,7 +328,7 @@ def save_cache_to_file(cache, filename="circuit_cache.pkl"):
     try:
         with open(filename, 'wb') as f:
             pickle.dump(cache, f)
-        print(f" Cache saved to {filename}")
+        # print(f" Cache saved to {filename}")
     except Exception as e:
         print(f"Error saving cache: {e}")
 
@@ -338,7 +338,7 @@ def load_cache_from_file(filename="circuit_cache.pkl"):
         if os.path.exists(filename):
             with open(filename, 'rb') as f:
                 cache = pickle.load(f)
-            print(f" Cache loaded from {filename}")
+            # print(f" Cache loaded from {filename}")
             return cache
         else:
             return None
@@ -383,28 +383,28 @@ def qiskit_to_qc_format(qubit_names, gate_sequence):
 
 def main():
     """Main function with precomputation and lookup - no options, only lookup"""
-    print(" Quantum Boolean Function Compiler with Precomputation")
-    print(" Ultra-fast circuit generation using lookup tables")
-    print("="*60)
+    # print(" Quantum Boolean Function Compiler with Precomputation")
+    # print(" Ultra-fast circuit generation using lookup tables")
+    # print("="*60)
     
     # Try to load existing cache
     cache = load_cache_from_file()
     
     if cache is None:
-        print(" No existing cache found. Precomputing all 256 circuits...")
+        # print(" No existing cache found. Precomputing all 256 circuits...")
         cache = precompute_all_256_circuits()
         save_cache_to_file(cache)
     else:
         print(f" Loaded cache with {len(cache)} precomputed circuits")
     
-    print("\n" + "="*60)
-    print("Ready for ultra-fast circuit generation!")
-    print("="*60)
+    # print("\n" + "="*60)
+    # print("Ready for ultra-fast circuit generation!")
+    # print("="*60)
     
     while True:
         func_input = input("\nEnter the Boolean function (use Xa, Xb, Xc as variables, ~ for negation) or 'quit' to exit: ")
         if func_input.lower() == 'quit':
-            print(" Goodbye!")
+            # print(" Goodbye!")
             break
         
         try:
@@ -414,21 +414,21 @@ def main():
             result, func_int, truth_values = lookup_circuit_from_cache(func_input, cache)
             
             if result is not None:
-                print(f" Found in cache! Function integer: {func_int}")
-                print(f" Truth table: {truth_values}")
+                # print(f" Found in cache! Function integer: {func_int}")
+                # print(f" Truth table: {truth_values}")
                 
                 circuit = result['circuit']
                 coefficients = result['coefficients']
                 
-                print(f"\n Circuit Diagram:")
-                print(circuit.draw(output='text'))
+                # print(f"\n Circuit Diagram:")
+                # print(circuit.draw(output='text'))
                 
-                print(f"\n Detailed Gate List:")
+                # print(f"\n Detailed Gate List:")
                 for i, (instruction, qargs, cargs) in enumerate(circuit.data):
                     qubit_indices = [circuit.qubits.index(q) for q in qargs]
-                    print(f"  Gate {i+1}: {instruction.name} on qubit(s) {qubit_indices}")
+                    # print(f"  Gate {i+1}: {instruction.name} on qubit(s) {qubit_indices}")
                 
-                print(f"\n Coefficients: {coefficients}")
+                # print(f"\n Coefficients: {coefficients}")
                 
                 # Generate and save circuit file
                 qubit_names, gate_sequence = extract_qiskit_circuit_info(circuit)
@@ -438,15 +438,15 @@ def main():
                 with open(filename, "w") as f:
                     f.write(qc_file_content)
                 
-                print(f"\n Circuit saved to: {filename}")
-                print(f"\n Circuit Statistics:")
-                print(f"   Qubits: {circuit.num_qubits}")
-                print(f"   Gates: {len(circuit.data)}")
-                print(f"   Depth: {circuit.depth()}")
-                print(f"   Function Integer: {func_int}")
+                # print(f"\n Circuit saved to: {filename}")
+                # print(f"\n Circuit Statistics:")
+                # print(f"   Qubits: {circuit.num_qubits}")
+                # print(f"   Gates: {len(circuit.data)}")
+                # print(f"   Depth: {circuit.depth()}")
+                # print(f"   Function Integer: {func_int}")
                 
             else:
-                print(f" Function not found in cache (this shouldn't happen!)")
+                # print(f" Function not found in cache (this shouldn't happen!)")
                 print(f"Function integer: {func_int}")
             
         except Exception as e:

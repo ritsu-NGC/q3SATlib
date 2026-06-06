@@ -30,7 +30,7 @@ class OptimizedQuantumCompiler:
             try:
                 with open(self.complete_cache_file, 'rb') as f:
                     self.complete_circuit_cache = pickle.load(f)
-                print(f"✅ Loaded {len(self.complete_circuit_cache)} complete circuits from cache")
+                # print(f"✅ Loaded {len(self.complete_circuit_cache)} complete circuits from cache")
             except Exception as e:
                 print(f"❌ Error loading complete cache: {e}")
     
@@ -46,26 +46,26 @@ class OptimizedQuantumCompiler:
         """Optimized compilation with multi-level caching"""
         # Level 1: Check complete circuit cache
         if func_expr in self.complete_circuit_cache:
-            print("⚡ Using cached complete circuit")
+            # print("⚡ Using cached complete circuit")
             return self.complete_circuit_cache[func_expr]
         
-        print("🔄 Compiling new function...")
+        # print("🔄 Compiling new function...")
         
         # Level 2: Fast coefficient lookup O(1)
         coefficients = self.walsh_lookup.get_coefficients(func_expr)
         
         if not coefficients:
-            print("❌ Could not compute coefficients")
+            # print("❌ Could not compute coefficients")
             return None
         
         # Level 3: Template-based circuit construction
         template = self.template_cache.get_template(coefficients)
         
         if template:
-            print("⚡ Using circuit template")
+            # print("⚡ Using circuit template")
             qc = self.build_from_template(template)
         else:
-            print("🔧 Building circuit from scratch")
+            # print("🔧 Building circuit from scratch")
             # Import here to avoid circular imports
             import quantumcircuit
             qc, _ = quantumcircuit.build_quantum_circuit_with_intelligent_monitoring(coefficients)
@@ -127,7 +127,7 @@ class OptimizedQuantumCompiler:
             if os.path.exists(cache_file):
                 try:
                     os.remove(cache_file)
-                    print(f"✅ Cleared cache: {cache_file}")
+                    # print(f"✅ Cleared cache: {cache_file}")
                 except Exception as e:
                     print(f"❌ Error clearing cache {cache_file}: {e}")
         
