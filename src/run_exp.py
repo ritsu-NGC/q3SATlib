@@ -475,7 +475,7 @@ def run_exp(test_type,runs,directory="."):
             f.write(f"\n# Reduced {qk_str}\n")
 
         # Caterpillar
-        exe = "/home/dizzy/xagtdep/build/esop_to_qasm"
+        exe = "../build/esop_to_qasm"
         expr = esop.replace("~", "!").replace("x","a")
         qc, kitty_expr, qasm_path = esop_cstyle_to_qiskit(expr, exe, "out.qasm")
         qc = qasm2.load("out.qasm")
